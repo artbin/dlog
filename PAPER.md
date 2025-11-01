@@ -1366,6 +1366,53 @@ While DLog provides Kafka protocol compatibility, broader compatibility would ea
 - Prometheus remote write (for metrics ingestion)
 - Clickhouse protocol (for analytics tools)
 
+### 13.8 Tensor Database for ML/AI Workloads
+
+DLog's Arrow-native architecture provides a foundation for tensor operations:
+
+**Native Tensor Support**:
+- Multi-dimensional arrays as first-class data types
+- Zero-copy tensor exchange via DLPack (PyTorch, TensorFlow, JAX, ONNX)
+- Arrow storage format with chunking, compression, and Flight protocol
+- Zarr format support for cloud-native arrays
+
+**Distributed Training**:
+- Data parallelism: Partition datasets across nodes
+- Model parallelism: Split large models across GPUs
+- Pipeline parallelism: Layer-wise model distribution
+- Gradient synchronization and checkpointing
+
+**GPU Acceleration**:
+- Unified memory management across CPU/GPU
+- Multi-GPU coordination and memory pooling
+- CUDA graphs for kernel fusion
+- Arrow GPU integration (RAPIDS cuDF)
+
+**Polystore Integration**:
+- Tensor-based data model with category theory foundations
+- Cross-model queries (tensors + relational + graph)
+- Mathematical transformations with formal semantics
+
+See [TENSOR_DATABASE.md](TENSOR_DATABASE.md) for detailed tensor database design.
+
+### 13.9 Decentralized Autonomous Database Systems
+
+DLog's architecture provides a foundation for decentralized autonomous operation:
+
+**Consensus Diversity**:
+- Current: Raft (crash fault tolerant)
+- Extension: Byzantine fault tolerant consensus (PBFT, Tendermint)
+- Research: Proof of Stake for public deployments
+- Hybrid: Multiple consensus mechanisms for different workloads
+
+**Autonomy Enhancements**:
+- Reinforcement learning for self-optimization
+- Anomaly detection for self-protection
+- Automatic capacity planning
+- Predictive failure detection
+
+See [DADBS.md](DADBS.md) for detailed design of Decentralized Autonomous Database Systems.
+
 ---
 
 ## 14. Related Systems and Comparisons
@@ -1576,6 +1623,34 @@ We also thank the Rust community for creating a language and ecosystem that make
 
 36. **DuckDB**: Raasveldt, M., & Mühleisen, H. (2019). DuckDB: An embeddable analytical database. SIGMOD.
 
+### Consensus Mechanisms and Decentralized Systems
+
+37. **PBFT**: Castro, M., & Liskov, B. (1999). Practical Byzantine fault tolerance. OSDI.
+
+38. **Tendermint**: Buchman, E. (2016). Tendermint: Byzantine fault tolerance in the age of blockchains.
+
+39. **Proof of Work**: Nakamoto, S. (2008). Bitcoin: A peer-to-peer electronic cash system.
+
+40. **Proof of Stake**: King, S., & Nadal, S. (2012). PPCoin: Peer-to-peer crypto-currency with proof-of-stake.
+
+### Data Structures
+
+41. **Perfect Hash Functions**: Botelho, F. C., Pagh, R., & Ziviani, N. (2007). Simple and space-efficient minimal perfect hash functions. WAE.
+
+42. **BBHash**: Limasset, A., et al. (2017). Fast and scalable minimal perfect hashing for massive key sets. SEA.
+
+43. **RecSplit**: Esposito, E., et al. (2020). RecSplit: Minimal perfect hashing via recursive splitting. ALENEX.
+
+### Tensor Processing and ML Systems
+
+44. **DLPack**: DLPack Consortium (2017). DLPack: An open in-memory tensor structure for sharing among frameworks.
+
+45. **Zarr**: Zarr Development Team (2020). Zarr: Chunked, compressed, N-dimensional arrays for Python.
+
+46. **RAPIDS cuDF**: NVIDIA (2018). RAPIDS: GPU-accelerated data science libraries.
+
+47. **Distributed Training**: Li, M., et al. (2014). Scaling distributed machine learning with the parameter server. OSDI.
+
 ---
 
 **Author Information**
@@ -1642,10 +1717,10 @@ All benchmarks follow these principles:
 
 **Document Statistics**
 
-- Pages: ~60
-- Words: ~18,000
+- Pages: ~64
+- Words: ~19,000
 - Sections: 17 main + 4 appendices
-- References: 36
+- References: 47
 - Figures: 0 (diagrams in text)
 - Tables: 11
 

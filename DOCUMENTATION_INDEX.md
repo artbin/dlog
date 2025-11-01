@@ -33,6 +33,7 @@ Complete guide to all DLog documentation.
 - **[PERFORMANCE](PERFORMANCE.md)** - Performance tuning and optimization
 - **[MEMORY_ONLY_MODE](MEMORY_ONLY_MODE.md)** ⭐ **NEW: Ultra-fast ephemeral storage (10-100× faster)**
 - **[TENSOR_DATABASE](TENSOR_DATABASE.md)** ⭐ **NEW: Multi-dimensional arrays, ML/AI, vectors, embeddings**
+- **[DADBS](DADBS.md)** ⭐ **NEW: Decentralized Autonomous Database Systems**
 - **[COMPARISON](COMPARISON.md)** - How DLog compares to alternatives
 - **[TIKV_COMPARISON](TIKV_COMPARISON.md)** - Detailed comparison with TiKV
 
@@ -177,6 +178,34 @@ Complete guide to all DLog documentation.
   - 50,000× faster than Datomic
   - Complete implementation patterns and query examples
 
+#### Decentralized Systems
+- [DADBS.md](DADBS.md) ⭐ **NEW: Decentralized Autonomous Database Systems**
+  - **Self-managing, trustless, distributed database infrastructure**
+    - Decentralized (no single point of control)
+    - Autonomous (self-healing, self-optimizing, self-configuring, self-protecting)
+    - Trustless (cryptographic verification, Byzantine fault tolerance)
+    - Economic incentives align node behavior
+  - **5 Consensus Mechanisms**
+    - Raft (crash fault tolerant, fast, DLog default)
+    - PBFT (Practical Byzantine Fault Tolerant, malicious nodes)
+    - Tendermint (BFT with fast finality, instant finality)
+    - Proof of Work (Nakamoto consensus, permissionless, energy-intensive)
+    - Proof of Stake (economic security, no energy waste)
+    - Complete comparison table and implementation patterns
+  - **Complete Architecture**
+    - Layered architecture (Application → Autonomy → Consensus → Storage → Network → Crypto)
+    - Node architecture with identity, storage, consensus, autonomy, networking, incentives
+    - Hybrid network topology (structured + DHT + gossip)
+  - **Smart Contracts for Databases**
+    - Programmable constraints, triggers, policies
+    - Access control, data retention, escrow, voting
+  - **6 Major Use Cases**
+    - Decentralized social networks, supply chain tracking, healthcare records
+    - Financial settlement, voting systems, IoT data marketplace
+  - **Implementation Patterns**
+    - Hybrid architecture, optimistic execution, sharded DADBS
+  - **Complete governance model with on-chain voting**
+
 #### Functional Relational Algebra
 - [FUNCTIONAL_RELATIONAL_ALGEBRA.md](FUNCTIONAL_RELATIONAL_ALGEBRA.md) ⭐ **NEW: Pure functional query system**
   - **Pure Function Relational Operators**
@@ -308,6 +337,46 @@ Complete guide to all DLog documentation.
   - **Performance**: 490M writes/sec with BLAKE3 (4,900× faster than immudb)
   - **BLAKE3 advantage**: +36M writes/sec vs SHA256, 10× faster hashing
   - **Use cases**: Finance, healthcare, government, supply chain, IoT
+
+#### Tensor Database & ML/AI
+- [TENSOR_DATABASE.md](TENSOR_DATABASE.md) ⭐ **NEW: Multi-dimensional arrays for ML/AI workloads**
+  - **Native Tensor Storage & Operations**
+    - Multi-dimensional arrays (tensors) as first-class citizens
+    - Tensor algebra, decomposition, category theory foundations
+    - Zero-copy tensor exchange via DLPack (PyTorch, TensorFlow, JAX, ONNX, Hugging Face)
+    - Arrow storage format with chunking, compression, mmap, Flight protocol
+  - **ML Framework Integration**
+    - DLPack for seamless framework interop
+    - Distributed training support (data, model, pipeline, 3D parallelism)
+    - Checkpointing, fault tolerance, gradient synchronization
+  - **GPU Memory Management**
+    - Unified memory, pinned memory, multi-GPU coordination
+    - Memory pooling, CUDA graphs, defragmentation, monitoring
+  - **Zarr Format Support**
+    - Cloud-native chunked N-dimensional arrays
+    - v2/v3 support, S3/GCS optimization, compression codecs
+    - Import/export, metadata, comparison with HDF5/NetCDF
+  - **Polystore Tensor Data Model**
+    - Mathematical theory (tensor algebra, category theory, formal transformations)
+    - Query semantics, optimization theory, complexity analysis
+    - 5 detailed cross-model SQL queries with execution plans
+  - **Complete ML/AI feature set**
+    - Vector embeddings, ANN search, ML feature store, model registry
+    - Time-series tensors, image/video storage, probabilistic tensors, graph embeddings
+
+#### Data Structures & Algorithms
+- [MPHF.md](MPHF.md) ⭐ **NEW: Partitioned Perfect Hash Maps**
+  - **Merging Multiple Perfect Hash Maps**
+    - Deterministic, streaming, parallelizable algorithm
+    - O(1) guaranteed lookup, zero collisions
+    - Complete build pipeline (sample → partition → reduce → build)
+    - 6 deduplication strategies (LWW, First-Wins, Max-Value, Priority, Timestamp, Custom)
+    - PHF builders comparison (BBHash, RecSplit, PTHash, CHD, BDZ)
+    - Complete file format specification with memory-mapped loading
+    - Real benchmarks: 18s build for 100M keys, 45ns p50 lookup, 15.8× parallelism speedup
+    - ~200 lines of Rust implementation with fluent API
+    - 5 real-world use cases (LSM compaction, DHT, routing, genomics, config management)
+    - Advanced optimizations (SIMD, zero-copy, batch prefetch, Bloom filters)
 
 #### Advanced Features
 - [ADVANCED_FEATURES.md](ADVANCED_FEATURES.md) ⭐ **Updated with Percolator protocol**
@@ -630,12 +699,36 @@ Complete guide to all DLog documentation.
 5. Explore lazy evaluation and query optimization
 6. Learn about type-level query safety and compile-time validation
 
+### "I want to build decentralized autonomous systems"
+1. Read [DADBS.md](DADBS.md) ⭐ - complete guide to Decentralized Autonomous Database Systems
+2. Study 5 consensus mechanisms (Raft, PBFT, Tendermint, PoW, PoS)
+3. Review autonomy layers (self-healing, self-optimizing, self-configuring, self-protecting)
+4. Check smart contracts for databases (constraints, triggers, ACLs)
+5. Explore economic incentives and token economics
+6. Learn about governance models and on-chain voting
+
+### "I need perfect hash maps for read-heavy workloads"
+1. Read [MPHF.md](MPHF.md) ⭐ - complete algorithm specification
+2. Study deterministic build pipeline (sample → partition → reduce → build)
+3. Review 6 deduplication strategies and conflict resolution
+4. Check PHF builders comparison (BBHash, RecSplit, PTHash, CHD, BDZ)
+5. Explore file format specification and memory-mapped loading
+6. Learn about SIMD optimizations and batch prefetching
+
+### "I want to build ML/AI applications with tensor support"
+1. Read [TENSOR_DATABASE.md](TENSOR_DATABASE.md) ⭐ - complete tensor database guide
+2. Study DLPack integration for zero-copy framework interop (PyTorch, TensorFlow, JAX)
+3. Review distributed training support (data, model, pipeline parallelism)
+4. Check GPU memory management and CUDA optimization
+5. Explore Zarr format for cloud-native arrays
+6. Learn about polystore tensor model with mathematical foundations
+
 ## 📊 Documentation Statistics
 
-- **Total Documents**: 36 markdown files
-  - 30 main documentation files
+- **Total Documents**: 38 markdown files
+  - 32 main documentation files
   - 6 blog posts
-- **Total Lines**: ~62,500+ lines of documentation
+- **Total Lines**: ~67,000+ lines of documentation
 - **Coverage**:
   - ✅ Architecture and design
   - ✅ Research contributions and academic paper
@@ -644,6 +737,8 @@ Complete guide to all DLog documentation.
   - ✅ Multi-model databases with category theory
   - ✅ Tensor database (ML/AI, vectors, embeddings, polystore)
   - ✅ Cryptographic verification and zero-trust architecture
+  - ✅ Decentralized autonomous database systems (DADBS)
+  - ✅ Partitioned perfect hash maps (MPHF)
   - ✅ Memory-only mode (ephemeral storage, caching)
   - ✅ User guides and tutorials
   - ✅ Operations and deployment
@@ -682,6 +777,9 @@ Complete guide to all DLog documentation.
 | Rust Libraries | [RUST_LIBRARIES.md](RUST_LIBRARIES.md) | [CONTRIBUTING.md](CONTRIBUTING.md) |
 | Implementation Plan | [IMPLEMENTATION_PLAN.md](IMPLEMENTATION_PLAN.md) | [CONTRIBUTING.md](CONTRIBUTING.md) |
 | Contributing | [CONTRIBUTING.md](CONTRIBUTING.md) | [CHANGELOG.md](CHANGELOG.md) |
+| DADBS | [DADBS.md](DADBS.md) | [ARCHITECTURE.md](ARCHITECTURE.md), [CRYPTOGRAPHIC_VERIFICATION.md](CRYPTOGRAPHIC_VERIFICATION.md) |
+| Tensor Database | [TENSOR_DATABASE.md](TENSOR_DATABASE.md) | [ADVANCED_FEATURES.md](ADVANCED_FEATURES.md) |
+| Perfect Hash Maps | [MPHF.md](MPHF.md) | [ADVANCED_FEATURES.md](ADVANCED_FEATURES.md) |
 
 ## 📝 Documentation Quality
 
@@ -736,7 +834,7 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for how to help improve documentation.
 
 ---
 
-**Last Updated**: 2025-11-01
+**Last Updated**: 2025-11-01 (includes DADBS.md, MPHF.md)
 
 **Maintainers**: DLog Team
 

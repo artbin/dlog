@@ -110,6 +110,21 @@ DLog is a revolutionary unified data platform built in Rust that eliminates the 
 - **Dynamic Partitions**: Automatic splitting/merging of hot/cold partitions
 - **Tiered Storage**: S3/GCS/Azure offloading for cost optimization
 
+### 🔗 Decentralized & Advanced Data Structures
+
+- **[TENSOR_DATABASE](TENSOR_DATABASE.md)**: Multi-dimensional arrays for ML/AI
+  - DLPack integration (PyTorch, TensorFlow, JAX, ONNX, Hugging Face)
+  - Distributed training (data, model, pipeline, 3D parallelism)
+  - GPU memory management, Zarr format, polystore tensor model
+- **[DADBS](DADBS.md)**: Decentralized Autonomous Database Systems
+  - 5 consensus mechanisms (Raft, PBFT, Tendermint, PoW, PoS)
+  - Self-healing, self-optimizing, self-configuring, self-protecting
+  - Smart contracts for databases, economic incentives, on-chain governance
+- **[MPHF](MPHF.md)**: Partitioned Perfect Hash Maps
+  - O(1) guaranteed lookup, zero collisions, zero wasted space
+  - Deterministic, streaming, parallelizable build algorithm
+  - 45ns p50 lookup, 15.8× parallelism speedup
+
 ## 📊 Unified Architecture
 
 DLog's revolutionary layered architecture eliminates traditional boundaries:
@@ -387,7 +402,7 @@ while let Some(batch) = stream.next().await {
 
 ## 📚 Comprehensive Documentation
 
-DLog includes **55,000+ lines** of documentation across **34 files**:
+DLog includes **67,000+ lines** of documentation across **38 files**:
 
 ### 🎯 Getting Started
 - **[QUICK_START.md](QUICK_START.md)** - Get up and running in 5 minutes
@@ -407,6 +422,11 @@ DLog includes **55,000+ lines** of documentation across **34 files**:
 ### 💾 Multi-Model Database
 - **[MULTI_MODEL_DATABASE.md](MULTI_MODEL_DATABASE.md)** - Category theory, 5 data models
 - **[FUNCTIONAL_RELATIONAL_ALGEBRA.md](FUNCTIONAL_RELATIONAL_ALGEBRA.md)** - Monads, type safety
+
+### 🔗 Decentralized & Advanced Algorithms
+- **[TENSOR_DATABASE.md](TENSOR_DATABASE.md)** - Tensor database (DLPack, distributed training, GPU, Zarr)
+- **[DADBS.md](DADBS.md)** - Decentralized Autonomous Database Systems (5 consensus mechanisms)
+- **[MPHF.md](MPHF.md)** - Partitioned Perfect Hash Maps (O(1) lookup, zero collisions)
 
 ### ⚡ Advanced Features
 - **[ADVANCED_FEATURES.md](ADVANCED_FEATURES.md)** - Transactions, stream processing, analytics
