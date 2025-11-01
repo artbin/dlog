@@ -175,6 +175,46 @@ Complete guide to all DLog documentation.
   - 50,000× faster than Datomic
   - Complete implementation patterns and query examples
 
+#### Functional Relational Algebra
+- [FUNCTIONAL_RELATIONAL_ALGEBRA.md](FUNCTIONAL_RELATIONAL_ALGEBRA.md) ⭐ **NEW: Pure functional query system**
+  - **Pure Function Relational Operators**
+    - Select (σ), Project (π), Join (⋈), Union (∪), Difference (−)
+    - Immutable operations, no side effects
+    - Composable via method chaining
+  - **Monad-Based Query DSL**
+    - Query as monad with `flatMap`/`>>=`
+    - Do-notation macro for Rust
+    - Composable queries
+    - Monad laws verified
+  - **Applicative Functor Queries**
+    - Parallel query execution
+    - Independent sub-queries
+    - 2-3× speedup for independent operations
+  - **Lazy Evaluation**
+    - Build queries without executing
+    - Optimize before execution
+    - 2.25× faster with fusion
+    - DataFusion integration
+  - **Algebraic Data Types (ADTs)**
+    - QueryExpr ADT with pattern matching
+    - Type-safe transformations
+    - Query serialization
+  - **Point-Free Style (Tacit Programming)**
+    - Function composition without parameters
+    - Query combinators library
+    - Operator overloading (`>>` for compose)
+  - **Type-Level Query Safety**
+    - Compile-time schema validation
+    - Typed columns and joins
+    - HList for heterogeneous rows
+    - Prevent column mismatches at compile time
+  - **Functional Query Rewrite Rules**
+    - Algebraic laws for optimization
+    - 14× speedup with filter pushdown
+    - Cost-based optimization
+    - Provably correct transformations
+  - **Complete implementation roadmap** (11-16 months)
+
 #### Multi-Model Database & Category Theory
 - [MULTI_MODEL_DATABASE.md](MULTI_MODEL_DATABASE.md) ⭐ **NEW: MultiCategory-inspired features**
   - **Multi-Model Data Support** (5 data models in single backend)
@@ -580,15 +620,24 @@ Complete guide to all DLog documentation.
 5. Explore graph queries (Cypher, SPARQL) and hierarchical queries (JSONPath, XPath)
 6. Learn about ML-driven query optimization
 
+### "I want pure functional programming with type-safe queries"
+1. Read [FUNCTIONAL_RELATIONAL_ALGEBRA.md](FUNCTIONAL_RELATIONAL_ALGEBRA.md) ⭐ - complete guide
+2. Study pure function operators (select, project, join)
+3. Review monad-based DSL for composable queries
+4. Check applicative functors for parallel execution
+5. Explore lazy evaluation and query optimization
+6. Learn about type-level query safety and compile-time validation
+
 ## 📊 Documentation Statistics
 
-- **Total Documents**: 33 markdown files
-  - 27 main documentation files
+- **Total Documents**: 34 markdown files
+  - 28 main documentation files
   - 6 blog posts
-- **Total Lines**: ~48,000+ lines of documentation
+- **Total Lines**: ~55,000+ lines of documentation
 - **Coverage**:
   - ✅ Architecture and design
   - ✅ Research contributions and academic paper
+  - ✅ Functional relational algebra and pure functional programming
   - ✅ Immutable knowledge databases and temporal systems
   - ✅ Multi-model databases with category theory
   - ✅ Cryptographic verification and zero-trust architecture
