@@ -1,0 +1,23 @@
+# Rust
+/target
+**/*.rs.bk
+*.pdb
+Cargo.lock
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Data directories
+/data*
+*.log
+*.index
+
+# Test artifacts
+/tmp/
+
+.history/

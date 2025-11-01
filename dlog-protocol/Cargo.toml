@@ -1,0 +1,14 @@
+[package]
+name = "dlog-protocol"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+dlog-core = { path = "../dlog-core" }
+tokio = { version = "1.35", features = ["full"] }
+serde = { version = "1.0", features = ["derive"] }
+bincode = "1.3"
+bytes = "1.5"
+thiserror = "1.0"
+async-trait = "0.1"
+
