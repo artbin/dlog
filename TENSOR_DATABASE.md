@@ -73,6 +73,564 @@ Image = 3D Tensor (height × width × channels)
 Video = 4D Tensor (time × height × width × channels)
 ```
 
+### Mathematical Foundations
+
+#### Tensor Definition
+
+A **tensor** of order n (or n-mode tensor) is a multi-dimensional array:
+
+```
+T ∈ ℝ^(I₁ × I₂ × ... × Iₙ)
+```
+
+where `I₁, I₂, ..., Iₙ` are the dimension sizes.
+
+**Special cases**:
+- Order 0: Scalar (ℝ)
+- Order 1: Vector (ℝⁿ)
+- Order 2: Matrix (ℝⁿˣᵐ)
+- Order n: n-dimensional array
+
+**Notation**: `T(i₁, i₂, ..., iₙ)` or `T[i₁, i₂, ..., iₙ]`
+
+#### Tensor Algebra
+
+**1. Tensor Addition** (element-wise):
+```
+(T₁ + T₂)(i₁, ..., iₙ) = T₁(i₁, ..., iₙ) + T₂(i₁, ..., iₙ)
+```
+
+**2. Scalar Multiplication**:
+```
+(αT)(i₁, ..., iₙ) = α · T(i₁, ..., iₙ)
+```
+
+**3. Tensor Product** (Kronecker product):
+```
+T₁ ⊗ T₂ ∈ ℝ^(I₁J₁ × I₂J₂ × ... × IₙJₙ)
+```
+
+**4. Tensor Contraction** (generalized matrix multiplication):
+```
+(T₁ ×ₖ T₂)(i₁, ..., iₖ₋₁, j, iₖ₊₁, ..., iₙ) = Σₗ T₁(i₁, ..., iₖ₋₁, l, iₖ₊₁, ..., iₙ) · T₂(l, j)
+```
+
+**5. Mode-k Product**:
+```
+T ×ₖ M = Y, where Y(i₁, ..., iₖ₋₁, j, iₖ₊₁, ..., iₙ) = Σᵢₖ T(i₁, ..., iₙ) · M(j, iₖ)
+```
+
+#### Tensor Decomposition
+
+**1. Tucker Decomposition**:
+```
+T ≈ G ×₁ A₁ ×₂ A₂ ×₃ ... ×ₙ Aₙ
+```
+where G is the core tensor, Aᵢ are factor matrices.
+
+**2. CANDECOMP/PARAFAC (CP)**:
+```
+T ≈ Σᵣ λᵣ · a₁⁽ʳ⁾ ⊗ a₂⁽ʳ⁾ ⊗ ... ⊗ aₙ⁽ʳ⁾
+```
+Sum of rank-1 tensors.
+
+**3. Tensor Train (TT) Decomposition**:
+```
+T(i₁, ..., iₙ) = G₁(i₁) · G₂(i₂) · ... · Gₙ(iₙ)
+```
+Product of matrices (efficient for high-dimensional tensors).
+
+### Category-Theoretic Foundation
+
+#### Tensor Category
+
+**Definition**: A tensor category (monoidal category) is a category **C** equipped with:
+
+1. **Tensor product** ⊗: C × C → C
+2. **Unit object** I
+3. **Associator** α: (A ⊗ B) ⊗ C ≅ A ⊗ (B ⊗ C)
+4. **Left/right unitors** λ, ρ: I ⊗ A ≅ A ≅ A ⊗ I
+
+**Properties**:
+- **Associativity**: (A ⊗ B) ⊗ C ≅ A ⊗ (B ⊗ C)
+- **Unit**: I ⊗ A ≅ A
+- **Naturality**: Tensor product is a bifunctor
+
+**Example in DLog**:
+
+```
+Objects: Tensor spaces (ℝⁿ, ℝⁿˣᵐ, ℝⁿˣᵐˣᵖ, ...)
+Morphisms: Linear maps (matrix multiply, reshape, transpose)
+Tensor product: Kronecker product ⊗
+Unit: Scalar (ℝ)
+```
+
+#### Data Model as Functors
+
+Each data model is a **functor** from the tensor category to Set:
+
+```
+F_Relational: TensorCat → Set
+F_Document: TensorCat → Set
+F_Graph: TensorCat → Set
+```
+
+**Natural transformations** between functors represent **model conversions**:
+
+```
+η: F_Relational ⇒ F_Tensor
+```
+
+**Example**: Converting a relational table to a tensor:
+
+```rust
+// Natural transformation: Relational → Tensor
+impl NaturalTransformation for RelationalToTensor {
+    fn transform(table: RelationalTable) -> Tensor2D {
+        // Preserve structure (rows, columns)
+        // Mapping is natural: commutes with morphisms
+        Tensor2D::from_table(table)
+    }
+}
+```
+
+#### Adjunctions and Limits
+
+**Adjunction** (free-forgetful):
+
+```
+Free ⊣ Forgetful
+```
+
+- **Free**: Embed data into tensor space (with structure)
+- **Forgetful**: Forget structure, keep raw tensor
+
+**Example**:
+```
+Free(Graph) → Tensor (adjacency matrix + metadata)
+Forgetful(Tensor) → Raw array (lose graph structure)
+```
+
+**Limits and Colimits**:
+
+- **Product**: Tensor product ⊗
+- **Coproduct**: Direct sum ⊕
+- **Equalizer**: Tensor equality constraints
+- **Pullback**: Join operations
+
+### Formal Data Model Transformations
+
+#### Relational to Tensor
+
+**Schema**: `R(A₁: τ₁, A₂: τ₂, ..., Aₙ: τₙ)`
+
+**Transformation**:
+```
+φ: R → ℝⁿˣᵐ
+```
+
+where:
+- n = number of rows (tuples)
+- m = number of columns (attributes)
+
+**Encoding**:
+```
+T[i, j] = encode(R[i].Aⱼ)
+```
+
+**Properties**:
+- **Preserves relational operations**:
+  - Selection: σ_p(R) ↦ mask-multiply
+  - Projection: π_A(R) ↦ tensor slicing
+  - Join: R ⋈ S ↦ tensor contraction
+
+**Example**:
+```
+SELECT A, B FROM R WHERE C > 10
+  ↓
+T[:, [0, 1]] * (T[:, 2] > 10)
+```
+
+#### Document (JSON) to Tensor
+
+**Schema**: Nested structure with fields
+
+**Transformation**: 
+```
+φ: JSON → ℝⁿ (flattened) or ℝⁿˣᵐ (structured)
+```
+
+**Strategies**:
+
+1. **Flattening**: Convert to 1D vector
+   ```
+   {"a": 1, "b": {"c": 2}} → [1, 2]
+   ```
+
+2. **Structured**: Preserve hierarchy as multi-dimensional
+   ```
+   {"users": [{"age": 30}, {"age": 25}]} → ℝ²ˣ¹ (2 users, 1 feature)
+   ```
+
+3. **Embedding**: Use learned embeddings
+   ```
+   JSON → Encoder → ℝᵈ (d-dimensional embedding)
+   ```
+
+#### Graph to Sparse Tensor
+
+**Schema**: G = (V, E) with |V| = n nodes
+
+**Transformation**:
+```
+φ: G → ℝⁿˣⁿ (adjacency matrix)
+```
+
+**Representations**:
+
+1. **Adjacency Matrix**:
+   ```
+   A[i, j] = 1 if (i, j) ∈ E, 0 otherwise
+   ```
+
+2. **Weighted Adjacency**:
+   ```
+   A[i, j] = w(i, j) if (i, j) ∈ E, 0 otherwise
+   ```
+
+3. **Incidence Matrix**: ℝⁿˣᵐ (n nodes, m edges)
+   ```
+   B[i, e] = 1 if node i is in edge e
+   ```
+
+4. **Multi-relational**: ℝⁿˣⁿˣʳ (r relation types)
+   ```
+   T[i, j, r] = weight of relation r from i to j
+   ```
+
+**Graph Operations**:
+- **BFS/DFS**: Matrix powers A^k
+- **PageRank**: Eigenvector of A
+- **Shortest paths**: Matrix multiplication (min-plus semiring)
+- **Community detection**: Tensor factorization
+
+#### Time-Series to Tensor
+
+**Schema**: Sequential observations
+
+**Transformation**:
+```
+φ: TimeSeries → ℝᵀˣᶠ
+```
+
+where:
+- T = time steps
+- F = features/variables
+
+**Multi-resolution**:
+```
+ℝᵀˣᶠ → ℝᵀ'ˣᶠˣʳ (T' downsampled, r resolutions)
+```
+
+**Operations**:
+- **Sliding window**: Unfold → ℝⁿˣʷˣᶠ (n windows, w window size)
+- **Convolution**: T * K (temporal filtering)
+- **Attention**: Q·Kᵀ·V (self-attention)
+
+### Query Semantics
+
+#### Tensor Query Language (TQL)
+
+**Grammar**:
+```
+Q ::= T                          (tensor reference)
+    | Q[slice]                   (slicing)
+    | Q₁ + Q₂                    (addition)
+    | Q₁ * Q₂                    (element-wise multiply)
+    | Q₁ @ Q₂                    (matrix multiply)
+    | Q₁ ⊗ Q₂                    (tensor product)
+    | map(f, Q)                  (element-wise map)
+    | reduce(op, Q, axis)        (reduction)
+    | reshape(Q, shape)          (reshape)
+    | transpose(Q, perm)         (permutation)
+```
+
+**Semantics** (denotational):
+```
+⟦T⟧ρ = ρ(T)                                     (lookup)
+⟦Q[s]⟧ρ = slice(⟦Q⟧ρ, s)                       (slicing)
+⟦Q₁ + Q₂⟧ρ = ⟦Q₁⟧ρ + ⟦Q₂⟧ρ                      (addition)
+⟦Q₁ @ Q₂⟧ρ = matmul(⟦Q₁⟧ρ, ⟦Q₂⟧ρ)              (matmul)
+⟦map(f, Q)⟧ρ = map(f, ⟦Q⟧ρ)                    (map)
+⟦reduce(op, Q, k)⟧ρ = reduce_k(op, ⟦Q⟧ρ)      (reduce)
+```
+
+where ρ is the environment (tensor bindings).
+
+#### Query Optimization Theory
+
+**Algebraic Laws**:
+
+1. **Associativity**:
+   ```
+   (Q₁ + Q₂) + Q₃ = Q₁ + (Q₂ + Q₃)
+   ```
+
+2. **Commutativity**:
+   ```
+   Q₁ + Q₂ = Q₂ + Q₁
+   ```
+
+3. **Distributivity**:
+   ```
+   Q₁ * (Q₂ + Q₃) = Q₁ * Q₂ + Q₁ * Q₃
+   ```
+
+4. **Fusion**:
+   ```
+   map(g, map(f, Q)) = map(g ∘ f, Q)
+   ```
+
+5. **Map-Reduce Fusion**:
+   ```
+   reduce(op, map(f, Q)) = reduce(op', Q)
+   ```
+   (if op and f can be fused)
+
+6. **Slice Pushdown**:
+   ```
+   (Q₁ @ Q₂)[i:j, :] = Q₁[i:j, :] @ Q₂
+   ```
+
+**Cost Model**:
+
+```
+Cost(Q) = Time(Q) + α · Space(Q) + β · IO(Q)
+```
+
+where:
+- Time: FLOPs (floating-point operations)
+- Space: Memory footprint
+- IO: Data transfers (disk, network, GPU)
+
+**Example**:
+```
+Cost(matmul(A, B)) = 2mnp FLOPs (for m×n, n×p matrices)
+Cost(slice) = O(1) (zero-copy)
+Cost(transpose) = O(n) (cache-aware)
+```
+
+**Optimization Rules**:
+
+1. **Lazy Evaluation**: Build computation graph, optimize before execution
+2. **Operator Fusion**: Combine multiple ops into single kernel
+3. **Memory Planning**: Reuse buffers, minimize allocations
+4. **Parallelization**: SIMD, multi-thread, GPU, distributed
+
+### Polystore Integration Theory
+
+#### Multi-Model Query Processing
+
+**Query**: Cross-model operations
+
+```sql
+SELECT r.id, COSINE(r.embedding, g.node_embedding)
+FROM relational_table r
+JOIN graph_nodes g ON r.user_id = g.id
+WHERE r.age > 30 AND g.pagerank > 0.1
+```
+
+**Execution Plan**:
+
+1. **Model Conversion**: 
+   - Relational table → 2D tensor
+   - Graph nodes → 2D tensor (node features)
+
+2. **Tensor Operations**:
+   - Filter: T_r[:, age_col] > 30
+   - Filter: T_g[:, pr_col] > 0.1
+   - Join: Hash join on id (tensor indices)
+   - Compute: Cosine similarity (dot product + norms)
+
+3. **Result Materialization**: Tensor → Result set
+
+**Optimization**: Minimize model conversions (keep in tensor form as long as possible)
+
+#### Universal Representation Theorem
+
+**Theorem**: Every data model D can be embedded into a tensor space T:
+
+```
+∃ φ: D → T such that:
+1. φ is injective (preserves information)
+2. φ preserves operations (homomorphism)
+3. φ is efficiently computable
+```
+
+**Proof sketch**:
+1. Any finite data structure can be serialized to a sequence (1D tensor)
+2. Structured data can be embedded in higher dimensions (preserving structure)
+3. Operations on data models correspond to tensor operations
+
+**Corollary**: Polystore queries can be compiled to tensor operations.
+
+#### Semantic Preservation
+
+**Definition**: A model transformation φ: M₁ → M₂ preserves semantics if:
+
+```
+∀ Q ∈ Queries(M₁): ⟦φ(Q)⟧_M₂ = φ(⟦Q⟧_M₁)
+```
+
+(Query results are equivalent after transformation)
+
+**Example**: Relational selection preserved in tensor:
+
+```
+⟦σ_age>30(R)⟧_Rel = {r ∈ R | r.age > 30}
+  ≡ (transform to tensor)
+⟦T[T[:, age_col] > 30]⟧_Tensor
+```
+
+### Complexity Analysis
+
+#### Space Complexity
+
+| Data Model | Raw Size | Tensor Size | Overhead |
+|------------|----------|-------------|----------|
+| Relational (n rows, m cols) | O(nm) | O(nm) | ~1× |
+| Document (avg depth d) | O(nd) | O(nd) (flat) | ~1-2× |
+| Graph (n nodes, e edges) | O(n + e) | O(n²) (dense) | ~n× (worst) |
+| Graph (sparse) | O(n + e) | O(n + e) | ~1× (sparse) |
+| Time-Series (t steps, f features) | O(tf) | O(tf) | ~1× |
+
+**Optimization**: Use sparse tensors for sparse data (graphs, sparse matrices)
+
+#### Time Complexity
+
+**Tensor Operations**:
+
+| Operation | Complexity | Notes |
+|-----------|-----------|-------|
+| Element-wise | O(n) | Parallelizable (SIMD) |
+| Matrix multiply (m×n, n×p) | O(mnp) | ~O(n^2.37) (Strassen) |
+| Tensor contraction | O(∏ dims) | Depends on contraction order |
+| Slice/Reshape | O(1) | Zero-copy (view) |
+| Reduction (sum, mean) | O(n) | Tree reduction (parallel) |
+| Transpose | O(n) | Cache-aware algorithms |
+
+**Model Operations**:
+
+| Operation | Relational | Tensor Equivalent | Complexity |
+|-----------|-----------|-------------------|-----------|
+| Selection | σ_p(R) | T * mask(p) | O(n) |
+| Projection | π_A(R) | T[:, A] | O(1) |
+| Join (hash) | R ⋈ S | Hash join | O(n + m) |
+| Join (nested) | R ⋈ S | Nested loop | O(nm) |
+| Aggregation | GROUP BY | reduce(op, T, axis) | O(n) |
+
+### Theoretical Properties
+
+#### Completeness
+
+**Theorem**: The tensor data model is **relationally complete** (can express all relational algebra).
+
+**Proof**:
+- Selection: Masking (element-wise multiply with boolean tensor)
+- Projection: Slicing
+- Union: Tensor concatenation
+- Difference: Boolean operations
+- Join: Tensor contraction
+- Rename: Index permutation
+
+#### Expressiveness
+
+**Theorem**: Tensors can express operations beyond relational algebra:
+- Matrix operations (eigenvalues, decompositions)
+- Signal processing (FFT, convolution)
+- Graph algorithms (shortest paths, centrality)
+- Machine learning (neural networks)
+
+#### Consistency
+
+**Theorem**: Model transformations preserve consistency:
+
+```
+If φ: M₁ → Tensor and ψ: Tensor → M₁ (inverse),
+then ψ(φ(D)) ≡ D (isomorphism)
+```
+
+(Lossless round-trip conversion)
+
+### Implementation Considerations
+
+**Lazy Evaluation**:
+```rust
+pub struct TensorExpr {
+    op: TensorOp,
+    inputs: Vec<TensorExpr>,
+    shape: Shape,
+    dtype: DType,
+}
+
+impl TensorExpr {
+    // Build computation graph (no execution)
+    pub fn add(self, other: TensorExpr) -> TensorExpr {
+        TensorExpr {
+            op: TensorOp::Add,
+            inputs: vec![self, other],
+            shape: self.shape.clone(),
+            dtype: self.dtype,
+        }
+    }
+    
+    // Optimize and execute
+    pub fn execute(&self) -> Tensor {
+        let optimized = optimize_graph(self);
+        execute_graph(optimized)
+    }
+}
+
+fn optimize_graph(expr: &TensorExpr) -> TensorExpr {
+    // Apply algebraic laws
+    // Fuse operations
+    // Eliminate common subexpressions
+    // ...
+}
+```
+
+**Type System**:
+```rust
+// Dependent types for shape safety
+pub struct Tensor<const SHAPE: &'static [usize], T> {
+    data: Vec<T>,
+    phantom: PhantomData<SHAPE>,
+}
+
+// Compile-time shape checking
+fn matmul<const M: usize, const N: usize, const P: usize>(
+    a: Tensor<&[M, N], f32>,
+    b: Tensor<&[N, P], f32>,
+) -> Tensor<&[M, P], f32> {
+    // Matrix multiply (shapes guaranteed valid)
+}
+```
+
+**Provenance Tracking**:
+```rust
+// Track data lineage through transformations
+pub struct ProvenanceTensor {
+    data: Tensor,
+    lineage: Lineage,
+}
+
+pub enum Lineage {
+    Source(String),                           // Original data
+    Transform(Box<Lineage>, TransformOp),     // Derived
+    Merge(Box<Lineage>, Box<Lineage>),       // Joined
+}
+```
+
 ### Unified Query Interface
 
 All data models accessible via **tensor operations**:
@@ -698,6 +1256,1295 @@ let comparison = dlog.compare_model_versions(
     metrics: vec!["auc", "latency", "conversion_rate"],
     duration: Duration::from_days(7),
 ).await?;
+```
+
+---
+
+## ML Framework Integration
+
+### DLPack: Zero-Copy Tensor Exchange
+
+**DLPack** is a standard for zero-copy tensor sharing between frameworks (PyTorch, TensorFlow, JAX, etc.).
+
+```rust
+use dlpack::{DLTensor, DLDataType, DLDevice};
+
+// DLog tensor to DLPack
+impl DLogTensor {
+    pub fn to_dlpack(&self) -> DLTensor {
+        DLTensor {
+            data: self.data.as_ptr() as *mut _,
+            device: DLDevice {
+                device_type: DLDeviceType::kDLCPU,  // or kDLCUDA
+                device_id: 0,
+            },
+            ndim: self.shape.len() as i32,
+            dtype: DLDataType {
+                code: DLDataTypeCode::kDLFloat,
+                bits: 32,
+                lanes: 1,
+            },
+            shape: self.shape.as_ptr() as *mut _,
+            strides: self.strides.as_ptr() as *mut _,
+            byte_offset: 0,
+        }
+    }
+    
+    pub fn from_dlpack(dl_tensor: &DLTensor) -> Self {
+        // Zero-copy import from any DLPack-compatible framework
+        unsafe {
+            let shape = std::slice::from_raw_parts(
+                dl_tensor.shape,
+                dl_tensor.ndim as usize,
+            );
+            
+            DLogTensor::from_raw_parts(
+                dl_tensor.data,
+                shape.to_vec(),
+                dl_tensor.dtype,
+            )
+        }
+    }
+}
+```
+
+### PyTorch Integration
+
+```rust
+// Zero-copy: DLog → PyTorch
+impl DLogTensor {
+    pub fn to_torch(&self) -> PyObject {
+        Python::with_gil(|py| {
+            let dl_tensor = self.to_dlpack();
+            
+            // Call torch.from_dlpack()
+            let torch = py.import("torch")?;
+            torch.call_method1("from_dlpack", (dl_tensor,))
+        })
+    }
+}
+
+// Zero-copy: PyTorch → DLog
+impl From<PyObject> for DLogTensor {
+    fn from(torch_tensor: PyObject) -> Self {
+        Python::with_gil(|py| {
+            // Get DLPack capsule from PyTorch
+            let capsule = torch_tensor.call_method0(py, "__dlpack__")?;
+            let dl_tensor = unsafe { extract_dlpack(capsule) };
+            
+            DLogTensor::from_dlpack(&dl_tensor)
+        })
+    }
+}
+```
+
+**Example Usage**:
+
+```python
+import torch
+import dlog
+
+# Create tensor in PyTorch
+torch_tensor = torch.randn(1000, 768, device='cuda')
+
+# Zero-copy transfer to DLog
+dlog_tensor = dlog.from_torch(torch_tensor)  # No copy!
+
+# Store in DLog
+client.insert("embeddings", id=1, embedding=dlog_tensor)
+
+# Retrieve and use in PyTorch
+dlog_tensor = client.get_tensor("embeddings", id=1)
+torch_tensor = dlog_tensor.to_torch()  # Zero-copy!
+
+# Use in model
+output = model(torch_tensor)
+```
+
+### TensorFlow/Keras Integration
+
+```rust
+// TensorFlow integration via DLPack
+pub fn to_tensorflow(&self) -> PyObject {
+    Python::with_gil(|py| {
+        let dl_tensor = self.to_dlpack();
+        
+        // tf.experimental.dlpack.from_dlpack()
+        let tf = py.import("tensorflow.experimental.dlpack")?;
+        tf.call_method1("from_dlpack", (dl_tensor,))
+    })
+}
+```
+
+**Example**:
+
+```python
+import tensorflow as tf
+import dlog
+
+# DLog → TensorFlow (zero-copy)
+dlog_tensor = client.get_tensor("features", id=123)
+tf_tensor = dlog.to_tensorflow(dlog_tensor)
+
+# Use in Keras model
+model = tf.keras.Sequential([...])
+predictions = model(tf_tensor)
+
+# TensorFlow → DLog
+dlog_result = dlog.from_tensorflow(predictions)
+client.insert("predictions", id=123, result=dlog_result)
+```
+
+### JAX/Flax Integration
+
+```rust
+// JAX uses the same DLPack protocol
+pub fn to_jax(&self) -> PyObject {
+    Python::with_gil(|py| {
+        let dl_tensor = self.to_dlpack();
+        
+        // jax.dlpack.from_dlpack()
+        let jax_dlpack = py.import("jax.dlpack")?;
+        jax_dlpack.call_method1("from_dlpack", (dl_tensor,))
+    })
+}
+```
+
+**Example**:
+
+```python
+import jax.numpy as jnp
+import dlog
+
+# DLog → JAX (zero-copy)
+dlog_tensor = client.get_tensor("weights", layer="encoder")
+jax_array = dlog.to_jax(dlog_tensor)
+
+# Use in JAX computation
+@jax.jit
+def forward(x, weights):
+    return jnp.dot(x, weights)
+
+output = forward(input, jax_array)
+```
+
+### ONNX Model Import/Export
+
+```rust
+// Import ONNX model into DLog
+pub async fn import_onnx_model(
+    model_path: &str,
+) -> Result<ModelWeights> {
+    let model = onnx::ModelProto::parse_from_file(model_path)?;
+    
+    let mut weights = ModelWeights::new();
+    
+    for initializer in model.graph.initializer {
+        let tensor = parse_onnx_tensor(&initializer)?;
+        weights.insert(initializer.name, tensor);
+    }
+    
+    Ok(weights)
+}
+
+// Export DLog model to ONNX
+pub async fn export_to_onnx(
+    model_weights: &ModelWeights,
+    output_path: &str,
+) -> Result<()> {
+    let mut graph = onnx::GraphProto::new();
+    
+    for (name, tensor) in model_weights {
+        let onnx_tensor = to_onnx_tensor(name, tensor);
+        graph.initializer.push(onnx_tensor);
+    }
+    
+    let model = onnx::ModelProto {
+        graph: Some(graph),
+        ..Default::default()
+    };
+    
+    model.write_to_file(output_path)?;
+    Ok(())
+}
+```
+
+**Example**:
+
+```rust
+// Import pre-trained ONNX model
+let weights = dlog.import_onnx_model("resnet50.onnx").await?;
+
+// Store in DLog
+dlog.save_model_weights("resnet50", "v1.0", weights).await?;
+
+// Later: Export to ONNX for deployment
+let weights = dlog.load_model_weights("resnet50", "v1.0").await?;
+dlog.export_to_onnx(&weights, "resnet50_deployed.onnx").await?;
+```
+
+### Hugging Face Transformers Integration
+
+```rust
+// Store Hugging Face model in DLog
+pub async fn save_hf_model(
+    model_name: &str,
+    model: &PreTrainedModel,
+) -> Result<()> {
+    // Extract model weights
+    let state_dict = model.state_dict();
+    
+    let mut weights = ModelWeights::new();
+    for (name, tensor) in state_dict {
+        // Convert to DLog tensor (zero-copy via DLPack)
+        let dlog_tensor = DLogTensor::from_torch(tensor);
+        weights.insert(name, dlog_tensor);
+    }
+    
+    // Save metadata
+    let config = model.config();
+    
+    dlog.save_model(SaveModelRequest {
+        name: model_name,
+        weights,
+        config: serde_json::to_value(config)?,
+        tokenizer: model.tokenizer().save_to_bytes()?,
+    }).await?;
+    
+    Ok(())
+}
+
+// Load Hugging Face model from DLog
+pub async fn load_hf_model(
+    model_name: &str,
+) -> Result<PreTrainedModel> {
+    let saved = dlog.load_model(model_name).await?;
+    
+    // Reconstruct model
+    let config = serde_json::from_value(saved.config)?;
+    let mut model = PreTrainedModel::from_config(config);
+    
+    // Load weights (zero-copy)
+    for (name, dlog_tensor) in saved.weights {
+        let torch_tensor = dlog_tensor.to_torch();
+        model.load_state_dict_key(name, torch_tensor);
+    }
+    
+    Ok(model)
+}
+```
+
+**Example**:
+
+```python
+from transformers import AutoModel, AutoTokenizer
+import dlog
+
+# Save Hugging Face model to DLog
+model = AutoModel.from_pretrained("bert-base-uncased")
+tokenizer = AutoTokenizer.from_pretrained("bert-base-uncased")
+
+dlog.save_hf_model("bert-base-uncased", model, tokenizer)
+
+# Later: Load from DLog (faster than downloading)
+model, tokenizer = dlog.load_hf_model("bert-base-uncased")
+
+# Use model
+inputs = tokenizer("Hello world", return_tensors="pt")
+outputs = model(**inputs)
+```
+
+### Performance: Zero-Copy vs. Copy
+
+| Operation | Copy (memcpy) | Zero-Copy (DLPack) | Speedup |
+|-----------|--------------|-------------------|---------|
+| 1GB tensor (CPU) | 300ms | <1ms | 300× |
+| 1GB tensor (GPU) | 500ms | <1ms | 500× |
+| 10GB model weights | 3s | <10ms | 300× |
+
+**Key benefit**: Seamless integration with ML ecosystem without serialization overhead.
+
+---
+
+## Distributed Training Support
+
+### Data Parallelism
+
+**Strategy**: Shard dataset across nodes, each trains on subset
+
+```rust
+pub struct DataParallelConfig {
+    // Number of training nodes
+    num_replicas: usize,
+    
+    // Gradient synchronization strategy
+    sync_strategy: SyncStrategy,
+    
+    // Batch size per replica
+    batch_size_per_replica: usize,
+}
+
+pub enum SyncStrategy {
+    // Synchronize after each batch
+    Synchronous,
+    
+    // Async gradient updates (faster, less stable)
+    Asynchronous,
+    
+    // Sync every N batches
+    Periodic { interval: usize },
+}
+```
+
+**Example**:
+
+```rust
+// Create distributed training job
+let training_job = dlog.create_training_job(TrainingConfig {
+    model: "recommendation_model",
+    dataset: "user_interactions",
+    
+    // Data parallelism across 8 GPUs
+    parallelism: ParallelismStrategy::Data(DataParallelConfig {
+        num_replicas: 8,
+        sync_strategy: SyncStrategy::Synchronous,
+        batch_size_per_replica: 256,  // Total batch size: 2048
+    }),
+    
+    // Training params
+    epochs: 10,
+    learning_rate: 0.001,
+}).await?;
+
+// DLog automatically:
+// 1. Shards dataset across 8 nodes
+// 2. Loads model on each node
+// 3. Coordinates gradient synchronization
+// 4. Checkpoints periodically
+```
+
+**Gradient Aggregation**:
+
+```rust
+// All-reduce pattern (ring or tree)
+pub async fn all_reduce_gradients(
+    local_gradients: Vec<Tensor>,
+    strategy: AllReduceStrategy,
+) -> Result<Vec<Tensor>> {
+    match strategy {
+        AllReduceStrategy::Ring => {
+            // Ring all-reduce (bandwidth-optimal)
+            ring_all_reduce(local_gradients).await
+        }
+        AllReduceStrategy::Tree => {
+            // Tree all-reduce (latency-optimal)
+            tree_all_reduce(local_gradients).await
+        }
+        AllReduceStrategy::NCCL => {
+            // Use NVIDIA NCCL (GPU-optimized)
+            nccl_all_reduce(local_gradients).await
+        }
+    }
+}
+```
+
+### Model Parallelism (Tensor Parallelism)
+
+**Strategy**: Shard model layers across nodes
+
+```rust
+pub struct TensorParallelConfig {
+    // Split dimension (rows or columns)
+    split_dim: usize,
+    
+    // Number of shards
+    num_shards: usize,
+    
+    // Communication strategy
+    comm_strategy: CommStrategy,
+}
+
+// Example: Split a large linear layer
+// W: [10000, 10000] → W1: [10000, 5000], W2: [10000, 5000]
+let layer = dlog.create_tensor_parallel_layer(TensorParallelLayer {
+    weight: large_weight_matrix,
+    config: TensorParallelConfig {
+        split_dim: 1,  // Split columns
+        num_shards: 2,  // Across 2 GPUs
+        comm_strategy: CommStrategy::AllGather,
+    },
+}).await?;
+
+// Forward pass:
+// 1. Split input across GPUs
+// 2. Each GPU computes partial result
+// 3. All-gather to combine results
+```
+
+### Pipeline Parallelism
+
+**Strategy**: Split model into stages, pipeline batches
+
+```rust
+pub struct PipelineParallelConfig {
+    // Number of pipeline stages
+    num_stages: usize,
+    
+    // Micro-batch size (for pipelining)
+    micro_batch_size: usize,
+    
+    // Schedule (GPipe, PipeDream, etc.)
+    schedule: PipelineSchedule,
+}
+
+pub enum PipelineSchedule {
+    // GPipe: Fill-drain pipeline
+    GPipe,
+    
+    // PipeDream: Asynchronous pipeline
+    PipeDream,
+    
+    // 1F1B: One forward, one backward
+    OneFOneBBackward,
+}
+```
+
+**Example**:
+
+```rust
+// 12-layer transformer, split into 4 stages (3 layers each)
+let pipeline = dlog.create_pipeline(PipelineConfig {
+    model: "gpt_12layer",
+    stages: vec![
+        PipelineStage { layers: 0..3, device: "gpu:0" },
+        PipelineStage { layers: 3..6, device: "gpu:1" },
+        PipelineStage { layers: 6..9, device: "gpu:2" },
+        PipelineStage { layers: 9..12, device: "gpu:3" },
+    ],
+    
+    // Pipeline config
+    micro_batch_size: 8,  // 8 micro-batches in flight
+    schedule: PipelineSchedule::OneFOneBBackward,
+}).await?;
+
+// Training automatically pipelines micro-batches across stages
+pipeline.train(dataset, epochs=10).await?;
+```
+
+### 3D Parallelism (Data + Tensor + Pipeline)
+
+**Combine all three strategies** for massive models:
+
+```rust
+pub struct Parallelism3DConfig {
+    // Data parallelism degree
+    data_parallel: usize,
+    
+    // Tensor parallelism degree
+    tensor_parallel: usize,
+    
+    // Pipeline parallelism degree
+    pipeline_parallel: usize,
+}
+
+// Example: Train 175B parameter model on 512 GPUs
+let config = Parallelism3DConfig {
+    data_parallel: 64,     // 64-way data parallelism
+    tensor_parallel: 4,    // 4-way tensor parallelism
+    pipeline_parallel: 2,  // 2-stage pipeline
+    // Total: 64 * 4 * 2 = 512 GPUs
+};
+
+let training_job = dlog.create_3d_parallel_training(
+    model: "gpt3_175b",
+    dataset: "web_corpus",
+    config,
+).await?;
+```
+
+### Checkpointing Strategies
+
+```rust
+pub enum CheckpointStrategy {
+    // Save after each epoch
+    Periodic { interval: Duration },
+    
+    // Save when validation metric improves
+    BestMetric { metric: String },
+    
+    // Gradient checkpointing (save memory)
+    GradientCheckpointing {
+        // Recompute activations during backward pass
+        checkpoint_every_n_layers: usize,
+    },
+    
+    // Incremental checkpointing (only save deltas)
+    Incremental,
+}
+```
+
+**Example**:
+
+```rust
+// Checkpoint configuration
+let checkpoint_config = CheckpointConfig {
+    strategy: CheckpointStrategy::BestMetric {
+        metric: "val_accuracy",
+    },
+    
+    // Save to DLog (versioned, time-travel enabled)
+    location: CheckpointLocation::DLog {
+        table: "model_checkpoints",
+        versioning: true,
+    },
+    
+    // Keep last N checkpoints
+    retention: CheckpointRetention::KeepLast(5),
+};
+
+// Training automatically saves checkpoints
+training_job.set_checkpoint_config(checkpoint_config).await?;
+```
+
+### Fault Tolerance
+
+```rust
+// Automatic recovery from node failures
+let fault_tolerance = FaultToleranceConfig {
+    // Checkpoint every N minutes
+    checkpoint_interval: Duration::from_secs(600),
+    
+    // Max number of retries
+    max_retries: 3,
+    
+    // Elastic training (adjust to available resources)
+    elastic: true,
+    min_replicas: 4,
+    max_replicas: 16,
+};
+
+// If a node fails during training:
+// 1. Detect failure via heartbeat
+// 2. Load last checkpoint
+// 3. Redistribute work to remaining nodes
+// 4. Resume training
+```
+
+---
+
+## Polystore Query Examples
+
+### Example 1: Cross-Model Join (Relational + Graph + Tensor)
+
+**Scenario**: Find similar users based on social graph and purchase embeddings
+
+```sql
+-- SQL query spanning multiple models
+SELECT 
+    u.user_id,
+    u.name,
+    g.pagerank,
+    COSINE_SIMILARITY(u.purchase_embedding, target.purchase_embedding) AS similarity
+FROM 
+    users u                              -- Relational table
+    JOIN graph_nodes g ON u.user_id = g.node_id  -- Graph model
+    CROSS JOIN (
+        SELECT purchase_embedding 
+        FROM users 
+        WHERE user_id = 12345
+    ) target                             -- Tensor operation
+WHERE 
+    g.pagerank > 0.01                    -- Graph filter
+    AND EXISTS (
+        SELECT 1 FROM graph_edges e
+        WHERE e.from_node = 12345 
+          AND e.to_node = u.user_id
+          AND e.relationship = 'follows'
+    )                                    -- Graph traversal
+ORDER BY similarity DESC
+LIMIT 10;
+```
+
+**Execution Plan** (tensor-based):
+
+```rust
+// 1. Convert models to tensors
+let users_tensor = relational_to_tensor("users");        // ℝⁿˣᵐ
+let graph_adjacency = graph_to_tensor("social_graph");   // ℝⁿˣⁿ (sparse)
+let target_embedding = users_tensor[12345, embedding_cols];  // ℝᵈ
+
+// 2. Graph filter: Get neighbors
+let neighbors = graph_adjacency[12345, :].nonzero();  // Sparse indices
+
+// 3. PageRank filter
+let high_pr_users = (graph_pagerank > 0.01).nonzero();
+
+// 4. Intersection (graph neighbors ∩ high PageRank)
+let candidates = neighbors.intersect(high_pr_users);
+
+// 5. Compute cosine similarity (tensor operation)
+let embeddings = users_tensor[candidates, embedding_cols];  // ℝᵏˣᵈ
+let similarities = cosine_similarity(embeddings, target_embedding);
+
+// 6. Top-k selection
+let top_k = similarities.topk(10);
+
+// 7. Materialize result (tensor → relational)
+tensor_to_result_set(top_k)
+```
+
+### Example 2: Time-Series + Document Analytics
+
+**Scenario**: Analyze sentiment trends from social media posts
+
+```sql
+-- Combine time-series (metrics) with document (text) analysis
+SELECT 
+    DATE_TRUNC('hour', ts.timestamp) AS hour,
+    AVG(SENTIMENT_SCORE(doc.text)) AS avg_sentiment,
+    STDDEV(ts.engagement_tensor[0]) AS engagement_stddev,  -- Tensor column
+    ARRAY_AGG(doc.text ORDER BY ts.engagement_tensor[0] DESC LIMIT 3) AS top_posts
+FROM 
+    timeseries_metrics ts               -- Time-series (2D tensor)
+    JOIN documents doc ON ts.post_id = doc.id  -- Document store
+WHERE 
+    ts.timestamp >= NOW() - INTERVAL '7' DAYS
+    AND VECTOR_SIMILARITY(
+        EMBED(doc.text),                -- Text embedding
+        ARRAY[0.1, 0.2, ..., 0.9]      -- Topic vector
+    ) > 0.7
+GROUP BY hour
+ORDER BY hour;
+```
+
+**Execution Plan**:
+
+```rust
+// 1. Time-series → 2D tensor
+let ts_tensor = dlog.get_tensor("timeseries_metrics").await?;  // ℝᵗˣᶠ
+
+// 2. Document → embeddings
+let documents = dlog.query_documents("documents").await?;
+let doc_embeddings = documents.map(|doc| embed(doc.text));  // ℝⁿˣᵈ
+
+// 3. Vector similarity (tensor operation)
+let topic_vector = vec![0.1, 0.2, ..., 0.9];
+let similarities = cosine_similarity(doc_embeddings, topic_vector);
+let relevant_docs = (similarities > 0.7).nonzero();
+
+// 4. Join (time-series ⋈ documents)
+let joined = ts_tensor.join(relevant_docs, on="post_id");
+
+// 5. Time-based aggregation
+let hourly_groups = joined.group_by_time(interval=Duration::hours(1));
+
+// 6. Compute statistics
+let results = hourly_groups.map(|group| {
+    let sentiment_scores = group.map(|row| sentiment(row.text));
+    let engagement = group[:, engagement_col];
+    
+    (
+        group.hour,
+        sentiment_scores.mean(),
+        engagement.std(),
+        group.topk(3, by=engagement),
+    )
+});
+```
+
+### Example 3: Graph + Image Similarity
+
+**Scenario**: Find visually similar products within social network
+
+```sql
+-- Graph traversal + image similarity search
+WITH reachable_products AS (
+    -- Graph: BFS from user's network
+    SELECT p.product_id, p.image_tensor
+    FROM products p
+    JOIN graph_reachable(
+        graph => 'social_network',
+        start_node => 12345,
+        max_hops => 2,
+        relationship => 'friend'
+    ) g ON p.seller_id = g.node_id
+)
+SELECT 
+    product_id,
+    IMAGE_SIMILARITY(
+        image_tensor,                    -- 3D tensor (H×W×C)
+        (SELECT image_tensor FROM products WHERE product_id = 999)
+    ) AS visual_similarity
+FROM reachable_products
+WHERE visual_similarity > 0.8
+ORDER BY visual_similarity DESC
+LIMIT 20;
+```
+
+**Execution Plan**:
+
+```rust
+// 1. Graph BFS (tensor power iteration)
+let adjacency = dlog.get_graph_adjacency("social_network").await?;
+let start_node = 12345;
+let reachable = graph_bfs(adjacency, start_node, max_hops=2);
+
+// 2. Image embeddings (CNN features)
+let products = dlog.query("SELECT product_id, seller_id, image_tensor FROM products").await?;
+let filtered_products = products.filter(|p| reachable.contains(p.seller_id));
+
+// 3. Image similarity (tensor cosine similarity)
+let target_image = dlog.get_tensor("products", id=999, column="image_tensor").await?;
+let target_features = cnn_extract_features(target_image);  // ℝᵈ
+
+let similarities = filtered_products.map(|p| {
+    let features = cnn_extract_features(p.image_tensor);
+    cosine_similarity(features, target_features)
+});
+
+// 4. Top-k selection
+similarities.topk(20)
+```
+
+### Example 4: Multi-Modal Search (Text + Image + Metadata)
+
+**Scenario**: Search products using natural language + visual similarity + filters
+
+```sql
+-- Unified multi-modal search
+SELECT 
+    p.product_id,
+    p.name,
+    (
+        0.4 * TEXT_SIMILARITY(p.description_embedding, :query_embedding) +
+        0.4 * IMAGE_SIMILARITY(p.image_embedding, :image_embedding) +
+        0.2 * METADATA_SCORE(p.category, p.price, :filters)
+    ) AS combined_score
+FROM products p
+WHERE 
+    p.price BETWEEN :min_price AND :max_price          -- Relational filter
+    AND p.category = ANY(:categories)                  -- Relational filter
+    AND TEXT_SIMILARITY(p.description_embedding, :query_embedding) > 0.3  -- Tensor
+    AND IMAGE_SIMILARITY(p.image_embedding, :image_embedding) > 0.3       -- Tensor
+ORDER BY combined_score DESC
+LIMIT 50;
+```
+
+**Execution Plan**:
+
+```rust
+// Hybrid index scan + tensor operations
+let products_tensor = dlog.get_tensor("products").await?;
+
+// 1. Relational filters (fast index scan)
+let filtered = products_tensor
+    .filter(|row| row.price >= min_price && row.price <= max_price)
+    .filter(|row| categories.contains(row.category));
+
+// 2. Text embedding similarity (ANN search)
+let text_scores = dlog.ann_search(
+    table="products",
+    column="description_embedding",
+    query=query_embedding,
+    candidates=filtered.ids(),
+).await?;
+
+// 3. Image embedding similarity (ANN search)
+let image_scores = dlog.ann_search(
+    table="products",
+    column="image_embedding",
+    query=image_embedding,
+    candidates=filtered.ids(),
+).await?;
+
+// 4. Combine scores (weighted sum)
+let combined_scores = 0.4 * text_scores + 0.4 * image_scores + 0.2 * metadata_scores;
+
+// 5. Top-k
+combined_scores.topk(50)
+```
+
+### Example 5: Temporal Graph + Feature Engineering
+
+**Scenario**: Predict user churn using temporal graph evolution + feature tensors
+
+```sql
+-- Temporal graph query with feature extraction
+WITH graph_evolution AS (
+    -- Analyze graph changes over time
+    SELECT 
+        user_id,
+        GRAPH_CENTRALITY(graph_snapshot, user_id, metric='betweenness') AS centrality,
+        timestamp
+    FROM graph_temporal_snapshots
+    WHERE timestamp >= NOW() - INTERVAL '30' DAYS
+),
+feature_tensor AS (
+    -- Construct feature matrix (time × features)
+    SELECT 
+        user_id,
+        TENSOR_FROM_TIMESERIES(
+            ARRAY[
+                AVG(login_count),
+                AVG(purchase_amount),
+                AVG(centrality),
+                SLOPE(login_count),          -- Temporal feature
+                VOLATILITY(purchase_amount)  -- Statistical feature
+            ],
+            window => '7 days',
+            stride => '1 day'
+        ) AS features  -- ℝᵗˣᶠ tensor
+    FROM 
+        user_activity
+        JOIN graph_evolution USING (user_id, timestamp)
+    GROUP BY user_id
+)
+SELECT 
+    user_id,
+    PREDICT_CHURN(features) AS churn_probability  -- ML model inference
+FROM feature_tensor
+WHERE churn_probability > 0.7
+ORDER BY churn_probability DESC;
+```
+
+---
+
+## Arrow Storage Format Details
+
+### Tensor Encoding in Arrow
+
+**Arrow Schema for Tensors**:
+
+```rust
+use arrow::datatypes::{Schema, Field, DataType};
+
+// Fixed-size tensor column
+let schema = Schema::new(vec![
+    Field::new("id", DataType::Int64, false),
+    Field::new("embedding", DataType::FixedSizeList(
+        Box::new(Field::new("item", DataType::Float32, false)),
+        768,  // Dimension
+    ), false),
+]);
+
+// Variable-size tensor (e.g., images of different sizes)
+let schema = Schema::new(vec![
+    Field::new("image_id", DataType::Int64, false),
+    Field::new("image_tensor", DataType::Struct(vec![
+        Field::new("data", DataType::List(
+            Box::new(Field::new("item", DataType::UInt8, false))
+        ), false),
+        Field::new("shape", DataType::List(
+            Box::new(Field::new("item", DataType::Int32, false))
+        ), false),
+        Field::new("dtype", DataType::Utf8, false),
+    ]), false),
+]);
+```
+
+### Chunking Strategy
+
+**Large tensors chunked for efficient I/O**:
+
+```rust
+pub struct TensorChunkConfig {
+    // Chunk size along each dimension
+    chunk_shape: Vec<usize>,
+    
+    // Compression per chunk
+    compression: CompressionCodec,
+    
+    // Alignment (for SIMD)
+    alignment: usize,
+}
+
+// Example: 4D video tensor (T×H×W×C)
+let config = TensorChunkConfig {
+    chunk_shape: vec![10, 256, 256, 3],  // 10 frames per chunk
+    compression: CompressionCodec::Zstd { level: 3 },
+    alignment: 64,  // Cache line alignment
+};
+
+// Chunked storage layout:
+// Chunk 0: frames [0:10]
+// Chunk 1: frames [10:20]
+// ...
+// Each chunk is independently compressed and addressable
+```
+
+### Zero-Copy Memory Mapping
+
+```rust
+// Memory-map Arrow file (zero-copy read)
+pub fn mmap_arrow_tensor(path: &Path) -> Result<Tensor> {
+    // mmap the file
+    let file = File::open(path)?;
+    let mmap = unsafe { Mmap::map(&file)? };
+    
+    // Parse Arrow IPC header
+    let reader = FileReader::try_new(mmap.as_ref(), None)?;
+    
+    // Return tensor backed by mmap (no copy!)
+    let record_batch = reader.next().unwrap()?;
+    let tensor_array = record_batch.column(0);
+    
+    Tensor::from_arrow_array(tensor_array)  // Zero-copy view
+}
+```
+
+### Compression and Encoding
+
+**Compression codecs for tensors**:
+
+```rust
+pub enum CompressionCodec {
+    // General-purpose
+    Zstd { level: i32 },              // Best ratio
+    LZ4 { acceleration: i32 },        // Fastest
+    Snappy,                            // Balanced
+    
+    // Tensor-specific
+    Quantization {
+        bits: usize,                   // 4, 8, 16 bits
+        scheme: QuantizationScheme,
+    },
+    ProductQuantization {
+        num_subvectors: usize,
+        codebook_size: usize,
+    },
+    
+    // Sparse tensors
+    SparseEncoding {
+        format: SparseFormat,          // COO, CSR, CSC
+        index_dtype: DataType,
+    },
+}
+```
+
+**Example**:
+
+```rust
+// Store tensor with compression
+dlog.insert_tensor("embeddings", TensorInsert {
+    id: 1,
+    tensor: embedding,
+    
+    // Compression config
+    compression: CompressionCodec::ProductQuantization {
+        num_subvectors: 96,   // 768D / 96 = 8D per subvector
+        codebook_size: 256,   // 8-bit codes
+    },
+}).await?;
+
+// Compression: 768 × 4 bytes = 3072 bytes
+//           → 96 bytes (97% reduction!)
+```
+
+### IPC and Flight Protocol
+
+**Arrow Flight for tensor transfer**:
+
+```rust
+// Server: Serve tensors via Flight
+let flight_server = FlightServer::new(TensorFlightService {
+    dlog_client: dlog.clone(),
+});
+
+impl FlightService for TensorFlightService {
+    async fn do_get(
+        &self,
+        request: Request<Ticket>,
+    ) -> Result<Response<FlightDataStream>> {
+        let ticket = request.into_inner();
+        let query: TensorQuery = serde_json::from_slice(&ticket.ticket)?;
+        
+        // Stream tensor data (zero-copy)
+        let tensor_stream = self.dlog_client.stream_tensor(query).await?;
+        
+        // Convert to Arrow Flight stream
+        let flight_stream = tensor_to_flight_stream(tensor_stream);
+        
+        Ok(Response::new(flight_stream))
+    }
+}
+
+// Client: Fetch tensor via Flight
+let mut client = FlightClient::connect("http://localhost:8815").await?;
+
+let ticket = Ticket {
+    ticket: serde_json::to_vec(&TensorQuery {
+        table: "embeddings",
+        filter: "id IN (1, 2, 3)",
+    })?,
+};
+
+let mut stream = client.do_get(ticket).await?;
+
+// Receive tensor data (streaming, zero-copy)
+while let Some(batch) = stream.next().await? {
+    let tensor = Tensor::from_flight_data(&batch)?;
+    process(tensor);
+}
+```
+
+### Metadata Storage
+
+**Tensor metadata in Arrow schema**:
+
+```rust
+// Custom metadata in Arrow schema
+let mut metadata = HashMap::new();
+metadata.insert("tensor_shape".to_string(), "[1000, 768]".to_string());
+metadata.insert("dtype".to_string(), "float32".to_string());
+metadata.insert("compression".to_string(), "zstd:3".to_string());
+metadata.insert("chunk_size".to_string(), "1048576".to_string());  // 1MB chunks
+
+let schema = Schema::new_with_metadata(
+    vec![
+        Field::new("embedding", DataType::FixedSizeList(
+            Box::new(Field::new("item", DataType::Float32, false)),
+            768,
+        ), false),
+    ],
+    metadata,
+);
+```
+
+---
+
+## GPU Memory Management
+
+### Unified Memory Management
+
+**Automatic CPU ↔ GPU transfers**:
+
+```rust
+pub struct GpuMemoryManager {
+    // GPU memory pools
+    device_pools: Vec<DeviceMemoryPool>,
+    
+    // Unified memory (accessible from both CPU and GPU)
+    unified_pool: UnifiedMemoryPool,
+    
+    // Eviction policy
+    eviction: EvictionPolicy,
+}
+
+pub enum EvictionPolicy {
+    // Least recently used
+    LRU { capacity: usize },
+    
+    // Least frequently used
+    LFU { capacity: usize },
+    
+    // Cost-based (evict cheapest to recompute)
+    CostBased { budget: usize },
+}
+```
+
+**Example**:
+
+```rust
+// Allocate tensor in unified memory
+let tensor = dlog.alloc_tensor_unified(TensorSpec {
+    shape: vec![1000, 768],
+    dtype: DType::F32,
+    initial_location: Location::GPU(0),
+}).await?;
+
+// Access from GPU (no explicit transfer needed)
+gpu_kernel<<<blocks, threads>>>(tensor.gpu_ptr());
+
+// Access from CPU (automatic transfer if needed)
+let cpu_slice = tensor.as_slice();  // Automatic GPU → CPU if necessary
+```
+
+### Pinned Memory for Fast Transfers
+
+**Pinned (page-locked) memory for faster CPU ↔ GPU transfers**:
+
+```rust
+// Allocate pinned memory
+let pinned_buffer = dlog.alloc_pinned_memory(size_bytes).await?;
+
+// Fast async transfer (2-3× faster than pageable memory)
+let gpu_tensor = dlog.copy_to_gpu_async(
+    pinned_buffer,
+    device_id: 0,
+    stream: cuda_stream,
+).await?;
+
+// Benchmark:
+// Pageable: 6 GB/s
+// Pinned: 12-16 GB/s (PCIe Gen3 bandwidth)
+```
+
+### Multi-GPU Coordination
+
+**Tensor sharding across multiple GPUs**:
+
+```rust
+pub struct MultiGPUTensor {
+    // Shards across GPUs
+    shards: Vec<(DeviceId, TensorShard)>,
+    
+    // Global shape
+    shape: Vec<usize>,
+    
+    // Sharding strategy
+    strategy: ShardingStrategy,
+}
+
+pub enum ShardingStrategy {
+    // Shard along dimension k
+    DimShard { dim: usize },
+    
+    // Replicate across all GPUs (for read-heavy)
+    Replicate,
+    
+    // Custom sharding function
+    Custom { shard_fn: Box<dyn Fn(usize) -> DeviceId> },
+}
+```
+
+**Example**:
+
+```rust
+// Large embedding table sharded across 4 GPUs
+let embeddings = dlog.create_multi_gpu_tensor(MultiGPUTensorSpec {
+    shape: vec![10_000_000, 768],  // 10M embeddings
+    dtype: DType::F32,
+    strategy: ShardingStrategy::DimShard { dim: 0 },  // Shard rows
+    devices: vec![0, 1, 2, 3],
+}).await?;
+
+// Lookup automatically routes to correct GPU
+let embedding_123 = embeddings.lookup(123).await?;  // Routed to GPU (123 % 4)
+```
+
+### Memory Pooling and Allocation
+
+**Reduce allocation overhead with memory pools**:
+
+```rust
+pub struct GpuMemoryPool {
+    // Pre-allocated memory blocks
+    blocks: Vec<MemoryBlock>,
+    
+    // Free list
+    free_list: BTreeMap<usize, Vec<*mut u8>>,
+    
+    // Allocation strategy
+    strategy: AllocationStrategy,
+}
+
+pub enum AllocationStrategy {
+    // Buddy allocator (power-of-2 sizes)
+    Buddy,
+    
+    // Slab allocator (fixed-size blocks)
+    Slab { block_size: usize },
+    
+    // Best-fit allocator
+    BestFit,
+}
+```
+
+**Example**:
+
+```rust
+// Create memory pool
+let pool = GpuMemoryPool::new(PoolConfig {
+    total_size: 16 * 1024 * 1024 * 1024,  // 16GB
+    strategy: AllocationStrategy::Buddy,
+    device_id: 0,
+}).await?;
+
+// Fast allocation from pool (no cudaMalloc overhead)
+let tensor1 = pool.alloc_tensor([1000, 768]).await?;  // ~10μs
+let tensor2 = pool.alloc_tensor([500, 512]).await?;   // ~10μs
+
+// Free (return to pool, no cudaFree)
+pool.free(tensor1).await?;
+
+// Reuse freed memory
+let tensor3 = pool.alloc_tensor([1000, 768]).await?;  // Reuses tensor1's memory
+```
+
+### CUDA Graphs for Optimization
+
+**Capture and replay GPU operations**:
+
+```rust
+// Capture CUDA graph (one-time cost)
+let graph = dlog.cuda_capture_graph(|| {
+    // Sequence of GPU operations
+    let x = tensor_a.matmul(&tensor_b);
+    let y = x.relu();
+    let z = y.softmax();
+    z
+}).await?;
+
+// Replay graph (10-100× lower kernel launch overhead)
+for _ in 0..1000 {
+    let result = graph.replay().await?;  // Very fast!
+}
+
+// Benchmark:
+// Without CUDA graph: 1000 iterations = 500ms (kernel launch overhead)
+// With CUDA graph: 1000 iterations = 50ms (10× faster!)
+```
+
+### Automatic Memory Defragmentation
+
+**Compact fragmented GPU memory**:
+
+```rust
+// Defragmentation policy
+let defrag_policy = DefragPolicy {
+    // Trigger when fragmentation > 30%
+    trigger_threshold: 0.3,
+    
+    // Defragment during idle periods
+    schedule: DefragSchedule::Idle,
+    
+    // Max time to spend defragmenting
+    max_duration: Duration::from_millis(100),
+};
+
+// Automatic defragmentation
+let memory_manager = GpuMemoryManager::new(defrag_policy);
+
+// Periodically:
+// 1. Detect fragmentation
+// 2. Compact live allocations
+// 3. Coalesce free blocks
+// 4. Update pointers (if using handles)
+```
+
+### Memory Usage Monitoring
+
+```rust
+// Real-time memory statistics
+let stats = dlog.gpu_memory_stats(device_id: 0).await?;
+
+println!("GPU 0 Memory:");
+println!("  Total: {} GB", stats.total_bytes / 1e9);
+println!("  Used: {} GB ({:.1}%)", 
+    stats.used_bytes / 1e9,
+    stats.used_bytes as f64 / stats.total_bytes as f64 * 100.0
+);
+println!("  Free: {} GB", stats.free_bytes / 1e9);
+println!("  Fragmentation: {:.1}%", stats.fragmentation * 100.0);
+println!("  Peak usage: {} GB", stats.peak_bytes / 1e9);
+
+// Set memory limit
+dlog.set_gpu_memory_limit(device_id: 0, limit: 14 * 1024 * 1024 * 1024).await?;  // 14GB
+
+// Alerts
+if stats.used_bytes > 0.9 * stats.total_bytes {
+    warn!("GPU memory usage high: {:.1}%", stats.usage_percent);
+}
 ```
 
 ---
