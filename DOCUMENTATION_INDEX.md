@@ -32,6 +32,7 @@ Complete guide to all DLog documentation.
 - **[OPERATIONS](OPERATIONS.md)** - Deployment, configuration, and maintenance
 - **[PERFORMANCE](PERFORMANCE.md)** - Performance tuning and optimization
 - **[MEMORY_ONLY_MODE](MEMORY_ONLY_MODE.md)** ⭐ **NEW: Ultra-fast ephemeral storage (10-100× faster)**
+- **[TENSOR_DATABASE](TENSOR_DATABASE.md)** ⭐ **NEW: Multi-dimensional arrays, ML/AI, vectors, embeddings**
 - **[COMPARISON](COMPARISON.md)** - How DLog compares to alternatives
 - **[TIKV_COMPARISON](TIKV_COMPARISON.md)** - Detailed comparison with TiKV
 
@@ -631,17 +632,19 @@ Complete guide to all DLog documentation.
 
 ## 📊 Documentation Statistics
 
-- **Total Documents**: 35 markdown files
-  - 29 main documentation files
+- **Total Documents**: 36 markdown files
+  - 30 main documentation files
   - 6 blog posts
-- **Total Lines**: ~61,000+ lines of documentation
+- **Total Lines**: ~62,500+ lines of documentation
 - **Coverage**:
   - ✅ Architecture and design
   - ✅ Research contributions and academic paper
   - ✅ Functional relational algebra and pure functional programming
   - ✅ Immutable knowledge databases and temporal systems
   - ✅ Multi-model databases with category theory
+  - ✅ Tensor database (ML/AI, vectors, embeddings, polystore)
   - ✅ Cryptographic verification and zero-trust architecture
+  - ✅ Memory-only mode (ephemeral storage, caching)
   - ✅ User guides and tutorials
   - ✅ Operations and deployment
   - ✅ Performance and optimization
