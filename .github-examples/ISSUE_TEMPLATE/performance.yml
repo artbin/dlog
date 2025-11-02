@@ -1,0 +1,89 @@
+name: ⚡ Performance Issue
+description: Report a performance problem or regression
+title: "[Perf]: "
+labels: ["performance", "needs-triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for reporting a performance issue! Benchmarks and profiling data are very helpful.
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Description
+      description: Describe the performance issue
+      placeholder: What operation is slow?
+    validations:
+      required: true
+
+  - type: textarea
+    id: benchmark
+    attributes:
+      label: Benchmark Results
+      description: Provide benchmark numbers if available
+      placeholder: |
+        Operation: Write
+        Current: 1000 ops/sec
+        Expected: 10000 ops/sec
+        Regression from: v0.1.0
+    validations:
+      required: true
+
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: How to Reproduce
+      description: Steps to reproduce the performance issue
+      placeholder: |
+        1. Start cluster with configuration...
+        2. Run benchmark with...
+        3. Observe throughput/latency...
+    validations:
+      required: true
+
+  - type: textarea
+    id: profiling
+    attributes:
+      label: Profiling Data
+      description: Flame graphs, perf output, or other profiling data
+      render: shell
+
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment
+      description: Hardware and configuration details
+      value: |
+        - Pyralog Version: 
+        - OS: 
+        - CPU: 
+        - RAM: 
+        - Storage: (SSD/NVMe/HDD)
+        - Configuration: (cluster size, replication factor, etc.)
+    validations:
+      required: true
+
+  - type: dropdown
+    id: component
+    attributes:
+      label: Affected Component
+      options:
+        - Write Path
+        - Read Path
+        - Indexing
+        - Replication
+        - Consensus
+        - Network I/O
+        - Disk I/O
+        - Query Engine
+        - Memory Usage
+        - CPU Usage
+        - Other
+
+  - type: textarea
+    id: additional
+    attributes:
+      label: Additional Context
+      description: Any other information that might help
+
