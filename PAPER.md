@@ -4,9 +4,9 @@
 
 We present DLog, a unified distributed data platform that introduces several novel architectural innovations to achieve unprecedented scalability and performance. DLog eliminates traditional coordination bottlenecks through a new primitive called the Sparse Append Counter, enabling distributed coordinators that scale linearly without central points of contention. Combined with a Dual Raft architecture, per-record CopySet replication, cryptographic verification with BLAKE3, multi-model database support grounded in category theory, and a pure functional query system, DLog achieves 28+ billion operations per second across all service types—orders of magnitude higher than existing systems. 
 
-We demonstrate how DLog's architecture enables it to serve simultaneously as a high-throughput distributed log, a transactional data store, a multi-model database (supporting relational, graph, document, key-value, and RDF models), an immutable knowledge database with temporal queries, a tamper-proof cryptographically verified log, a stream processing platform with functional programming primitives, and an observability backend—all while maintaining strong consistency guarantees, exactly-once semantics, and mathematical rigor through category theory. Implemented in Rust and built on Apache Arrow, DLog represents a new generation of distributed systems that unify traditionally separate infrastructure components into a single, mathematically sound, cryptographically verifiable platform.
+We demonstrate how DLog's architecture enables it to serve simultaneously as a high-throughput distributed log, a transactional data store, a multi-model database (supporting relational, graph, document, key-value, and RDF models), an immutable knowledge database with temporal queries, a tamper-proof cryptographically verified log, a stream processing platform with functional programming primitives, and an observability backend—all while maintaining strong consistency guarantees, exactly-once semantics, and mathematical rigor through category theory. DLog includes Batuta, a novel programming language that combines Lisp macros, Elixir-style actor model, Zig-style explicit error handling, and Pony-style reference capabilities, compiling to both native code and WebAssembly for universal deployment. Implemented in Rust and built on Apache Arrow, DLog represents a new generation of distributed systems that unify traditionally separate infrastructure components into a single, mathematically sound, cryptographically verifiable platform with a type-safe, high-level programming language.
 
-**Keywords**: Distributed Systems, Append-Only Logs, Consensus Protocols, Coordination Primitives, Columnar Storage, Stream Processing, Category Theory, Cryptographic Verification, Multi-Model Databases, Functional Programming
+**Keywords**: Distributed Systems, Append-Only Logs, Consensus Protocols, Coordination Primitives, Columnar Storage, Stream Processing, Category Theory, Cryptographic Verification, Multi-Model Databases, Functional Programming, Actor Model, Reference Capabilities, WebAssembly
 
 ---
 
@@ -1525,6 +1525,8 @@ We thank the teams behind Apache Kafka, LogDevice, Redpanda, TiKV, Databend, Apa
 
 We also thank the Rust community for creating a language and ecosystem that makes safe, high-performance distributed systems development accessible, and the category theory community for providing mathematical foundations that enable rigorous reasoning about data systems.
 
+Special thanks to the creators of Clojure (Rich Hickey), Elixir (José Valim), Erlang/OTP (Joe Armstrong), Zig (Andrew Kelley), Pony (Sylvan Clebsch), Racket (PLT), and Haskell for pioneering language features that inspired Batuta—DLog's high-level programming language combining Lisp macros, actor model, explicit error handling, reference capabilities, and WebAssembly compilation.
+
 ---
 
 ## 17. References
@@ -1657,6 +1659,24 @@ We also thank the Rust community for creating a language and ecosystem that make
 
 47. **Distributed Training**: Li, M., et al. (2014). Scaling distributed machine learning with the parameter server. OSDI.
 
+### Programming Languages and Actor Systems
+
+48. **Clojure**: Hickey, R. (2008). The Clojure programming language. ACM Symposium on Dynamic Languages.
+
+49. **Elixir**: Valim, J. (2013). Elixir: A modern approach to programming for the Erlang VM.
+
+50. **Erlang/OTP**: Armstrong, J. (2010). Erlang. Communications of the ACM, 53(9), 68-75.
+
+51. **Zig**: Ruchalski, A. (2023). Zig: A general-purpose programming language and toolchain.
+
+52. **Pony**: Clebsch, S., et al. (2015). Deny capabilities for safe, fast actors. AGERE.
+
+53. **Racket**: Flatt, M., & PLT. (2010). Reference: Racket. Technical Report PLT-TR-2010-1, PLT Design Inc.
+
+54. **Haskell**: Marlow, S., ed. (2010). Haskell 2010 Language Report.
+
+55. **WebAssembly**: Haas, A., et al. (2017). Bringing the web up to speed with WebAssembly. PLDI.
+
 ---
 
 **Author Information**
@@ -1665,7 +1685,7 @@ This paper describes the design and implementation of DLog, an open-source distr
 
 Project repository: https://github.com/dlog/dlog
 
-License: MIT OR Apache-2.0
+License: MIT-0 (code) & CC0-1.0 (documentation)
 
 ---
 
@@ -1723,10 +1743,10 @@ All benchmarks follow these principles:
 
 **Document Statistics**
 
-- Pages: ~64
-- Words: ~19,000
+- Pages: ~65
+- Words: ~19,500
 - Sections: 17 main + 4 appendices
-- References: 47
+- References: 55
 - Figures: 0 (diagrams in text)
 - Tables: 11
 
