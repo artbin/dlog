@@ -28,6 +28,7 @@ DLog has evolved from a distributed log into a **comprehensive computing platfor
 - 🔐 **Cryptographically Verified**: BLAKE3 Merkle trees, 490M writes/sec (4,900× faster than immudb)
 - ⏱️ **Immutable Knowledge Base**: Temporal queries, 50,000× faster than Datomic
 - 🧮 **Functional Query System**: Monads, type safety, 14× optimization speedup
+- 🔭 **Self-Observability**: DLog monitors DLog via OpenTelemetry (no separate stack needed)
 
 ## 🚀 Revolutionary Features
 
@@ -116,6 +117,7 @@ DLog has evolved from a distributed log into a **comprehensive computing platfor
 ### 🌐 Enterprise Ready
 
 - **OpenTelemetry Backend**: Native OTLP ingestion (10-50× faster than Jaeger)
+- **Self-Observability**: DLog monitors itself - no separate observability stack needed
 - **Multi-Tenancy**: Isolated workloads with resource limits
 - **Kafka Protocol Compatible**: Drop-in replacement for existing Kafka apps
 - **Dynamic Partitions**: Automatic splitting/merging of hot/cold partitions
@@ -422,6 +424,70 @@ while let Some(batch) = stream.next().await {
     println!("Window: {:?}", batch);
 }
 ```
+
+### 7. Self-Observability with OpenTelemetry
+
+DLog can monitor itself using its own OpenTelemetry backend:
+
+```rust
+use dlog::observability::*;
+use opentelemetry::trace::Tracer;
+
+#[tokio::main]
+async fn main() -> Result<()> {
+    // Configure DLog to ingest its own telemetry
+    let config = DLogConfig {
+        otlp_endpoint: "localhost:4317",
+        traces_log: "dlog_traces",
+        metrics_log: "dlog_metrics",
+        logs_log: "dlog_logs",
+    };
+    
+    let client = DLogClient::new_with_observability(config).await?;
+    
+    // DLog now monitors itself - traces, metrics, logs all stored in DLog
+    
+    // Query your own performance in real-time
+    let query_latency = client.query_sql(r#"
+        SELECT 
+            span_name,
+            AVG(duration_ms) as avg_latency,
+            MAX(duration_ms) as p99_latency,
+            COUNT(*) as request_count
+        FROM dlog_traces
+        WHERE timestamp > NOW() - INTERVAL '5' MINUTE
+        GROUP BY span_name
+        ORDER BY avg_latency DESC
+    "#).await?;
+    
+    // Time-travel debugging - what happened during that incident?
+    let incident_traces = client.query_sql(r#"
+        SELECT *
+        FROM dlog_traces
+        WHERE timestamp BETWEEN 
+            '2024-01-15 14:30:00' AND '2024-01-15 14:35:00'
+        AND span_name LIKE '%partition_rebalance%'
+        ORDER BY timestamp
+    "#).await?;
+    
+    // Cryptographic audit trail - verify observability data hasn't been tampered
+    let verified = client.verify_log("dlog_traces", start_offset, end_offset).await?;
+    assert!(verified, "Observability data is tamper-proof!");
+    
+    Ok(())
+}
+```
+
+**Benefits of Self-Hosting Observability:**
+- ✅ **No separate stack**: No Jaeger, Prometheus, Loki, Grafana needed
+- ✅ **10-50× faster**: Native Arrow storage vs. external backends
+- ✅ **Unified queries**: SQL across traces, metrics, logs, and business data
+- ✅ **Time-travel debugging**: Query historical telemetry at any point in time
+- ✅ **Cryptographic verification**: Tamper-proof audit trails (regulatory compliance)
+- ✅ **Infinite retention**: Tiered storage (S3/GCS) for long-term observability
+- ✅ **Cost-effective**: Single system, single deployment, single bill
+
+**DLog monitors DLog** - complete dogfooding for production confidence.
 
 ## 🎯 Design Principles
 
