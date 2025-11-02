@@ -74,15 +74,25 @@ Batuta is built on seven core principles:
 
 ## Theoretical Foundation: Sulise
 
-Batuta's syntax and grammar are built upon **Sulise** - a modular grammar toolkit for Lisp/S-expression and surface syntaxes. Sulise provides the theoretical foundation that enables Batuta to offer multiple syntax profiles while maintaining homoiconicity.
+Batuta is built upon **🌲 Sulise Evergreen** - a complete programming language development toolkit. Sulise provides the theoretical and practical foundation for all aspects of Batuta's design, from syntax to semantics to compilation.
 
 ### What is Sulise?
 
-[Sulise](sulise/README.md) is a comprehensive grammar specification system that defines:
+[Sulise](sulise/README.md) 🌲 is a comprehensive programming language development toolkit covering:
 
-1. **Canonical S-expression Core** (Profile A): The homoiconic foundation where code is data
-2. **Surface Syntax Conveniences** (Profile B/C): Modern ergonomic features with explicit desugaring rules
-3. **Modular EBNF Grammar**: Composable grammar components following ISO/IEC 14977
+1. **Grammar & Parsing**: Modular S-expression and surface syntaxes (EBNF, profiles, desugaring)
+2. **Type Systems**: Type theory, inference, polymorphism
+3. **Semantics**: Operational, denotational, axiomatic semantics
+4. **Compilation**: AST transformations, optimization passes, code generation
+5. **Language Design**: Primitives, abstractions, composition rules
+6. **Theoretical Foundations**: Category theory, lambda calculus, formal methods
+
+**For Batuta specifically**, Sulise provides:
+- **Canonical S-expression Core** (Profile A): The homoiconic foundation where code is data
+- **Surface Syntax Conveniences** (Profile B/C): Modern ergonomic features with explicit desugaring rules
+- **Modular EBNF Grammar**: Composable grammar components following ISO/IEC 14977
+- **Type System Framework**: Gradual typing, error union types, reference capabilities
+- **Semantic Foundation**: Actor semantics, evaluation model, operational semantics
 
 ### How Batuta Uses Sulise
 
@@ -119,6 +129,8 @@ Batuta leverages Sulise's three-profile system:
 
 ### Sulise Features Used by Batuta
 
+**Grammar & Syntax** (Sulise Profiles A/B/C):
+
 | Sulise Feature | Batuta Usage | Example |
 |----------------|--------------|---------|
 | **S-expressions** | Core syntax, macro expansion | `(query users (where (> age 18)))` |
@@ -129,6 +141,24 @@ Batuta leverages Sulise's three-profile system:
 | **Keywords** | Actor messages, maps | `:keyword`, `{:key value}` |
 | **Numeric literals** | Radix, exactness | `#x1A`, `#b1010`, `1_000_000` |
 | **Collections** | Maps, sets, vectors | `{k: v}`, `#{1 2 3}`, `[1 2 3]` |
+
+**Type System** (Sulise Type Theory):
+
+| Sulise Feature | Batuta Usage | Example |
+|----------------|--------------|---------|
+| **Gradual typing** | Optional type annotations | `(defn add :: [Int Int -> Int] ...)` |
+| **Type inference** | Automatic type deduction | Infers types from usage |
+| **Error union types** | Explicit error handling (Zig-style) | `Result!Int`, `FileError!String` |
+| **Reference capabilities** | Safe concurrency (Pony-style) | `iso`, `val`, `ref`, `box`, `tag` |
+| **Actor protocols** | Typed actor messages | `(defprotocol Counter ...)` |
+
+**Semantics** (Sulise Operational Semantics):
+
+| Sulise Feature | Batuta Usage | Example |
+|----------------|--------------|---------|
+| **Actor semantics** | Message-passing concurrency | `(send actor msg)`, `(receive ...)` |
+| **Evaluation model** | Lazy/eager evaluation rules | Persistent data structures |
+| **Homoiconicity** | Code as data | Macros operate on S-expressions |
 
 ### Desugaring Contract
 
@@ -185,12 +215,14 @@ Batuta's parser incorporates these Sulise modules:
 
 ### Benefits of Sulise Foundation
 
-1. **Formally Specified**: ISO EBNF grammars with precise desugaring rules
-2. **Modular**: Compose only the features you need
-3. **Tested**: Extensive examples and desugaring validation
-4. **Flexible**: Three profiles for different use cases
-5. **Homoiconic**: Macros work on canonical representation
-6. **Predictable**: Explicit desugaring = no surprises
+1. **Complete Toolkit**: Everything needed for language development (grammar, types, semantics, compilation)
+2. **Formally Specified**: ISO EBNF grammars, type theory, operational semantics with precise rules
+3. **Modular**: Compose only the features you need from the complete tree of knowledge
+4. **Tested**: Extensive examples covering all language development aspects
+5. **Flexible**: Three syntax profiles (A/B/C), gradual typing, multiple compilation targets
+6. **Homoiconic**: Macros work on canonical S-expression representation
+7. **Predictable**: Explicit desugaring, type inference, error handling = no surprises
+8. **Theoretical Foundation**: Built on category theory, lambda calculus, formal methods
 
 ### Example: Sulise Desugaring in Action
 
@@ -229,16 +261,23 @@ Batuta's parser incorporates these Sulise modules:
 
 This canonical form is what Batuta's **macro system**, **type checker**, and **compiler** operate on.
 
-### Batuta Extensions Beyond Sulise
+### Batuta: Sulise Instantiation for Pyralog
 
-While Sulise provides the syntactic foundation, Batuta adds:
+While Sulise provides the **complete language development toolkit**, Batuta is a **concrete language implementation** that:
 
-- **Actor semantics**: `defactor`, `spawn`, `send`, `receive`
-- **Error handling**: `!` operator, `deferror`, error union types
-- **Reference capabilities**: `iso`, `val`, `ref`, `box`, `tag` annotations
-- **Pyralog integration**: Native query functions, time-travel, actors
-- **Type system**: Gradual typing, type inference, actor protocols
-- **Standard library**: Persistent data structures, actor utilities
+**Uses Sulise's toolkit to provide:**
+- **Grammar**: S-expressions (Profile A), infix operators (Profile B), indentation (Profile C)
+- **Type System**: Gradual typing, error union types (Zig-inspired), reference capabilities (Pony-inspired)
+- **Semantics**: Actor-based operational semantics, message-passing concurrency
+- **Compilation**: Rust codegen, optimization passes, native + WASM targets
+
+**Adds Pyralog-specific features:**
+- **Pyralog Integration**: Native query functions, time-travel queries, distributed actors
+- **Standard Library**: Persistent data structures (Clojure-style), actor utilities (Elixir-style)
+- **Runtime**: Actor scheduler, supervision trees, fault tolerance
+- **Tooling**: REPL, hot code reloading, distributed debugging
+
+**Batuta = Sulise (foundation) + Pyralog primitives + Clojure/Elixir inspiration**
 
 ---
 
@@ -248,19 +287,21 @@ Batuta combines:
 
 | Feature | Inspiration | Purpose |
 |---------|-------------|---------|
-| **Grammar foundation** | Sulise | Modular EBNF, three profiles, explicit desugaring |
+| **Language development toolkit** | 🌲 Sulise Evergreen | Complete PL foundation: grammar, types, semantics, compilation |
+| **Grammar foundation** | Sulise (Grammar) | Modular EBNF, three profiles, explicit desugaring |
 | **Lisp S-expressions** | Clojure / Sulise Profile A | Code as data, powerful macros, REPL |
 | **Infix operators** | Sulise Profile B | Ergonomic arithmetic and comparisons |
 | **Pipeline operator** | Elixir / Sulise Profile B | Chainable transformations |
 | **Indentation blocks** | Python / Sulise Profile C | Optional offside rule syntax |
+| **Type system** | Sulise (Type Theory) | Gradual typing, inference, polymorphism |
+| **Error handling** | Zig + Sulise | Explicit error union types, no exceptions |
+| **Reference capabilities** | Pony + Sulise | Safe concurrency, no data races |
+| **Semantics** | Sulise (Operational) | Actor-based evaluation, message-passing |
 | **Persistent data structures** | Clojure | Immutable collections with structural sharing |
 | **Pattern matching** | Elixir/Erlang | Destructure data, elegant control flow |
 | **Actors** | Elixir/Erlang | Concurrent, fault-tolerant execution |
 | **Supervision trees** | Elixir/Erlang | Self-healing systems |
-| **Error handling** | Zig | Explicit error union types, no exceptions |
-| **Reference capabilities** | Pony | Safe concurrency, no data races |
-| **Gradual typing** | Typed Clojure/Elixir Dialyzer | Optional type annotations |
-| **Compilation targets** | Rust/WASM | Native + WebAssembly (browser, edge, serverless) |
+| **Compilation** | Sulise + Rust/WASM | Native + WebAssembly (browser, edge, serverless) |
 
 ### Hello World
 

@@ -12,7 +12,8 @@
 ### Core Identity
 - [Brand Philosophy](#-brand-philosophy) - Why Egyptian theme
 - [The Platform Icon](#-pyralog-platform-icon) - 🔺 Pyramid
-- [The Four Pillars](#️-the-four-pillars) - 🗿 🌝 🪲 🎼
+- [The Four Pillars](#️-the-four-pillars) - 🗿 ☀️ 🪲 🎼
+- [Sulise Foundation](#-sulise-evergreen) - 🌲 Language development toolkit
 - [Brand Architecture](#-brand-architecture) - How they work together
 
 ### Visual Design
@@ -91,6 +92,8 @@ Pyralog's architecture consists of three Egyptian infrastructure primitives and 
 | **☀️ Pharaoh Network** | Sun/Ruler | Distributed coordination | • 1024 nodes<br>• No bottlenecks<br>• Linear scaling |
 | **🪲 Scarab IDs** | Sacred Beetle | Unique identifiers | • 64-bit IDs<br>• Time-ordered<br>• Zero coordination |
 | **🎼 Batuta** | Conductor's Baton | Query language | • Clojure + Elixir<br>• Actor-first<br>• Compiles to Rust |
+
+**Plus the grammar foundation**: 🌲 [Sulise Evergreen](#-sulise-evergreen) (modular grammar toolkit)
 
 ---
 
@@ -205,16 +208,91 @@ let id = generator.next()?;  // Globally unique!
 
 ---
 
+### 🌲 Sulise Evergreen
+
+**Symbol**: Evergreen Tree  
+**Technical Role**: Complete programming language development toolkit
+
+**What It Does**:
+- **Grammar & Parsing**: Modular S-expression and surface syntaxes (EBNF, profiles, desugaring)
+- **Type Systems**: Type theory, inference, polymorphism
+- **Semantics**: Operational, denotational, axiomatic semantics
+- **Compilation**: AST transformations, optimization passes, code generation
+- **Language Design**: Primitives, abstractions, composition rules
+- **Theoretical Foundations**: Category theory, lambda calculus, formal methods
+
+**Why Evergreen?**
+- **Complete tree of knowledge** = all language development aspects
+- **Evergreen** = permanent, stable, comprehensive foundation
+- **Growth** = extensible, composable language primitives
+- **Deep roots** = theoretical foundations (category theory, type theory)
+- **Strong trunk** = core language primitives (S-expressions, evaluation)
+- **Many branches** = diverse language features (syntax, types, semantics)
+- **Always green** = timeless principles that never go out of date
+
+**Visual Metaphor**:
+- **Roots** = Theoretical foundations (lambda calculus, category theory)
+- **Trunk** = Core primitives (S-expressions, evaluation model)
+- **Branches** = Language features (syntax, types, semantics, compilation)
+- **Leaves** = Concrete implementations (Batuta, other languages)
+- **Evergreen** = Permanent foundation for all language development
+
+**Relationship to Batuta**:
+```
+🌲 Sulise (Language Dev Toolkit)
+    ↓ provides foundation for
+🎼 Batuta (Concrete Language)
+    ↓ orchestrates
+🗿☀️🪲 Pyralog (Infrastructure)
+```
+
+**Complete Scope**:
+```
+Grammar ────┐
+Types ──────┤
+Semantics ──┤─→ 🌲 Sulise ─→ 🎼 Batuta
+Compiler ───┤
+Theory ─────┘
+```
+
+**Usage Example**:
+```
+;; Sulise provides complete language toolkit
+(defrule expression syntax/grammar)
+(deftype Value type-system/inference)
+(defsem eval semantics/operational)
+(defpass optimize compiler/transform)
+
+;; Batuta is built using Sulise primitives
+(deflang batuta
+  :grammar sulise/profile-a
+  :types sulise/gradual
+  :semantics sulise/actor-model)
+```
+
+**Why Not Egyptian?**
+- Sulise is **academic/research** (complete language science)
+- Batuta is **artistic/human** (Latin, musical, expressive)
+- Pyralog is **infrastructure** (Egyptian, monumental, permanent)
+- Each layer has its own cultural metaphor that fits its purpose
+
+---
+
 ## 🎭 Brand Architecture
 
-**How the Four Pillars Work Together**:
+**How the Complete Stack Works Together**:
 
 ```
 ┌───────────────────────────────────────────────┐
 │        🎼 Batuta (Interface Layer)            │
 │   Orchestrates queries and data operations    │
 └───────────────────────────────────────────────┘
-                     ↓ uses
+                 ↓ syntax provided by
+          ┌────────────────────┐
+          │  🌲 Sulise         │
+          │  (Grammar Layer)   │
+          └────────────────────┘
+                 ↓ uses infrastructure
 ┌───────────────────────────────────────────────┐
 │      🗿 Obelisk → 🪲 Scarab → ☀️ Pharaoh      │
 │         Primitive    IDs      Network         │
@@ -230,7 +308,8 @@ let id = generator.next()?;  // Globally unique!
 1. **🗿 Obelisk** = Foundation primitive (crash-safe counter)
 2. **🪲 Scarab** = Uses Obelisk for sequence generation
 3. **☀️ Pharaoh** = Uses Scarab for distributed coordination
-4. **🎼 Batuta** = Orchestrates all three for queries
+4. **🌲 Sulise** = Grammar foundation (EBNF, profiles, desugaring)
+5. **🎼 Batuta** = Uses Sulise grammar to orchestrate infrastructure
 
 **Code Example Showing Integration**:
 
@@ -405,6 +484,7 @@ to recover the counter value instantly.
     ────────────
    🗿 ☀️ 🪲 🎼
   Obelisk·Pharaoh·Scarab·Batuta
+    (🌲 Sulise grammar)
 ```
 
 **2. Simple** (Clean & Minimal):
@@ -415,14 +495,16 @@ to recover the counter value instantly.
 
 **3. Horizontal** (Headers & Badges):
 ```
-🔺 Pyralog  |  🗿 Obelisk · ☀️ Pharaoh · 🪲 Scarab · 🎼 Batuta
+🔺 Pyralog  |  🗿 Obelisk · ☀️ Pharaoh · 🪲 Scarab · 🎼 Batuta · 🌲 Sulise
 ```
 
-**4. Layered** (Shows Architecture):
+**4. Layered** (Shows Full Architecture):
 ```
       🔺 Pyralog
      ─────────
     🎼 Batuta
+   ───────────
+    🌲 Sulise
    ───────────
   🗿  ☀️  🪲
  Infrastructure
@@ -437,6 +519,7 @@ to recover the counter value instantly.
 | ☀️ | Pharaoh Network | Discussing coordination |
 | 🪲 | Scarab IDs | Discussing unique identifiers |
 | 🎼 | Batuta Language | Discussing queries/interface |
+| 🌲 | Sulise Evergreen | Discussing language development/theory |
 
 ### ASCII Art Style
 
@@ -470,16 +553,18 @@ Use clean, professional ASCII art for diagrams:
 | **Actor-Reactor** | Stella Language | Topology-level reactivity |
 | **Networking** | WireGuard | Quantum-resistant protocol |
 | **Transactions** | TiKV's Percolator | Distributed transaction protocol |
+| **Lang Dev** | Sulise | Complete PL development toolkit |
 
-**Egyptian Theme**:
-- Respectful homage to ancient Egyptian engineering excellence
-- Not cultural appropriation—educational context provided
-- Acknowledges 4,500+ years of architectural achievements
+**Thematic Influences**:
+- **Egyptian** (🗿☀️🪲): Ancient Egyptian engineering excellence (4,500+ years)
+- **Latin** (🎼): Musical/orchestral tradition (precision + expression)
+- **Natural** (🌲): Evergreen trees (permanence, growth, complete knowledge tree)
 
 **Credit Format**:
 ```markdown
 🪲 Scarab IDs are inspired by Twitter's Snowflake algorithm (2010)
 🎼 Batuta draws from Clojure, Elixir, Zig, and Pony
+🌲 Sulise: Complete programming language development toolkit (grammar, types, semantics, compilation)
 ```
 
 ---
@@ -638,6 +723,15 @@ When creating Pyralog content, ensure:
 ---
 
 ## 📝 Version History
+
+- **v2.1** (2025-11-02): Added Sulise Evergreen language development toolkit
+  - Added 🌲 Sulise as complete PL development foundation
+  - Covers: grammar, types, semantics, compilation, theory
+  - Evergreen tree = complete tree of language knowledge
+  - Positioned beneath Batuta (provides all language primitives)
+  - Updated all architecture diagrams to show 5 components
+  - Added thematic influences (Egyptian, Latin, Natural)
+  - Natural metaphor for academic/research/language science layer
 
 - **v2.0** (2025-11-02): Major refactoring for clarity
   - Added comprehensive table of contents
