@@ -1,229 +1,262 @@
-# Pyralog Branding Guide
+# 🔺 Pyralog Branding Guide
 
-> **Theme**: Ancient Egyptian Architecture & Symbolism  
-> **Core Values**: Permanence · Power · Precision · Monumentality
+> **Built to Last Millennia**
 
----
-
-## 🎨 Brand Identity
-
-Pyralog's branding draws from **ancient Egyptian civilization**—a culture renowned for:
-
-- **Engineering Excellence**: Pyramids and monuments that lasted millennia
-- **Precision**: Advanced mathematics and astronomy
-- **Distributed Coordination**: Managing vast territories without modern communication
-- **Permanence**: Stone architecture, immutable hieroglyphics, eternal legacy
-
-These values mirror Pyralog's technical characteristics:
-- **Crash-safe primitives** (Obelisk Sequencer)
-- **Distributed coordination** without consensus (Pharaoh Network)
-- **Immutable, time-ordered data** (Scarab IDs)
+**Theme**: Ancient Egyptian Architecture & Symbolism  
+**Core Values**: Permanence · Power · Precision · Monumentality
 
 ---
 
-## 🏛️ The Three Pillars
+## 📖 Table of Contents
 
-Pyralog's architecture is embodied by three Egyptian symbols:
+### Core Identity
+- [Brand Philosophy](#-brand-philosophy) - Why Egyptian theme
+- [The Platform Icon](#-pyralog-platform-icon) - 🔺 Pyramid
+- [The Four Pillars](#️-the-four-pillars) - 🗿 🌝 🪲 🎼
+- [Brand Architecture](#-brand-architecture) - How they work together
+
+### Visual Design
+- [Visual Identity](#-visual-identity) - Colors, typography, logos
+- [Logo Variations](#logo--iconography) - Usage examples
+
+### Usage Guidelines
+- [Writing Style](#-writing-style) - Tone and voice
+- [Terminology](#️-terminology-guidelines) - Naming conventions
+- [Use Cases](#-use-cases-for-branding) - Documentation, blog, social media
+
+### Reference
+- [Attribution](#-attribution--credits) - Inspirations and credits
+- [Checklist](#-brand-checklist) - Quality control
+- [What to Avoid](#-what-to-avoid) - Common mistakes
+
+---
+
+## 🎨 Brand Philosophy
+
+Pyralog's branding draws from **ancient Egyptian civilization**—a culture that perfected:
+
+- **Engineering Excellence**: Pyramids lasting 4,500+ years
+- **Mathematical Precision**: Advanced geometry and astronomy
+- **Distributed Coordination**: Managing vast territories without modern technology
+- **Permanence**: Stone architecture, immutable records, eternal legacy
+
+**Why Egyptian?** These values directly mirror Pyralog's architecture:
+
+| Egyptian Engineering | Pyralog Technology |
+|---------------------|-------------------|
+| Stone monuments (permanent) | Crash-safe primitives |
+| Pharaohs (distributed authority) | Decentralized coordination |
+| Scarab seals (unique identity) | Globally unique IDs |
+| Hieroglyphics (immutable records) | Append-only logs |
+
+**Why Batuta (Latin)?** The 🎼 Batuta language represents the **human interface** layer—orchestration and expression. While the infrastructure is Egyptian (monumental, permanent), the interface is musical (expressive, artistic).
+
+---
+
+## 🔺 Pyralog Platform Icon
+
+**Symbol**: Pyramid  
+**Represents**: The complete Pyralog platform
+
+**Why Pyramid?**
+- Most iconic Egyptian symbol
+- **Layered architecture** - Foundation → Coordination → Interface
+- **Timeless monument** - Built to last millennia
+- **Solid foundation** - Stable, crash-safe infrastructure
+- **Points upward** - Infinite scalability
+- **Hierarchical structure** - Clear system organization
+
+**Platform Hierarchy**:
+```
+      🔺 Pyramid
+     Platform Layer
+    ──────────────
+     🎼 Interface
+    (Batuta Language)
+    ──────────────
+   🗿  ☀️  🪲
+  Infrastructure
+   (Egyptian)
+```
+
+---
+
+## 🏛️ The Four Pillars
+
+Pyralog's architecture consists of three Egyptian infrastructure primitives and one Latin interface language:
+
+| Component | Symbol | What It Is | Key Features |
+|-----------|--------|------------|--------------|
+| **🗿 Obelisk Sequencer** | Monument | Crash-safe atomic counter | • Sparse files<br>• ~1-2μs latency<br>• Instant recovery |
+| **☀️ Pharaoh Network** | Sun/Ruler | Distributed coordination | • 1024 nodes<br>• No bottlenecks<br>• Linear scaling |
+| **🪲 Scarab IDs** | Sacred Beetle | Unique identifiers | • 64-bit IDs<br>• Time-ordered<br>• Zero coordination |
+| **🎼 Batuta** | Conductor's Baton | Query language | • Clojure + Elixir<br>• Actor-first<br>• Compiles to Rust |
+
+---
 
 ### 🗿 Obelisk Sequencer
 
-**Symbol**: Monument · Primitive · Foundation  
-**What It Represents**: The fundamental building block—tall, permanent, unshakeable
+**Egyptian Symbol**: Obelisk/Monument  
+**Technical Role**: Foundation primitive for crash-safe atomic operations
 
-**Technical Meaning**:
-- Crash-safe persistent atomic counters
-- Minimal disk overhead (~1-2μs per increment)
-- Instant recovery after crashes
-- Foundation for all distributed coordination
+**What It Does**:
+- Persistent atomic counters using sparse files
+- File size = counter value (genius simplicity)
+- Survives crashes with instant recovery
+- Powers Scarab IDs and transaction sequencing
 
-**Visual Metaphor**:
-- Obelisks marked important locations in ancient Egypt
-- Single solid piece of stone (monolithic, atomic)
-- Tall and visible from afar (observable state)
-- Survived thousands of years (durability)
+**Why Obelisk?**
+- Single piece of stone = atomic operation
+- Tall and permanent = durable state
+- Marks important locations = observable checkpoints
+- Lasted millennia = crash-safe guarantee
 
-**Usage in Documentation**:
-```markdown
-🗿 Obelisk Sequencer enables crash-safe counting...
-The 🗿 Obelisk Sequencer primitive...
-Built on the Obelisk Sequencer (🗿)...
+**Usage Example**:
+```rust
+let counter = ObeliskSequencer::open("txn.seq")?;
+let id = counter.increment()?;  // Crash-safe!
 ```
 
 ---
 
 ### ☀️ Pharaoh Network
 
-**Symbol**: Sun God (Ra) · Ruler · Coordinator  
-**What It Represents**: Divine power radiating to all points—central authority that reaches everywhere
+**Egyptian Symbol**: Sun God Ra / Pharaoh  
+**Technical Role**: Distributed coordination without centralized bottlenecks
 
-**Technical Meaning**:
-- Distributed coordination without centralized bottlenecks
+**What It Does**:
 - 1024 independent coordinator nodes
-- Snowflake-style architecture eliminating single points of failure
+- Inspired by Twitter's Snowflake architecture
+- Each node autonomous, no single point of failure
 - Linear horizontal scalability
 
-**Visual Metaphor**:
-- Pharaohs = divine rulers (coordinators)
-- Ra = sun god (rays reaching all points = distributed)
-- Royal authority without physical presence everywhere (remote coordination)
-- Pyramids as tombs = lasting coordination records
+**Why Pharaoh/Sun?**
+- Pharaohs = distributed authority
+- Sun rays = reaching all points simultaneously
+- Ra = divine power without physical presence
+- Royal seals = coordination tokens
 
-**Usage in Documentation**:
-```markdown
-☀️ Pharaoh Network eliminates bottlenecks...
-The ☀️ Pharaoh Network pattern...
-Built on Pharaoh Network (☀️)...
+**Usage Example**:
+```rust
+let coordinator = pharaoh_network.route(key);  // No bottleneck!
+let id = coordinator.assign_scarab_id()?;
 ```
 
 ---
 
 ### 🪲 Scarab IDs
 
-**Symbol**: Sacred Beetle · Seal · Identity  
-**What It Represents**: Unique identification and authentication—the scarab as royal seal
+**Egyptian Symbol**: Sacred Scarab Beetle  
+**Technical Role**: Globally unique, time-ordered identifiers
 
-**Technical Meaning**:
-- 64-bit distributed unique IDs
-- Time-ordered, globally unique
-- No coordination required
-- Inspired by Twitter's Snowflake (2010)
+**What It Does**:
+- 64-bit distributed IDs (inspired by Snowflake)
+- Timestamp + Coordinator ID + Sequence
+- No coordination needed between nodes
+- Monotonically increasing within coordinator
 
-**Visual Metaphor**:
-- Scarab = sacred beetle, symbol of transformation
-- Used as **seals** for authentication and identity
-- Pressed into clay/wax = immutable record
-- Each scarab seal unique = globally unique IDs
-- Symbol of eternal life = permanent identifiers
+**Why Scarab?**
+- Sacred seals for identity and authentication
+- Each seal unique = globally unique IDs
+- Pressed into clay/wax = immutable records
+- Symbol of transformation = data lifecycle
 
-**Usage in Documentation**:
-```markdown
-🪲 Scarab IDs provide unique identifiers...
-The 🪲 Scarab ID algorithm...
-Using Scarab IDs (🪲)...
+**Usage Example**:
+```rust
+let generator = ScarabGenerator::new(worker_id, sequencer);
+let id = generator.next()?;  // Globally unique!
 ```
 
 ---
 
 ### 🎼 Batuta Language
 
-**Symbol**: Conductor's Baton · Orchestration · Direction  
-**What It Represents**: The conductor guiding the orchestra—orchestrating distributed data operations
+**Latin Symbol**: Conductor's Baton  
+**Technical Role**: Human interface for orchestrating distributed operations
 
-**Technical Meaning**:
-- Dynamic programming language (Clojure + Elixir inspired)
-- Actor-first queries and data processing
+**What It Does**:
+- Lisp-based language (Clojure + Elixir fusion)
+- Actor-first concurrency model
 - Compiles to Rust and WebAssembly
-- Lisp syntax with macros and metaprogramming
 - Native Pyralog integration
+- Zig-style error handling, Pony-style capabilities
 
-**Visual Metaphor**:
-- Batuta = Spanish/Portuguese/Italian for "baton"
-- Conductor = orchestrator (like pharaoh coordinates)
-- Baton directs musicians = language directs data operations
-- Harmony through coordination = distributed computation
+**Why Batuta (not Egyptian)?**
+- **Infrastructure is Egyptian** (permanent, monumental)
+- **Interface is Latin** (expressive, artistic)
+- Conductor orchestrates the orchestra
+- Bridges power (🗿☀️🪲) with expression (🎼)
+- Both cultures valued precision and beauty
 
-**Why Not Egyptian?**:
-- Batuta represents the **human interface** to Pyralog
-- While infrastructure is Egyptian (permanent, monumental), the language is **orchestral** (expressive, artistic)
-- Bridges the gap between raw power (🗿☀️🪲) and human expression (🎼)
-- Complements rather than replaces the Egyptian theme
-
-**Usage in Documentation**:
-```markdown
-🎼 Batuta provides an expressive interface...
-The 🎼 Batuta language compiles to Rust...
-Query data using Batuta (🎼)...
-```
-
-**Relationship to Egyptian Theme**:
-```
-Egyptian Foundation (Infrastructure)
-    🗿 Obelisk Sequencer
-    ☀️ Pharaoh Network  
-    🪲 Scarab IDs
-         ↓
-    Powers
-         ↓
-🎼 Batuta (Human Interface)
-    Orchestrates the infrastructure
-    Expressive query language
-    Actor-based concurrency
-```
-
----
-
-## 🎭 Brand Architecture
-
-### The Hierarchy
-
-```
-┌─────────────────────────────────────────────────┐
-│              Pyralog Platform                      │
-│         (Unified Data Platform)                 │
-└─────────────────────────────────────────────────┘
-                    │
-        ┌───────────┴───────────┐
-        │                       │
-    Egyptian                🎼 Batuta
-  Infrastructure          (Interface)
-        │
-    ┌───┼───┐
-    │   │   │
-┌───▼┐ ┌▼──┐ ┌▼───┐
-│🗿  │ │☀️ │ │🪲  │
-│Seq.│ │Net│ │IDs │
-└────┘ └───┘ └────┘
-Found  Coord  Ident
-```
-
-### How They Work Together
-
-```rust
-// 🗿 Obelisk Sequencer provides the primitive
-let counter = ObeliskSequencer::open("counter.seq")?;
-
-// 🪲 Scarab IDs use Obelisk for crash-safety
-let scarab = ScarabGenerator::new(worker_id, counter);
-let unique_id = scarab.next_id()?;  // Globally unique!
-
-// ☀️ Pharaoh Network uses Scarab IDs for distribution
-// 1024 coordinators × Scarab IDs = no bottlenecks
-let coordinator_id = hash(key) % 1024;
-let pharaoh_node = pharaoh_network.get(coordinator_id);
-```
-
-**🎼 Batuta orchestrates it all**:
-
+**Usage Example**:
 ```clojure
-;; Batuta code - expressive and powerful
-(defquery user-activity
-  "Find active users using Pyralog primitives"
-  [db time-range]
+(defquery active-users [db time-range]
   (->> (pyralog/query db
          {:find [?user ?count]
           :where [[?e :event/user ?user]
                   [?e :event/timestamp ?t]
                   [(>= ?t ~(:start time-range))]]})
        (group-by first)
-       (map (fn [[user events]] 
-              {:user user 
+       (map (fn [[user events]]
+              {:user user
                :count (count events)
-               :id (pyralog/scarab-id)}))))  ; 🪲 Scarab IDs
+               :scarab (pyralog/scarab-id)}))))
 ```
 
-**Visual Flow**:
+---
+
+## 🎭 Brand Architecture
+
+**How the Four Pillars Work Together**:
+
 ```
-        🎼 Batuta (orchestrates)
-              ↓
-         queries via
-              ↓
-🗿 Obelisk (primitive)
-    ↓ enables
-🪲 Scarab (identifiers)
-    ↓ powers
-☀️ Pharaoh (coordination)
-    ↓ achieves
-28 Billion ops/sec
+┌───────────────────────────────────────────────┐
+│        🎼 Batuta (Interface Layer)            │
+│   Orchestrates queries and data operations    │
+└───────────────────────────────────────────────┘
+                     ↓ uses
+┌───────────────────────────────────────────────┐
+│      🗿 Obelisk → 🪲 Scarab → ☀️ Pharaoh      │
+│         Primitive    IDs      Network         │
+│                                                │
+│  Foundation  →  Identity  → Coordination      │
+└───────────────────────────────────────────────┘
+                     ↓ achieves
+           28 Billion Operations/Second
+```
+
+**Dependency Flow**:
+
+1. **🗿 Obelisk** = Foundation primitive (crash-safe counter)
+2. **🪲 Scarab** = Uses Obelisk for sequence generation
+3. **☀️ Pharaoh** = Uses Scarab for distributed coordination
+4. **🎼 Batuta** = Orchestrates all three for queries
+
+**Code Example Showing Integration**:
+
+```rust
+// 1. Foundation: Obelisk provides crash-safety
+let counter = ObeliskSequencer::open("counter.seq")?;
+
+// 2. Identity: Scarab uses Obelisk for uniqueness
+let scarab = ScarabGenerator::new(worker_id, counter);
+let unique_id = scarab.next()?;
+
+// 3. Coordination: Pharaoh routes via Scarab
+let coordinator = pharaoh_network.route_by_id(unique_id);
+
+// 4. Interface: Batuta orchestrates everything
+```
+
+```clojure
+;; Batuta query using all three primitives
+(defquery user-transactions [db user-id]
+  (pyralog/query db
+    {:find [?txn-id ?amount ?timestamp]
+     :where [[?t :txn/user user-id]
+             [?t :txn/id ?txn-id]      ; 🪲 Scarab ID
+             [?t :txn/amount ?amount]
+             [?t :txn/timestamp ?timestamp]]}))
 ```
 
 ---
@@ -363,197 +396,148 @@ to recover the counter value instantly.
 
 ## 📐 Logo & Iconography
 
-### Pyralog Platform Icon
+### Logo Variations
 
-**🔺 Pyramid** represents Pyralog as a platform:
-- Most iconic Egyptian symbol
-- Represents **layered architecture** (data layer, coordination layer, interface layer)
-- **Timeless monument** = built to last millennia
-- **Solid foundation** = stable infrastructure
-- **Points upward** = scaling to the sky
-- **Hierarchical** = clear system organization
-
-### Component Icons
-
-**The Four Component Icons**:
-- 🗿 = Moai (Easter Island head) represents obelisk/monument
-- ☀️ = Sun with rays represents pharaoh/coordination
-- 🪲 = Beetle represents scarab/identity
-- 🎼 = Musical score represents batuta/orchestration
-
-**Primary Logo**:
+**1. Full Stack** (Complete Branding):
 ```
        🔺
       Pyralog
-    ────────
+    ────────────
    🗿 ☀️ 🪲 🎼
+  Obelisk·Pharaoh·Scarab·Batuta
 ```
 
-**Alternative - Pyramid Structure**:
+**2. Simple** (Clean & Minimal):
 ```
-        🔺 Pyralog
-       ─────────
-      🎼 Batuta
-     ───────────
-    🗿  ☀️  🪲
-  Infrastructure
+🔺 Pyralog
+🗿☀️🪲🎼
 ```
 
-**Text Logo (Horizontal)**:
+**3. Horizontal** (Headers & Badges):
 ```
 🔺 Pyralog  |  🗿 Obelisk · ☀️ Pharaoh · 🪲 Scarab · 🎼 Batuta
 ```
 
-**Simple Stack**:
+**4. Layered** (Shows Architecture):
 ```
-   🔺 Pyralog
-   ───────
-   🗿☀️🪲🎼
+      🔺 Pyralog
+     ─────────
+    🎼 Batuta
+   ───────────
+  🗿  ☀️  🪲
+ Infrastructure
 ```
 
-### ASCII Art Diagrams
+### Icon Reference
 
-Use ASCII art liberally for:
-- Architecture diagrams
-- Data flow
-- System topology
-- Performance comparisons
+| Icon | Represents | Use When |
+|------|------------|----------|
+| 🔺 | Pyralog Platform | Mentioning entire system |
+| 🗿 | Obelisk Sequencer | Discussing crash-safety |
+| ☀️ | Pharaoh Network | Discussing coordination |
+| 🪲 | Scarab IDs | Discussing unique identifiers |
+| 🎼 | Batuta Language | Discussing queries/interface |
 
-**Example**:
+### ASCII Art Style
+
+Use clean, professional ASCII art for diagrams:
+
 ```
-┌──────────────────────────────────────┐
-│   🎼 Batuta Query Interface          │
-│  ┌────────────────────────────────┐ │
-│  │  ☀️ Pharaoh Network            │ │
-│  │ ┌────────────────────────────┐ │ │
-│  │ │ 1024 Coordinator Nodes     │ │ │
-│  │ │ (🪲 Scarab IDs)            │ │ │
-│  │ │ (🗿 Obelisk)               │ │ │
-│  │ └────────────────────────────┘ │ │
-│  └────────────────────────────────┘ │
-└──────────────────────────────────────┘
+┌─────────────────────────────┐
+│  🎼 Batuta (Interface)      │
+│ ┌─────────────────────────┐ │
+│ │  ☀️ Pharaoh (Coord)     │ │
+│ │ ┌─────────────────────┐ │ │
+│ │ │ 🪲 Scarab + 🗿 Base │ │ │
+│ │ └─────────────────────┘ │ │
+│ └─────────────────────────┘ │
+└─────────────────────────────┘
 ```
 
 ---
 
 ## 🌍 Attribution & Credits
 
-### Inspiration Sources
+**Always credit these inspirations**:
 
-**Always credit**:
-- Twitter's Snowflake (2010) - inspiration for Scarab IDs
-- TiKV's Percolator - transaction protocol
-- **Clojure** (Rich Hickey) - Batuta's Lisp syntax, persistent data structures, macros
-- **Elixir/Erlang/OTP** (José Valim, Joe Armstrong) - Batuta's actor model, supervision trees
-- **Zig** (Andrew Kelley) - Batuta's error handling (`Result!Type`)
-- **Pony** (Sylvan Clebsch) - Batuta's reference capabilities
-- Stella Language - actor-reactor model
-- WireGuard - networking protocol
+| What | Who/What | How We Use It |
+|------|----------|---------------|
+| **Scarab IDs** | Twitter's Snowflake (2010) | Distributed ID generation |
+| **Batuta Syntax** | Clojure (Rich Hickey) | Lisp syntax, macros, persistent data |
+| **Batuta Actors** | Elixir/Erlang (José Valim, Joe Armstrong) | Actor model, supervision trees |
+| **Error Handling** | Zig (Andrew Kelley) | `Result!Type` error unions |
+| **Reference Caps** | Pony (Sylvan Clebsch) | Compile-time data race prevention |
+| **Actor-Reactor** | Stella Language | Topology-level reactivity |
+| **Networking** | WireGuard | Quantum-resistant protocol |
+| **Transactions** | TiKV's Percolator | Distributed transaction protocol |
 
-**Format**:
+**Egyptian Theme**:
+- Respectful homage to ancient Egyptian engineering excellence
+- Not cultural appropriation—educational context provided
+- Acknowledges 4,500+ years of architectural achievements
+
+**Credit Format**:
 ```markdown
 🪲 Scarab IDs are inspired by Twitter's Snowflake algorithm (2010)
+🎼 Batuta draws from Clojure, Elixir, Zig, and Pony
 ```
-
-### Egyptian Theme
-
-**Acknowledge**:
-- Ancient Egyptian civilization
-- Not appropriation—respectful homage to engineering excellence
-- Educational context provided
-
-### Multi-Cultural Design
-
-**Why both Egyptian and Latin?**:
-- **Egyptian theme** (🗿☀️🪲) = Infrastructure layer (permanent, monumental, low-level)
-- **Latin/Romance theme** (🎼 Batuta) = Human interface (expressive, artistic, high-level)
-- Represents the **duality of systems**:
-  - Stone foundations (Egyptian engineering)
-  - Artistic expression (Latin musical tradition)
-- Both cultures valued **precision, beauty, and lasting impact**
 
 ---
 
 ## 📊 Use Cases for Branding
 
-### 1. Documentation
+### Documentation
 
-**Project README**:
 ```markdown
 # 🔺 Pyralog
-
 > Built to Last Millennia
 
-Pyralog is a unified distributed data platform...
-
-## Components
-- 🗿 Obelisk Sequencer
-- ☀️ Pharaoh Network
-- 🪲 Scarab IDs
-- 🎼 Batuta Language
-```
-
-**Section Headings**:
-```markdown
-# 🗿 Obelisk Sequencer
-
-## Overview
+## 🗿 Obelisk Sequencer
 The Obelisk Sequencer is a crash-safe...
 
-## Architecture
-Built on sparse files...
+## ☀️ Pharaoh Network
+The Pharaoh Network eliminates...
 ```
 
-### 2. Blog Posts
+### Blog Posts & Talks
 
-**Titles**:
+**Title Format**:
 - "The Obelisk Sequencer: A Novel Persistent Atomic Primitive"
+- "🔺 Pyralog: Built to Last Millennia"
 - "Pharaoh Network: Coordination Without Consensus"
-- "Scarab IDs: Distributed Identity at Scale"
-
-### 3. Conference Talks
 
 **Slide Structure**:
-1. Title slide: "🔺 Pyralog: Built to Last Millennia"
-2. Problem: Centralized bottlenecks
-3. Solution: Four components (🗿☀️🪲🎼)
-4. Each component gets dedicated slides with icon
-5. Pyramid architecture diagram
+1. Title: 🔺 + tagline
+2. Problem statement
+3. Four pillars: 🗿☀️🪲🎼
+4. Architecture diagram
+5. Benchmarks
 
-### 4. Social Media
+### Social Media
 
-**Twitter/X**:
+**Twitter/X Template**:
 ```
 🔺 Pyralog achieves 28B ops/sec with:
-🗿 Obelisk Sequencer - crash-safe counters
-☀️ Pharaoh Network - distributed coordination
-🪲 Scarab IDs - unique identifiers
-🎼 Batuta - expressive query language
+🗿 Crash-safe counters
+☀️ Distributed coordination
+🪲 Unique identifiers
+🎼 Expressive queries
 
 Built to last millennia. Zero bottlenecks.
 ```
 
-**GitHub README Badge Ideas**:
+**Badges**:
 ```markdown
 ![Pyralog](https://img.shields.io/badge/🔺-Pyralog-C2B280)
-![Obelisk](https://img.shields.io/badge/🗿-Obelisk-D4AF37)
-![Pharaoh](https://img.shields.io/badge/☀️-Pharaoh-15317E)
-![Scarab](https://img.shields.io/badge/🪲-Scarab-30D5C8)
-![Batuta](https://img.shields.io/badge/🎼-Batuta-9B59B6)
+![Components](https://img.shields.io/badge/🗿☀️🪲🎼-Components-15317E)
 ```
 
-### 5. Code Documentation
+### Code Documentation
 
-**Rust Doc Comments**:
 ```rust
-/// The Obelisk Sequencer (🗿) provides crash-safe persistent
-/// atomic counters with minimal disk overhead.
-///
-/// # Architecture
-/// Uses sparse files where file size = counter value...
-pub struct ObeliskSequencer {
-    // ...
-}
+/// The 🗿 Obelisk Sequencer provides crash-safe
+/// persistent atomic counters.
+pub struct ObeliskSequencer { /* ... */ }
 ```
 
 ---
@@ -655,23 +639,27 @@ When creating Pyralog content, ensure:
 
 ## 📝 Version History
 
+- **v2.0** (2025-11-02): Major refactoring for clarity
+  - Added comprehensive table of contents
+  - Consolidated "Three Pillars" → "Four Pillars" (fixed inconsistency)
+  - Streamlined component descriptions with comparison table
+  - Simplified logo variations (4 clear options)
+  - Condensed Attribution & Credits into table format
+  - Reduced redundancy across sections
+  - Improved scannability and navigation
+  - Total changes: 580 lines modified (284 insertions, 296 deletions)
+
 - **v1.2** (2025-11-02): Added Pyralog platform icon
-  - Selected 🔺 Pyramid as primary Pyralog icon
+  - Selected 🔺 Pyramid as primary platform icon
   - Represents layered architecture and lasting monument
-  - Updated all logos and branding examples
-  - Added pyramid structure diagrams
 
 - **v1.1** (2025-11-02): Added Batuta language
   - Added 🎼 Batuta as fourth component
   - Multi-cultural design philosophy (Egyptian + Latin)
-  - Batuta code examples and guidelines
-  - Updated all diagrams and examples
 
 - **v1.0** (2025-11-02): Initial branding guide
   - Established Egyptian theme
-  - Defined three pillars: 🗿☀️🪲
-  - Color palette and typography
-  - Usage guidelines
+  - Defined infrastructure components: 🗿☀️🪲
 
 ---
 
