@@ -104,6 +104,54 @@ Using Scarab IDs (🪲)...
 
 ---
 
+### 🎼 Batuta Language
+
+**Symbol**: Conductor's Baton · Orchestration · Direction  
+**What It Represents**: The conductor guiding the orchestra—orchestrating distributed data operations
+
+**Technical Meaning**:
+- Dynamic programming language (Clojure + Elixir inspired)
+- Actor-first queries and data processing
+- Compiles to Rust and WebAssembly
+- Lisp syntax with macros and metaprogramming
+- Native DLog integration
+
+**Visual Metaphor**:
+- Batuta = Spanish/Portuguese/Italian for "baton"
+- Conductor = orchestrator (like pharaoh coordinates)
+- Baton directs musicians = language directs data operations
+- Harmony through coordination = distributed computation
+
+**Why Not Egyptian?**:
+- Batuta represents the **human interface** to DLog
+- While infrastructure is Egyptian (permanent, monumental), the language is **orchestral** (expressive, artistic)
+- Bridges the gap between raw power (🗿☀️🪲) and human expression (🎼)
+- Complements rather than replaces the Egyptian theme
+
+**Usage in Documentation**:
+```markdown
+🎼 Batuta provides an expressive interface...
+The 🎼 Batuta language compiles to Rust...
+Query data using Batuta (🎼)...
+```
+
+**Relationship to Egyptian Theme**:
+```
+Egyptian Foundation (Infrastructure)
+    🗿 Obelisk Sequencer
+    ☀️ Pharaoh Network  
+    🪲 Scarab IDs
+         ↓
+    Powers
+         ↓
+🎼 Batuta (Human Interface)
+    Orchestrates the infrastructure
+    Expressive query language
+    Actor-based concurrency
+```
+
+---
+
 ## 🎭 Brand Architecture
 
 ### The Hierarchy
@@ -114,14 +162,18 @@ Using Scarab IDs (🪲)...
 │         (Unified Data Platform)                 │
 └─────────────────────────────────────────────────┘
                     │
-        ┌───────────┼───────────┐
-        │           │           │
-    ┌───▼───┐   ┌───▼───┐   ┌──▼──┐
-    │ 🗿    │   │ ☀️    │   │ 🪲  │
-    │Obelisk│   │Pharaoh│   │Scarab│
-    │Seq.   │   │Network│   │ IDs  │
-    └───────┘   └───────┘   └──────┘
-   Foundation  Coordination Identity
+        ┌───────────┴───────────┐
+        │                       │
+    Egyptian                🎼 Batuta
+  Infrastructure          (Interface)
+        │
+    ┌───┼───┐
+    │   │   │
+┌───▼┐ ┌▼──┐ ┌▼───┐
+│🗿  │ │☀️ │ │🪲  │
+│Seq.│ │Net│ │IDs │
+└────┘ └───┘ └────┘
+Found  Coord  Ident
 ```
 
 ### How They Work Together
@@ -140,8 +192,31 @@ let coordinator_id = hash(key) % 1024;
 let pharaoh_node = pharaoh_network.get(coordinator_id);
 ```
 
+**🎼 Batuta orchestrates it all**:
+
+```clojure
+;; Batuta code - expressive and powerful
+(defquery user-activity
+  "Find active users using DLog primitives"
+  [db time-range]
+  (->> (dlog/query db
+         {:find [?user ?count]
+          :where [[?e :event/user ?user]
+                  [?e :event/timestamp ?t]
+                  [(>= ?t ~(:start time-range))]]})
+       (group-by first)
+       (map (fn [[user events]] 
+              {:user user 
+               :count (count events)
+               :id (dlog/scarab-id)}))))  ; 🪲 Scarab IDs
+```
+
 **Visual Flow**:
 ```
+        🎼 Batuta (orchestrates)
+              ↓
+         queries via
+              ↓
 🗿 Obelisk (primitive)
     ↓ enables
 🪲 Scarab (identifiers)
@@ -243,6 +318,7 @@ Hieroglyph Black:     #000000  ■  Strong emphasis
 - **Obelisk Sequencer** (not "obelisk sequencer" or "Obelisk")
 - **Pharaoh Network** (not "pharaoh network" or "Pharaoh")
 - **Scarab IDs** (not "scarab IDs" or "Scarab")
+- **Batuta** (not "batuta" or "BATUTA")
 - **DLog** (not "dlog" or "DLOG" or "D-Log")
 
 ### When to Use Icons
@@ -261,6 +337,13 @@ DLog's Obelisk Sequencer provides:
 - Atomic increments
 - Crash safety
 - Instant recovery
+
+## 🎼 Batuta: Orchestrating Data Operations
+
+Query DLog using Batuta's expressive syntax:
+- Lisp macros
+- Actor-first concurrency
+- Compiles to Rust
 ```
 
 **Don't overuse** in:
@@ -282,13 +365,16 @@ to recover the counter value instantly.
 
 ### Icon Usage
 
-**The Three Icons**:
+**The Four Icons**:
 - 🗿 = Moai (Easter Island head) represents obelisk/monument
 - ☀️ = Sun with rays represents pharaoh/coordination
 - 🪲 = Beetle represents scarab/identity
+- 🎼 = Musical score represents batuta/orchestration
 
 **Combined Logo Concept**:
 ```
+        🎼
+        │
      ☀️
    /  |  \
   /   |   \
@@ -297,9 +383,17 @@ to recover the counter value instantly.
 
 **Text Logo**:
 ```
-DLog
-━━━━
-🗿☀️🪲
+   DLog
+   ━━━━
+🗿☀️🪲 + 🎼
+```
+
+**Alternative Stack**:
+```
+     🎼 Batuta
+    ─────────
+    🗿 ☀️ 🪲
+  Infrastructure
 ```
 
 ### ASCII Art Diagrams
@@ -312,14 +406,17 @@ Use ASCII art liberally for:
 
 **Example**:
 ```
-┌────────────────────────────────────┐
-│     ☀️ Pharaoh Network            │
-│  ┌──────────────────────────────┐ │
-│  │ 1024 Coordinator Nodes       │ │
-│  │ (Powered by 🪲 Scarab IDs)   │ │
-│  │ (Built on 🗿 Obelisk)        │ │
-│  └──────────────────────────────┘ │
-└────────────────────────────────────┘
+┌──────────────────────────────────────┐
+│   🎼 Batuta Query Interface          │
+│  ┌────────────────────────────────┐ │
+│  │  ☀️ Pharaoh Network            │ │
+│  │ ┌────────────────────────────┐ │ │
+│  │ │ 1024 Coordinator Nodes     │ │ │
+│  │ │ (🪲 Scarab IDs)            │ │ │
+│  │ │ (🗿 Obelisk)               │ │ │
+│  │ └────────────────────────────┘ │ │
+│  └────────────────────────────────┘ │
+└──────────────────────────────────────┘
 ```
 
 ---
@@ -331,8 +428,10 @@ Use ASCII art liberally for:
 **Always credit**:
 - Twitter's Snowflake (2010) - inspiration for Scarab IDs
 - TiKV's Percolator - transaction protocol
-- Clojure, Elixir, Erlang/OTP - Batuta language inspiration
-- Pony Language - reference capabilities
+- **Clojure** (Rich Hickey) - Batuta's Lisp syntax, persistent data structures, macros
+- **Elixir/Erlang/OTP** (José Valim, Joe Armstrong) - Batuta's actor model, supervision trees
+- **Zig** (Andrew Kelley) - Batuta's error handling (`Result!Type`)
+- **Pony** (Sylvan Clebsch) - Batuta's reference capabilities
 - Stella Language - actor-reactor model
 - WireGuard - networking protocol
 
@@ -347,6 +446,16 @@ Use ASCII art liberally for:
 - Ancient Egyptian civilization
 - Not appropriation—respectful homage to engineering excellence
 - Educational context provided
+
+### Multi-Cultural Design
+
+**Why both Egyptian and Latin?**:
+- **Egyptian theme** (🗿☀️🪲) = Infrastructure layer (permanent, monumental, low-level)
+- **Latin/Romance theme** (🎼 Batuta) = Human interface (expressive, artistic, high-level)
+- Represents the **duality of systems**:
+  - Stone foundations (Egyptian engineering)
+  - Artistic expression (Latin musical tradition)
+- Both cultures valued **precision, beauty, and lasting impact**
 
 ---
 
@@ -388,6 +497,7 @@ Built on sparse files...
 🗿 Obelisk Sequencer - crash-safe counters
 ☀️ Pharaoh Network - distributed coordination
 🪲 Scarab IDs - unique identifiers
+🎼 Batuta - expressive query language
 
 No central bottlenecks. Pure scalability.
 ```
@@ -397,6 +507,7 @@ No central bottlenecks. Pure scalability.
 ![Obelisk](https://img.shields.io/badge/🗿-Obelisk-D4AF37)
 ![Pharaoh](https://img.shields.io/badge/☀️-Pharaoh-15317E)
 ![Scarab](https://img.shields.io/badge/🪲-Scarab-30D5C8)
+![Batuta](https://img.shields.io/badge/🎼-Batuta-9B59B6)
 ```
 
 ### 5. Code Documentation
@@ -452,12 +563,13 @@ DLog: Distributed data infrastructure with zero bottlenecks.
 
 When creating DLog content, ensure:
 
-- [ ] Egyptian theme is consistent (if using metaphors)
-- [ ] Three pillars (🗿☀️🪲) are properly introduced
+- [ ] Egyptian theme is consistent (if using metaphors for infrastructure)
+- [ ] Four components (🗿☀️🪲🎼) are properly introduced when relevant
 - [ ] Icons used appropriately (not overused)
+- [ ] Batuta code examples use proper Lisp syntax
 - [ ] Technical precision maintained
 - [ ] Performance numbers cited with sources
-- [ ] Proper attribution to inspirations
+- [ ] Proper attribution to inspirations (Clojure, Elixir, Zig, Pony, etc.)
 - [ ] Confident but not arrogant tone
 - [ ] Architecture diagrams use ASCII art
 - [ ] Code examples are production-quality
@@ -469,23 +581,23 @@ When creating DLog content, ensure:
 
 ### Don't
 
-❌ **Mix metaphors**: Don't introduce Greek/Roman gods alongside Egyptian  
-❌ **Overuse icons**: Not every mention needs 🗿☀️🪲  
+❌ **Mix metaphors**: Don't introduce Greek/Roman gods alongside Egyptian (Batuta's Latin origin is intentional exception)  
+❌ **Overuse icons**: Not every mention needs 🗿☀️🪲🎼  
 ❌ **Claim perfection**: Acknowledge trade-offs  
 ❌ **Belittle competitors**: Compare objectively  
 ❌ **Use buzzwords**: No "revolutionary" without proof  
-❌ **Forget attribution**: Credit Twitter, TiKV, etc.  
-❌ **Inconsistent naming**: Always "Obelisk Sequencer", not "Obelisk"
+❌ **Forget attribution**: Credit Twitter, TiKV, Clojure, Elixir, Zig, Pony, etc.  
+❌ **Inconsistent naming**: Always "Obelisk Sequencer", not "Obelisk"; "Batuta", not "batuta"
 
 ### Do
 
-✅ **Stay consistent**: Egyptian theme throughout  
+✅ **Stay consistent**: Egyptian theme for infrastructure, Batuta for language  
 ✅ **Be precise**: Exact numbers, benchmarks  
 ✅ **Educate**: Explain complex concepts clearly  
-✅ **Show code**: Real Rust examples  
+✅ **Show code**: Real Rust and Batuta examples  
 ✅ **Benchmark**: Production-validated numbers  
-✅ **Acknowledge**: Credit inspirations  
-✅ **Maintain hierarchy**: Foundation → Coordination → Scale
+✅ **Acknowledge**: Credit all inspirations (Clojure, Elixir, Zig, Pony, etc.)  
+✅ **Maintain hierarchy**: Foundation → Coordination → Orchestration → Scale
 
 ---
 
@@ -495,9 +607,11 @@ When creating DLog content, ensure:
 
 - [README.md](README.md) - Project overview
 - [PAPER.md](PAPER.md) - Academic research paper
+- [BATUTA.md](BATUTA.md) - Batuta language specification
 - [Blog Series](blog/README.md) - Technical deep-dives
   - [The Obelisk Sequencer](blog/2-obelisk-sequencer.md)
   - [Pharaoh Network](blog/3-pharaoh-network.md)
+  - [Batuta Language](blog/8-batuta-language.md)
 
 ### External References
 
@@ -508,6 +622,12 @@ When creating DLog content, ensure:
 ---
 
 ## 📝 Version History
+
+- **v1.1** (2025-11-02): Added Batuta language
+  - Added 🎼 Batuta as fourth component
+  - Multi-cultural design philosophy (Egyptian + Latin)
+  - Batuta code examples and guidelines
+  - Updated all diagrams and examples
 
 - **v1.0** (2025-11-02): Initial branding guide
   - Established Egyptian theme
@@ -535,5 +655,5 @@ We encourage:
 
 **Questions?** Open an issue or join our [Discord](https://discord.gg/dlog)
 
-**DLog**: Built to last millennia. 🗿☀️🪲
+**DLog**: Built to last millennia. 🗿☀️🪲 + 🎼
 
