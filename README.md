@@ -1,4 +1,6 @@
-# DLog - Platform for Secure, Parallel, Distributed, and Decentralized Computing
+# 🔺 DLog - Platform for Secure, Parallel, Distributed, and Decentralized Computing
+
+> **Built to last millennia** · 🗿 Obelisk · ☀️ Pharaoh · 🪲 Scarab · 🎼 Batuta
 
 **A unified infrastructure for building secure, fault-tolerant distributed systems with cryptographic verification, actor-based concurrency, and functional programming abstractions.**
 
