@@ -607,7 +607,7 @@ This concludes our 10-part blog series on Pyralog. We've covered:
 
 ```bash
 # Clone repository
-git clone https://github.com/artbin/dlog
+git clone https://github.com/pyralog/pyralog
 cd dlog
 
 # Start cluster
@@ -627,7 +627,7 @@ cargo run --example quick-start
 
 ### Join the Community
 
-- **GitHub**: [github.com/artbin/dlog](https://github.com/artbin/dlog)
+- **GitHub**: [github.com/pyralog/pyralog](https://github.com/pyralog/pyralog)
 - **Discord**: [discord.gg/dlog](https://discord.gg/dlog)
 - **Email**: hello@dlog.io
 
