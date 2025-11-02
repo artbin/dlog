@@ -1,0 +1,8 @@
+# Nested block comments in Surface
+#| outer
+   #| inner |#
+|#
+
+f x
+#| mid |#
++ g y

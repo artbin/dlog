@@ -1,0 +1,7 @@
+#| outer
+   #| inner level 1
+      #| inner level 2 |#
+   |#
+|#
+(define x 42)
+(+ x 1)

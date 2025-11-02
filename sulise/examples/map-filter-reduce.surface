@@ -1,0 +1,7 @@
+# Profile: B + 13
+
+data
+  |> map f
+  |> filter p
+  |> foldl + 0
+|> (+ 3)

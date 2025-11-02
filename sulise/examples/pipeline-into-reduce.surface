@@ -1,0 +1,3 @@
+# Profile: B + 13
+
+(data |> map f |> filter p) |> reduce op z

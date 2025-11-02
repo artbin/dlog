@@ -1,0 +1,28 @@
+# line comment
+#| outer block
+   #| nested |#
+|#
+
+(define config { :mode : "fast" :limit : 1_000 })
+(define sample-bytes #u8(1 2 255))
+(define ch #\\A)
+(define tags #{ :fast :safe :portable })
+
+(define xs '(3 5 12 20 7 4 18 2))
+
+(define (square x) (* x x))
+(define (gt10 x) (> x 10))
+(define (sum xs) (foldl + 0 xs))
+
+(define (sum-of-squares-gt10 xs)
+  (sum (map square (filter gt10 xs))))
+
+(define (dot xs ys)
+  (sum (map (lambda (p) (* (car p) (cdr p)))
+            (zip xs ys))))
+
+(define (main)
+  (let ((s (sum-of-squares-gt10 xs)))
+    (if (> s 100) s 0)))
+
+(main)

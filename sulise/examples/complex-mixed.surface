@@ -1,0 +1,7 @@
+# Profile: B (03) + 10 + 12 + 13
+
+data
+  |> map square
+  |> filter gt10
+  |> take 5
+|> (+ (f x) (* (g (h y)) 2))

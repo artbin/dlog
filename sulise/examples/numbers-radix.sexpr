@@ -1,0 +1,5 @@
+(define nb #b1010)
+(define no #o755)
+(define nd #d42)
+(define nx #xFF)
+(define ne #e10)

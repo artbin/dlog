@@ -1,0 +1,3 @@
+(define s5 "quote: \" and backslash: \\" )
+(define s6 "unicode-ish text: café — use ASCII in grammar docs")
+(define s7 "windows newline\r\n and unix newline\n")

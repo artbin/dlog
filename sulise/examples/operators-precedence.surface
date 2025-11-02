@@ -1,0 +1,5 @@
+# Profile: B + 10 (application tighter than infix) + 12 (minimal precedence) + 11 (illustrative prefix/postfix)
+
+1 + 2 * 3 + 4 * 5
+f x + g y * h z
+neg x + y++

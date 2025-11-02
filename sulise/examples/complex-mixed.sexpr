@@ -1,0 +1,2 @@
+(+ (f x) (* (g (h y)) 2)
+   (take 5 (filter gt10 (map square data))))

@@ -1,0 +1,12 @@
+# Profile: C (04) + 14 (optional colons) + 15 (single-line suites) + 16 (trailing operator join)
+
+if x > 0:
+  y = f x
+  return y
+
+if x > 0 -> return f x
+
+a
+  |> map f
+  |> filter p
+  |> sum

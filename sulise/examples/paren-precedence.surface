@@ -1,0 +1,5 @@
+# Profile: B + 10 (app tighter) + 12 (minimal precedence)
+
+f (x + y) * (g (h z) + 1)
+
+a + b * (c + d) + e * (f (g x))

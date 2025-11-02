@@ -1,0 +1,3 @@
+# Profile: B + 13
+
+data |> foldl + 0

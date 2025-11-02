@@ -1,0 +1,9 @@
+(if (== mode "fast")
+    (begin
+      (set xs (read input))
+      (set ys (take 10 (filter p (map f xs))))
+      (if (> (len ys) 0) (return ys))
+      (return ()))
+    ())
+
+(set result (sum (filter h (map g data))))

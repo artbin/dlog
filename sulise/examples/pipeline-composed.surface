@@ -1,0 +1,7 @@
+# Profile: B (03) + 10 + 12 + 13
+
+(data
+  |> map (compose f g)
+  |> filter p
+  |> take 10)
+|> (+ 1)

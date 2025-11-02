@@ -1,0 +1,1 @@
+(reduce op z (filter p (map f data)))

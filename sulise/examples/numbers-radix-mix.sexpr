@@ -1,0 +1,5 @@
+(define b #b1_010_101)
+(define o #o7_5_5)
+(define d #d1_000_000)
+(define x #xDE_AD_BE_EF)
+(define e #e1_000)

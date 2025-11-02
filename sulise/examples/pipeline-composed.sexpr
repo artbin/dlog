@@ -1,0 +1,4 @@
+((+ 1)
+  (take 10
+    (filter p
+      (map (compose f g) data))))

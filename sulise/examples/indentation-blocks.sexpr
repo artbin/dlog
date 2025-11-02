@@ -1,0 +1,5 @@
+(if (> x 0)
+    (begin (set y (f x)) (return y)))
+(if (> x 0)
+    (return (f x)))
+(sum (filter p (map f a)))

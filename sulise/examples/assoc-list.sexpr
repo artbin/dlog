@@ -1,0 +1,6 @@
+(define alist '((a . 1) (b . 2) (c . 3)))
+(define lookup (lambda (k xs)
+  (cond
+    ((null? xs) #f)
+    ((eq? (caar xs) k) (cdar xs))
+    (else (lookup k (cdr xs))))))

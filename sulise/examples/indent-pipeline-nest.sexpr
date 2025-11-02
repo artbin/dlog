@@ -1,0 +1,1 @@
+(set result (finalize (filter p (map f input))))

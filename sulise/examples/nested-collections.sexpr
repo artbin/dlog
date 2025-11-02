@@ -1,0 +1,8 @@
+(define settings
+  { :users : (
+      (alice { :roles : #{ :admin :dev } :quota : 10_000 })
+      (bob   { :roles : #{ :viewer }      :quota : 1_000 })
+    )
+    :features : #{ :fast :portable }
+    :magic-bytes : #u8(222 173 190 239)
+  })

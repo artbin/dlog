@@ -1,0 +1,9 @@
+(define cfg
+  { :name : "demo"
+    :flags : #{ :portable :fast }
+    :users : (
+      (u1 { :attrs : #(1 2 3) :tags : #{ :a :b } })
+      (u2 { :attrs : #(4 5)   :tags : #{ :b :c } })
+    )
+    :blob : #u8(1 2 3 4 5)
+  })

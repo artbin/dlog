@@ -1,0 +1,4 @@
+(define s1 "hello")
+(define s2 "line1\nline2")
+(define s3 "tab\tquote\"backslash\\")
+(define s4 "braces {} and pipes | not special in strings")

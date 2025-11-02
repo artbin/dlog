@@ -1,0 +1,3 @@
+(define dotted '(a . b))
+(define improper '(1 2 . 3))
+(define vec #(1 2 (3 . 4) "x"))

@@ -1,0 +1,7 @@
+# Profile: C + 16 + 13
+
+result =
+  input
+    |> map f
+    |> filter p
+|> finalize

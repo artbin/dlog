@@ -1,0 +1,6 @@
+# Profile: B + 13
+
+items
+  |> map (compose g h)
+  |> filter p
+  |> foldl combine init

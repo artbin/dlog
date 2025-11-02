@@ -1,0 +1,16 @@
+# Profile: C (04) + 14 + 15 + 16
+
+if mode == "fast":
+  xs = read input
+  ys = xs
+    |> map f
+    |> filter p
+    |> take 10
+  if len ys > 0 -> return ys
+  return []
+
+result =
+  data
+    |> map g
+    |> filter h
+    |> sum

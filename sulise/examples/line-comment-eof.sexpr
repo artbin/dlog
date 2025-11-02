@@ -1,0 +1,2 @@
+(+ 1 2)  # comment to end of line
+(+ 3 4)  # another; reader consumes to newline or EOF

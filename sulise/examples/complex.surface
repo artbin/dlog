@@ -1,0 +1,4 @@
+xs
+  |> filter gt10
+  |> map square
+  |> sum
