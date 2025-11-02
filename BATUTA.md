@@ -17,34 +17,56 @@ Batuta (Spanish/Portuguese/Italian for "baton" - the conductor's tool) is a dyna
 9. [Pipeline Operations](#pipeline-operations)
 10. [Macro System](#macro-system)
 11. [Fault Tolerance](#fault-tolerance)
+    - [Supervision Trees](#supervision-trees)
+    - [Restart Strategies](#restart-strategies)
+    - [Error Handling (Zig-Style)](#error-handling-zig-style)
+    - [Links and Monitors](#links-and-monitors)
 12. [Distributed Execution](#distributed-execution)
 13. [Type System](#type-system)
+    - [Gradual Typing](#gradual-typing)
+    - [Type Inference](#type-inference)
+    - [Error Union Types (Zig-Inspired)](#error-union-types-zig-inspired)
+    - [Spec-Based Validation](#spec-based-validation)
+    - [Actor Protocols](#actor-protocols)
+    - [Reference Capabilities (Pony-Inspired)](#reference-capabilities-pony-inspired)
 14. [REPL & Interactive Development](#repl--interactive-development)
 15. [Standard Library](#standard-library)
 16. [DLog Integration](#dlog-integration)
 17. [Performance](#performance)
+    - [Compilation Strategy](#compilation-strategy)
+    - [Native Compilation](#1-native-via-rust)
+    - [WebAssembly (WASM)](#2-webassembly-wasm)
+    - [Optimization Techniques](#optimization-techniques)
+    - [Benchmarks](#benchmarks)
 18. [Comparison](#comparison)
 19. [Implementation](#implementation)
 20. [Examples](#examples)
+21. [Getting Started](#getting-started)
+22. [Roadmap](#roadmap)
+23. [Contributing](#contributing)
+24. [Conclusion](#conclusion)
 
 ---
 
 ## Philosophy
 
-Batuta is built on five core principles:
+Batuta is built on seven core principles:
 
 1. **Orchestration**: Like a conductor's baton, the language coordinates distributed actors and data flows
 2. **Immutability**: All data is immutable by default, ensuring safety in concurrent systems
 3. **Actor-First**: Queries, operations, and computations are actors that communicate via messages
-4. **Fault Tolerance**: "Let it crash" philosophy with supervision trees
-5. **Interactive**: REPL-driven development for exploring live distributed systems
+4. **Explicit Errors**: Zig-style error handling - no exceptions, all errors visible in type signatures
+5. **Safe Concurrency**: Pony-style reference capabilities prevent data races at compile time
+6. **Fault Tolerance**: "Let it crash" philosophy with supervision trees
+7. **Interactive**: REPL-driven development for exploring live distributed systems
 
 ### Design Goals
 
 - **Expressive**: Write complex distributed queries in few lines
-- **Safe**: Immutable data + actor isolation = no race conditions
+- **Safe**: Immutable data + actor isolation + reference capabilities = no race conditions, compile-time safety
 - **Fast**: Compile to efficient Rust code, leverage DLog's performance
 - **Distributed**: First-class support for multi-node execution
+- **Universal**: Compile to native or WASM - run anywhere (server, browser, edge, embedded)
 - **Inspectable**: Live introspection of running systems via REPL
 
 ---
@@ -61,7 +83,10 @@ Batuta combines:
 | **Pipe operator** | Elixir | Chainable transformations |
 | **Actors** | Elixir/Erlang | Concurrent, fault-tolerant execution |
 | **Supervision trees** | Elixir/Erlang | Self-healing systems |
+| **Error handling** | Zig | Explicit error union types, no exceptions |
+| **Reference capabilities** | Pony | Safe concurrency, no data races |
 | **Gradual typing** | Typed Clojure/Elixir Dialyzer | Optional type annotations |
+| **Compilation targets** | Rust/WASM | Native + WebAssembly (browser, edge, serverless) |
 
 ### Hello World
 
@@ -111,12 +136,13 @@ Batuta combines:
     transform
     save)
 
-;; Guard clauses
-(defn factorial [n]
+;; Guard clauses with error handling
+(defn factorial :: [Int -> Result!Int]
+  [n]
   (cond
-    (= n 0) -> 1
-    (> n 0) -> (* n (factorial (- n 1)))
-    :else -> (throw "Invalid input")))
+    (= n 0) -> (ok 1)
+    (> n 0) -> (ok (* n (! (factorial (- n 1)))))
+    :else -> (error :negative-input)))
 ```
 
 ---
@@ -587,29 +613,64 @@ Queries execute as **actors** for parallelism:
 :rest-for-one
 ```
 
-### Error Handling
+### Error Handling (Zig-Style)
+
+Batuta uses **explicit error handling** inspired by Zig - no exceptions, only error union types:
 
 ```clojure
-;; Try-catch (discouraged - use supervision)
-(try
-  (risky-operation)
-  (catch Exception e
-    (log-error e)))
+;; Error union type: Result!Type means "error or Type"
+(defn divide :: [Int Int -> Result!Int]
+  [x y]
+  (if (= y 0)
+    (error :division-by-zero)
+    (ok (/ x y))))
 
-;; Let it crash (encouraged)
+;; Try unwrap with !
+(let [result (divide 10 2)]
+  (! result))  ; => 5 (unwraps or propagates error)
+
+;; Try unwrap with default value
+(let [result (divide 10 0)]
+  (? result 0))  ; => 0 (uses default if error)
+
+;; Pattern match on Result
+(match (divide 10 0)
+  {:ok value} -> (println "Success:" value)
+  {:error :division-by-zero} -> (println "Cannot divide by zero")
+  {:error reason} -> (println "Error:" reason))
+
+;; Error propagation with ?
+(defn complex-operation :: [Int Int -> Result!Int]
+  [x y]
+  (let [a (? (divide x y))        ; Propagates error if divide fails
+        b (? (divide a 2))]       ; Propagates error if divide fails
+    (ok (* b 3))))                ; Returns success
+
+;; Let it crash (encouraged for actors)
 (defactor worker []
   (receive
-    {:process data} -> (process-or-crash data)))  ; Supervisor will restart
+    {:process data} -> (! (process-or-fail data))))  ; Supervisor will restart
 
-;; Error replies
+;; Explicit error replies
 (defactor safe-worker []
   (receive
     {:compute x y} ->
-      (try
-        (reply {:ok (compute x y)})
-        (catch Exception e
-          (reply {:error (str e)})))))
+      (reply (divide x y))))  ; Returns Result!Int
+
+;; Error types (like Zig error sets)
+(deferror MathError
+  :division-by-zero
+  :negative-sqrt
+  :overflow)
+
+(defn safe-sqrt :: [Float -> MathError!Float]
+  [x]
+  (if (< x 0)
+    (error :negative-sqrt)
+    (ok (sqrt x))))
 ```
+
+**No exceptions, ever.** All errors are explicit in the type signature.
 
 ### Links and Monitors
 
@@ -731,6 +792,80 @@ Batuta supports **optional type annotations**:
       (reduce +)))     ; Returns Int
 ```
 
+### Error Union Types (Zig-Inspired)
+
+Batuta uses **error union types** for explicit error handling:
+
+```clojure
+;; Error union type syntax: ErrorSet!Type
+Result!Int           ; Can be error or Int
+FileError!String     ; Can be FileError or String
+Unit!Unit            ; Can be error or Unit (like Result<(), Error>)
+
+;; Define error sets
+(deferror FileError
+  :not-found
+  :permission-denied
+  :io-error)
+
+(deferror NetworkError
+  :timeout
+  :connection-refused
+  :dns-failure)
+
+;; Function with error union return type
+(defn read-file :: [String -> FileError!String]
+  [path]
+  (if (file-exists? path)
+    (if (can-read? path)
+      (ok (slurp path))
+      (error :permission-denied))
+    (error :not-found)))
+
+;; Inferred error sets
+(defn combined :: [String -> (FileError | NetworkError)!String]
+  [url]
+  (let [local-file (? (read-file url))          ; Can return FileError
+        remote-data (? (http-get local-file))]  ; Can return NetworkError
+    (ok remote-data)))
+
+;; Error propagation with ?
+;; Automatically propagates errors up the call stack
+(defn process :: [String -> Result!Data]
+  [path]
+  (let [content (? (read-file path))  ; Returns early if error
+        parsed (? (parse content))     ; Returns early if error
+        validated (? (validate parsed))] ; Returns early if error
+    (ok validated)))
+
+;; Catch and handle errors
+(defn process-with-fallback :: [String -> String]
+  [path]
+  (match (read-file path)
+    {:ok content} -> content
+    {:error :not-found} -> "default content"
+    {:error :permission-denied} -> (! (read-file "/tmp/fallback"))
+    {:error e} -> (panic "Unexpected error:" e)))
+
+;; Unwrap or panic
+(! result)           ; Unwraps or crashes (for infallible code)
+(? result default)   ; Unwraps or returns default value
+
+;; Type annotations show errors explicitly
+(defn fallible-operation :: [Int -> IoError!Int]
+  [x]
+  ...)
+
+;; No hidden exceptions - all errors in type signature
+```
+
+**Key differences from exceptions:**
+- Errors are **values**, not control flow
+- All errors **explicit in type signature**
+- **Zero-cost** - compiles to Rust Result<T, E>
+- **Composable** - use ?, !, match, or pattern matching
+- **No try-catch** - errors are data
+
 ### Spec-Based Validation
 
 ```clojure
@@ -769,6 +904,176 @@ Batuta supports **optional type annotations**:
     :decrement -> (recur (- state 1))
     :get-value -> (do (reply state) (recur state))))
 ```
+
+### Reference Capabilities (Pony-Inspired)
+
+Batuta uses **reference capabilities** for safe concurrency without data races:
+
+#### Capability Types
+
+```clojure
+;; Reference capabilities (like Pony)
+iso     ; Isolated - exclusive mutable, can be sent to actors
+trn     ; Transition - temporary exclusive mutable
+ref     ; Reference - local mutable, cannot be sent
+val     ; Value - immutable, can be shared
+box     ; Box - read-only, local
+tag     ; Tag - opaque reference, no read/write
+
+;; Type with capability
+(defn process :: [iso String -> val String]
+  [s]
+  (let [result (transform s)]  ; s consumed (iso)
+    result))                    ; Returns immutable (val)
+```
+
+#### Safe Actor Message Passing
+
+```clojure
+;; Only iso, val, and tag can be sent to actors
+(defactor processor []
+  (receive
+    {:process data :: iso Data} ->  ; Accepts isolated data
+      (let [result (expensive-computation data)]
+        (reply result))            ; Returns val Data
+        
+    {:get-cached} ->
+      (reply cached-value :: val)))  ; Immutable, safe to share
+
+;; Send isolated data
+(let [data (create-data :: iso)]
+  (send processor {:process data}))  ; data consumed, safe
+```
+
+#### Capability Constraints
+
+```clojure
+;; Prevent data races at compile time
+(defn bad-example [data :: ref String]
+  (send actor {:process data}))  ; COMPILE ERROR: ref cannot be sent!
+
+;; Correct version
+(defn good-example [data :: iso String]
+  (send actor {:process data}))  ; OK: iso can be sent
+
+;; Share immutable data
+(defn share [data :: val String]
+  (send actor1 {:process data})  ; OK
+  (send actor2 {:process data})  ; OK - val can be shared
+  (use data))                     ; OK - val can be used locally
+```
+
+#### Capability Recovery
+
+```clojure
+;; Recover isolated capability
+(defn build-list :: [-> iso [Int]]
+  []
+  (recover
+    ;; Inside recover block, build mutable list
+    (let [list (new-mutable-list)]
+      (push list 1)
+      (push list 2)
+      (push list 3)
+      list)))  ; Escapes as iso
+
+;; The list is isolated, safe to send
+(let [data (build-list)]
+  (send actor {:process data}))
+```
+
+#### Viewpoint Adaptation
+
+```clojure
+;; Capability depends on receiver's capability
+(defn get-field [obj :: iso Object] :: iso String
+  (.field obj))  ; Returns iso because obj is iso
+
+(defn get-field [obj :: ref Object] :: ref String
+  (.field obj))  ; Returns ref because obj is ref
+
+(defn get-field [obj :: val Object] :: val String
+  (.field obj))  ; Returns val because obj is val
+```
+
+#### Capability Subtyping
+
+```
+iso <: trn <: ref <: box
+iso <: val <: box
+iso <: tag
+```
+
+```clojure
+;; Can pass more restrictive capability
+(defn take-box [x :: box String] ...)
+
+(take-box my-iso-string)  ; OK: iso <: box
+(take-box my-ref-string)  ; OK: ref <: box
+(take-box my-val-string)  ; OK: val <: box
+```
+
+#### Practical Example
+
+```clojure
+;; Actor that processes unique data
+(defactor data-processor []
+  (receive
+    {:process data :: iso Data} ->
+      ;; We have exclusive access, can mutate freely
+      (let [enriched (enrich-data data)
+            validated (validate enriched)
+            result (compute validated)]
+        ;; Send result to another actor
+        (send result-actor {:result result :: iso}))))
+
+;; Actor that shares read-only data
+(defactor cache []
+  (let [cached-data (load-cache :: val)]
+    (receive
+      {:get key} ->
+        ;; Safe to share immutable data with all requesters
+        (reply (lookup cached-data key :: val)))))
+
+;; Actor that coordinates
+(defactor coordinator []
+  (receive
+    {:request} ->
+      ;; Create isolated data
+      (let [data (create-data :: iso)]
+        ;; Send to processor (consumes data)
+        (send processor {:process data}))
+        
+    {:cached} ->
+      ;; Get shared data from cache
+      (let [cached (call cache {:get "key"})]
+        ;; Can use it multiple times
+        (use cached)
+        (send logger {:log cached})
+        (reply cached))))
+```
+
+#### Benefits
+
+1. **No Data Races**: Compiler prevents concurrent mutation
+2. **Zero-Cost**: Capabilities are compile-time only
+3. **Safe Message Passing**: Only sendable types can be sent to actors
+4. **Gradual**: Optional - use when you need safety guarantees
+5. **Composable**: Works with error union types and other features
+
+#### Capability Inference
+
+```clojure
+;; Compiler infers capabilities when possible
+(defn process [data]
+  (send actor data))  ; Infers: data must be iso, val, or tag
+
+;; Explicit when needed
+(defn process [data :: iso Data]
+  (send actor data))  ; Explicit: data is iso
+```
+
+**Key Innovation**: Batuta combines Pony's reference capabilities with Lisp's flexibility, making safe concurrency optional but available when needed.
 
 ---
 
@@ -1021,18 +1326,139 @@ batuta> (profile
 
 ### Compilation Strategy
 
-Batuta compiles to **efficient Rust code**:
+Batuta compiles to **multiple targets**:
+
+#### 1. Native (via Rust)
 
 ```clojure
 ;; Batuta code
 (defn sum [numbers]
   (reduce + 0 numbers))
 
-;; Compiles to (approximately)
+;; Compiles to Rust
 pub fn sum(numbers: Vec<i64>) -> i64 {
     numbers.iter().fold(0, |acc, x| acc + x)
 }
+
+;; Then to native machine code
 ```
+
+```bash
+# Compile to native binary
+batuta compile hello.ba -o hello
+
+# Run
+./hello
+```
+
+#### 2. WebAssembly (WASM)
+
+Batuta compiles to **WebAssembly** for browser and edge deployment:
+
+```bash
+# Compile to WASM
+batuta compile hello.ba --target wasm32-wasi -o hello.wasm
+
+# Run with WASM runtime
+wasmtime hello.wasm
+
+# Or in browser
+# <script type="module">
+#   import init from './hello.wasm';
+#   await init();
+# </script>
+```
+
+**WASM Features:**
+
+```clojure
+;; Batuta code runs in browser
+(defn fibonacci [n]
+  (if (<= n 1)
+    n
+    (+ (fibonacci (- n 1))
+       (fibonacci (- n 2)))))
+
+;; Export to JavaScript
+(export fibonacci)
+
+;; Call from JS: fibonacci(10)
+```
+
+**Browser Integration:**
+
+```html
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Batuta in Browser</title>
+</head>
+<body>
+  <h1>Batuta WebAssembly Demo</h1>
+  <script type="module">
+    // Load Batuta WASM module
+    import init, { fibonacci, process_data } from './batuta.wasm';
+    
+    async function run() {
+      await init();
+      
+      // Call Batuta function from JavaScript
+      const result = fibonacci(20);
+      console.log('Fibonacci(20):', result);
+      
+      // Process data with Batuta actors
+      const data = [1, 2, 3, 4, 5];
+      const processed = process_data(data);
+      console.log('Processed:', processed);
+    }
+    
+    run();
+  </script>
+</body>
+</html>
+```
+
+**WASM Use Cases:**
+
+1. **Edge Computing**: Deploy Batuta actors on Cloudflare Workers, Fastly Compute@Edge
+2. **Browser Analytics**: Run DLog queries directly in the browser
+3. **Serverless Functions**: AWS Lambda, Google Cloud Functions with WASM runtime
+4. **Embedded Systems**: Run on IoT devices with WASM runtime
+5. **Plugin Systems**: Safe sandboxed plugins for applications
+6. **Cross-Platform**: Write once, run anywhere (desktop, mobile, web, embedded)
+
+**Actor System in WASM:**
+
+```clojure
+;; Batuta actors work in WASM
+(defactor counter [state]
+  (receive
+    :increment -> (recur (+ state 1))
+    :get -> (do (reply state) (recur state))))
+
+;; Spawn in browser
+(def cnt (spawn counter 0))
+
+;; Send from JavaScript
+(send cnt :increment)
+(call cnt :get)  ; => 1
+```
+
+**WASM Limitations:**
+
+- No threads (single-threaded WASM)
+- Actor system uses async/await instead
+- File I/O via WASI (WebAssembly System Interface)
+- Network via browser APIs or WASI-http
+
+**Performance:**
+
+| Target | Startup Time | Throughput | Binary Size |
+|--------|--------------|------------|-------------|
+| **Native** | <10ms | 100% | 5-10 MB |
+| **WASM** | <50ms | 70-80% | 1-2 MB |
+
+WASM is 70-80% native speed but with much smaller binaries and universal compatibility.
 
 ### Optimization Techniques
 
@@ -1062,9 +1488,12 @@ pub fn sum(numbers: Vec<i64>) -> i64 {
 | **Host** | Rust/DLog | JVM |
 | **Actors** | First-class | core.async |
 | **Pattern matching** | Built-in | Via library |
+| **Error handling** | Zig-style (explicit) | Exceptions |
+| **Compilation** | Native + WASM | JVM bytecode |
 | **Distributed** | Native | Via library |
 | **Performance** | ~2-3× faster | Baseline |
 | **Startup time** | 50ms | 2s |
+| **WASM support** | ✅ First-class | ❌ Via GraalVM |
 
 ### Batuta vs Elixir
 
@@ -1072,10 +1501,13 @@ pub fn sum(numbers: Vec<i64>) -> i64 {
 |---------|--------|--------|
 | **Syntax** | Lisp | Ruby-like |
 | **Macros** | Full Lisp macros | More limited |
+| **Error handling** | Zig-style (explicit) | Pattern matching {:ok/:error} |
 | **Data structures** | Persistent | Functional |
+| **Compilation** | Native + WASM | BEAM bytecode |
 | **Distribution** | DLog cluster | BEAM cluster |
 | **Queries** | Native SQL/graph | Via Ecto |
 | **Performance** | ~1.5× faster | Baseline |
+| **WASM support** | ✅ First-class | ❌ No |
 
 ---
 
@@ -1085,32 +1517,70 @@ pub fn sum(numbers: Vec<i64>) -> i64 {
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
-│  Batuta Source Code (.bat files)                           │
+│  Batuta Source Code (.ba files)                            │
+│  - Lisp S-expressions                                       │
+│  - Pattern matching                                         │
+│  - Error union types (Zig-style)                           │
 └─────────────────────────────────────────────────────────────┘
                            ▼
 ┌─────────────────────────────────────────────────────────────┐
 │  Parser (nom) → AST                                         │
+│  - S-expression parsing                                     │
+│  - Error recovery                                           │
 └─────────────────────────────────────────────────────────────┘
                            ▼
 ┌─────────────────────────────────────────────────────────────┐
 │  Macro Expansion                                            │
+│  - Lisp macros (defmacro)                                  │
+│  - Query DSL macros                                         │
+│  - Actor macros                                             │
 └─────────────────────────────────────────────────────────────┘
                            ▼
 ┌─────────────────────────────────────────────────────────────┐
-│  Type Inference (optional)                                  │
+│  Type Inference & Error Checking                           │
+│  - Gradual typing                                           │
+│  - Error union type inference                               │
+│  - Exhaustiveness checking                                  │
 └─────────────────────────────────────────────────────────────┘
                            ▼
 ┌─────────────────────────────────────────────────────────────┐
-│  Optimization (constant folding, inlining, etc.)            │
+│  Optimization                                               │
+│  - Constant folding                                         │
+│  - Inlining                                                 │
+│  - Dead code elimination                                    │
+│  - Error path optimization                                  │
 └─────────────────────────────────────────────────────────────┘
                            ▼
 ┌─────────────────────────────────────────────────────────────┐
 │  Codegen → Rust IR                                          │
+│  - Result<T, E> for error union types                      │
+│  - Actor system integration                                 │
+│  - Persistent data structures                               │
 └─────────────────────────────────────────────────────────────┘
                            ▼
-┌─────────────────────────────────────────────────────────────┐
-│  Rust Compiler → Native Code                                │
-└─────────────────────────────────────────────────────────────┘
+                    ┌──────┴──────┐
+                    ▼              ▼
+    ┌───────────────────────┐  ┌──────────────────────┐
+    │  Native Compilation   │  │  WASM Compilation    │
+    │  (via rustc)          │  │  (via rustc)         │
+    └───────────────────────┘  └──────────────────────┘
+                    │              │
+                    ▼              ▼
+    ┌───────────────────────┐  ┌──────────────────────┐
+    │  Native Binary        │  │  WebAssembly Module  │
+    │  - Linux/macOS/Win    │  │  - wasm32-wasi       │
+    │  - 5-10 MB            │  │  - 1-2 MB            │
+    │  - <10ms startup      │  │  - <50ms startup     │
+    │  - 100% performance   │  │  - 70-80% native     │
+    └───────────────────────┘  └──────────────────────┘
+                    │              │
+                    ▼              ▼
+    ┌───────────────────────┐  ┌──────────────────────┐
+    │  Server/Desktop       │  │  Browser/Edge/IoT    │
+    │  - DLog clusters      │  │  - Cloudflare Workers│
+    │  - Distributed actors │  │  - Browser analytics │
+    │  - Full I/O           │  │  - Serverless        │
+    └───────────────────────┘  └──────────────────────┘
 ```
 
 ### Runtime Components
@@ -1144,8 +1614,7 @@ pub struct Message {
 ### File Extension
 
 ```
-.bat    - Batuta source files
-.batc   - Compiled Batuta bytecode
+.ba     - Batuta source files
 ```
 
 ---
@@ -1333,7 +1802,7 @@ batuta --version
 ### Hello World Program
 
 ```clojure
-;; hello.bat
+;; hello.ba
 (defn main []
   (println "Hello, DLog!")
   (println "Batuta is orchestrating your data."))
@@ -1343,10 +1812,10 @@ batuta --version
 
 ```bash
 # Run
-batuta run hello.bat
+batuta run hello.ba
 
 # Compile
-batuta compile hello.bat -o hello
+batuta compile hello.ba -o hello
 
 # Execute compiled
 ./hello
@@ -1441,7 +1910,7 @@ batuta/
 │   ├── codegen.rs     # Rust codegen
 │   ├── runtime.rs     # Actor runtime
 │   └── repl.rs        # REPL
-├── stdlib/            # Standard library (.bat files)
+├── stdlib/            # Standard library (.ba files)
 ├── examples/          # Example programs
 └── tests/             # Test suite
 ```
