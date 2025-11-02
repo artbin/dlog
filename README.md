@@ -16,7 +16,7 @@ DLog has evolved from a distributed log into a **comprehensive computing platfor
 
 | Pillar | Key Technologies | Benefits |
 |--------|------------------|----------|
-| **🔐 Secure** | BLAKE3 Merkle trees, zero-trust architecture, capability-based security, HSM integration, multi-signature transactions | Cryptographic verification, Byzantine fault tolerance, audit trails, regulatory compliance (SEC, HIPAA, SOC2) |
+| **🔐 Secure** | BLAKE3 Merkle trees, WireGuard + Rosenpass (quantum-resistant), zero-trust architecture, capability-based security, HSM integration, multi-signature transactions | Cryptographic verification, post-quantum security, Byzantine fault tolerance, audit trails, regulatory compliance (SEC, HIPAA, SOC2) |
 | **⚡ Parallel** | Actor model, functional query parallelism, SIMD optimizations, GPU acceleration, tensor operations | Message-passing concurrency, lock-free algorithms, 28B+ ops/sec, automatic parallelization |
 | **🌍 Distributed** | Raft/PBFT consensus, partition management, location transparency, supervision trees, topology-level reactivity | Fault tolerance, linear scalability, instant failover, no single point of failure |
 | **🔗 Decentralized** | Proof of Stake/Work, autonomous agents, peer discovery (flocks), deploy-* operators, perfect hash functions | Autonomous operation, open networks, self-organizing, censorship resistance |
@@ -35,6 +35,7 @@ DLog has evolved from a distributed log into a **comprehensive computing platfor
 - 🌐 **Decentralized Autonomous**: 5 consensus mechanisms (Raft, PBFT, Tendermint, PoW, PoS)
 - ⚡ **Extreme Performance**: 28B+ ops/sec, sub-millisecond latency, linear scalability
 - 🔍 **Perfect Hash Functions**: O(1) lookups, 45ns p50, zero collisions, zero wasted space
+- 🔒 **Quantum-Resistant Networking**: WireGuard + Rosenpass, NIST PQC compliant, DPI resistant
 
 ## 🚀 Revolutionary Features
 
@@ -185,6 +186,18 @@ DLog has evolved from a distributed log into a **comprehensive computing platfor
 - **Memory-Mapped Loading**: Zero-copy deserialization, instant startup
 - **Performance**: 45ns p50 lookup, 80ns p99, 15.8× parallelism speedup on 32 cores
 - **Space Efficiency**: 5.5% overhead (2.3 bits per key)
+
+### 🔒 WireGuard Universal Protocol
+
+- **Universal Communication**: Single protocol for all DLog communication (client-cluster, node-node, cluster-cluster, admin-cluster)
+- **Quantum Resistance**: Rosenpass integration for post-quantum security (Kyber1024 + Dilithium)
+- **Hybrid Cryptography**: Defense in depth - attacker must break BOTH classical AND post-quantum crypto
+- **Extreme Performance**: 1-RTT handshake (~0.2ms), 9.5 Gbps kernel / 6-8 Gbps userspace (BoringTun)
+- **DPI Resistance**: Stealth protocol, traffic shaping, port hopping, obfs4-style obfuscation
+- **Zero-Trust Architecture**: Cryptokey routing, no IP-based trust, perfect forward secrecy
+- **Cross-Platform**: Linux kernel module, BoringTun userspace (Rust), FreeBSD/OpenBSD/Windows/macOS
+- **Production Ready**: Used by Cloudflare, Tailscale, mullvad VPN - proven at scale
+- **NIST PQC Compliant**: Meets CNSA 2.0 requirements (quantum-resistant by 2030)
 
 ## 📊 Unified Architecture
 
@@ -555,6 +568,7 @@ DLog includes **70,000+ lines** of documentation across **39 files**:
 - **[TENSOR_DATABASE.md](TENSOR_DATABASE.md)** - Tensor database (DLPack, distributed training, GPU, Zarr)
 - **[DADBS.md](DADBS.md)** - Decentralized Autonomous Database Systems (5 consensus mechanisms)
 - **[MPHF.md](MPHF.md)** - Partitioned Perfect Hash Maps (O(1) lookup, zero collisions)
+- **[WIREGUARD_PROTOCOL.md](WIREGUARD_PROTOCOL.md)** - WireGuard universal protocol (quantum resistance, DPI evasion)
 
 ### ⚡ Advanced Features
 - **[ADVANCED_FEATURES.md](ADVANCED_FEATURES.md)** - Transactions, stream processing, analytics
@@ -750,8 +764,12 @@ DLog builds upon groundbreaking work from many projects:
 - [Apache Flink](https://flink.apache.org/) - Stream processing
 - [Databend](https://databend.rs/) - Modern data warehouse features
 
-### Cryptography
+### Cryptography & Networking
 - [BLAKE3](https://github.com/BLAKE3-team/BLAKE3) - High-performance cryptographic hashing
+- [WireGuard](https://www.wireguard.com/) - Fast, modern, secure VPN protocol
+- [BoringTun](https://github.com/cloudflare/boringtun) - Userspace WireGuard implementation in Rust
+- [Rosenpass](https://rosenpass.eu/) - Post-quantum key exchange for WireGuard
+- [NIST PQC](https://csrc.nist.gov/projects/post-quantum-cryptography) - Post-quantum cryptography standards (Kyber, Dilithium)
 
 ### Actor-Based Systems
 - [Erlang/OTP](https://www.erlang.org/) - Supervision trees, let-it-crash philosophy
