@@ -157,7 +157,7 @@ DLog was designed with these use cases in mind, even though it's primarily a dis
 │  6. Exactly-Once Semantics                                 │
 │     • Idempotent writes (no accidental duplicates)         │
 │     • Distributed session managers                         │
-│     • Crash-safe (Sparse Append Counters)                  │
+│     • Crash-safe (Obelisk Sequencers)                  │
 │                                                            │
 └────────────────────────────────────────────────────────────┘
 ```

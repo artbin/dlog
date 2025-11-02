@@ -635,7 +635,7 @@ cargo run --example quick-start
 
 **Blog Series** (Complete):
 1. [Introducing DLog: Rethinking Distributed Logs](1-introducing-dlog.md)
-2. [The Sparse Append Counter: A Novel Persistent Atomic Primitive](2-sparse-append-counter.md)
+2. [The Obelisk Sequencer: A Novel Persistent Atomic Primitive](2-obelisk-sequencer.md)
 3. [Distributed Coordinators Without Consensus](3-distributed-coordinators.md)
 4. [28 Billion Operations Per Second: Architectural Deep-Dive](4-28-billion-ops.md)
 5. [Building Modern Data Infrastructure in Rust](5-rust-infrastructure.md)

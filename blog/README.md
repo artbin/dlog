@@ -20,7 +20,7 @@ A 10-part technical blog series explaining DLog's architecture, innovations, and
 
 ---
 
-### [2. The Sparse Append Counter: A Novel Persistent Atomic Primitive](2-sparse-append-counter.md)
+### [2. The Obelisk Sequencer: A Novel Persistent Atomic Primitive](2-obelisk-sequencer.md)
 *How a simple insight about sparse files enables crash-safe counters*
 
 **Key Topics**:
@@ -263,7 +263,7 @@ A 10-part technical blog series explaining DLog's architecture, innovations, and
 ---
 
 ### For Distributed Systems Engineers
-1. [Sparse Append Counter](2-sparse-append-counter.md) - Novel primitive
+1. [Obelisk Sequencer](2-obelisk-sequencer.md) - Novel primitive
 2. [Distributed Coordinators](3-distributed-coordinators.md) - Coordination pattern
 3. [28 Billion Ops/Sec](4-28-billion-ops.md) - Implementation details
 4. [Actor-Based Concurrency](9-actor-concurrency.md) - Supervision trees & topology reactivity
@@ -286,7 +286,7 @@ A 10-part technical blog series explaining DLog's architecture, innovations, and
 ### For Rust Developers
 1. [Introducing DLog](1-introducing-dlog.md) - What we're building
 2. [Building in Rust](5-rust-infrastructure.md) - Rust-specific insights
-3. [Sparse Append Counter](2-sparse-append-counter.md) - Code example
+3. [Obelisk Sequencer](2-obelisk-sequencer.md) - Code example
 4. [Cryptographic Verification](6-cryptographic-verification.md) - BLAKE3 in Rust
 5. [Implementation Plan](../IMPLEMENTATION_PLAN.md) - How to contribute
 

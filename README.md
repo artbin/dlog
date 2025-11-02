@@ -47,7 +47,7 @@ DLog has evolved from a distributed log into a **comprehensive computing platfor
 
 ### 🎯 Novel Coordination Primitives
 
-- **Sparse Append Counter**: Crash-safe persistent atomic counters with minimal disk overhead (~1-2μs per increment)
+- **Obelisk Sequencer**: Crash-safe persistent atomic counters with minimal disk overhead (~1-2μs per increment)
 - **Distributed Coordinators**: Eliminate all centralized bottlenecks via Snowflake IDs
   - 4B+ transactions/sec (8,000× faster than TiKV)
   - 4B+ timestamps/sec (distributed TSO)
@@ -240,7 +240,7 @@ DLog's revolutionary layered architecture eliminates traditional boundaries:
 ┌────────────────────────────────────────────────────────────┐
 │  Distributed Coordinator Layer (1024 nodes each type)      │
 │  Timestamp Oracles │ Tx Coordinators │ Session Managers    │
-│  (Snowflake IDs + Sparse Append Counters)                 │
+│  (Snowflake IDs + Obelisk Sequencers)                     │
 └────────────────────────────────────────────────────────────┘
                            ▼
 ┌────────────────────────────────────────────────────────────┐
@@ -606,7 +606,7 @@ DLog includes **74,000+ lines** of documentation across **41 files**:
 - **[ADVANCED_FEATURES.md](ADVANCED_FEATURES.md)** - Transactions, stream processing, analytics
 - **[EPOCHS.md](EPOCHS.md)** - Understanding epochs and safe failover
 - **[DYNAMIC_PARTITIONS.md](DYNAMIC_PARTITIONS.md)** - Auto-splitting/merging
-- **[CLIENT_PARTITIONING_PATTERNS.md](CLIENT_PARTITIONING_PATTERNS.md)** - VLSN, Sparse Append Counter
+- **[CLIENT_PARTITIONING_PATTERNS.md](CLIENT_PARTITIONING_PATTERNS.md)** - VLSN, Obelisk Sequencer
 
 ### 📊 Performance & Operations
 - **[PERFORMANCE.md](PERFORMANCE.md)** - Performance tuning guide

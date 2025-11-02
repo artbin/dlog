@@ -440,13 +440,13 @@ impl PeriodicCheckpointVLSN {
 - ✅ Low overhead (checkpoint every N records)
 - ⚠️ May lose up to 1000 VLSNs on crash (depending on interval)
 
-#### Strategy 2: Sparse Append Counter Pattern (Optimal) ⭐
+#### Strategy 2: Obelisk Sequencer Pattern (Optimal) ⭐
 
 **A persistent atomic counter primitive.**
 
 **What it is:**
 
-The Sparse Append Counter is a **general-purpose primitive** for durable monotonic counters - like `std::sync::atomic::AtomicU64`, but **crash-safe**!
+The Obelisk Sequencer is a **general-purpose primitive** for durable monotonic counters - like `std::sync::atomic::AtomicU64`, but **crash-safe**!
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
@@ -456,7 +456,7 @@ The Sparse Append Counter is a **general-purpose primitive** for durable monoton
 │  In-memory atomic counter:                                  │
 │    AtomicU64::fetch_add(1)  →  Lost on crash ❌            │
 │                                                             │
-│  Sparse Append Counter:                                     │
+│  Obelisk Sequencer:                                     │
 │    AtomicU64::fetch_add(1)  →  Persisted to disk ✅        │
 │    append_byte_to_file()                                    │
 │                                                             │
@@ -537,11 +537,11 @@ impl SparseFileVLSN {
 }
 ```
 
-**The Sparse Append Counter Pattern:**
+**The Obelisk Sequencer Pattern:**
 
 ```
 ┌─────────────────────────────────────────────────────────┐
-│   Sparse Append Counter Pattern                         │
+│   Obelisk Sequencer Pattern                         │
 ├─────────────────────────────────────────────────────────┤
 │                                                         │
 │  Algorithm:                                             │
@@ -621,7 +621,7 @@ File system support:
 │    Disk I/O:      Minimal (0.001 fsync per write)       │
 │    Best for:      Testing only                           │
 │                                                          │
-│  Strategy 2: Sparse Append Counter ⭐                    │
+│  Strategy 2: Obelisk Sequencer ⭐                    │
 │    Write latency: ~1-2 µs (append + fsync batch)        │
 │    Recovery:      ~2 µs (just stat syscall)              │
 │    Disk usage:    ~8 KB (sparse file)                    │
@@ -964,18 +964,18 @@ extern "C" fn sigbus_handler(_: libc::c_int) {
 }
 ```
 
-**Bottom line:** Mmap strategies (especially Fixed-Size) are fastest but carry SIGBUS crash risk. Sparse Append Counter has explicit error handling.
+**Bottom line:** Mmap strategies (especially Fixed-Size) are fastest but carry SIGBUS crash risk. Obelisk Sequencer has explicit error handling.
 
 ---
 
-### Detailed Comparison: All Mmap Strategies vs Sparse Append Counter
+### Detailed Comparison: All Mmap Strategies vs Obelisk Sequencer
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
 │   Architecture Comparison                                    │
 ├─────────────────────────────────────────────────────────────┤
 │                                                             │
-│  Sparse Append Counter:                                     │
+│  Obelisk Sequencer:                                     │
 │    write() syscall → kernel → page cache → disk (async)    │
 │    fsync() → force flush to disk                           │
 │    File size = counter value (metadata)                     │
@@ -1007,7 +1007,7 @@ extern "C" fn sigbus_handler(_: libc::c_int) {
 │   Write Latency Comparison                                  │
 ├─────────────────────────────────────────────────────────────┤
 │                                                             │
-│  Sparse Append Counter (per write):                         │
+│  Obelisk Sequencer (per write):                         │
 │    1. fetch_add (atomic)         ~10 ns                     │
 │    2. write(&[0]) syscall        ~500 ns - 1 µs            │
 │    3. fsync() (if batched)       ~0.01 µs (amortized)      │
@@ -1043,7 +1043,7 @@ extern "C" fn sigbus_handler(_: libc::c_int) {
 │   Durability Guarantees                                     │
 ├─────────────────────────────────────────────────────────────┤
 │                                                             │
-│  Sparse Append Counter:                                     │
+│  Obelisk Sequencer:                                     │
 │    • Explicit fsync() control                               │
 │    • Know exactly when data is durable                      │
 │    • Can batch for performance                              │
@@ -1090,7 +1090,7 @@ extern "C" fn sigbus_handler(_: libc::c_int) {
 │   Disk Space Comparison (1 Billion VLSNs)                  │
 ├─────────────────────────────────────────────────────────────┤
 │                                                             │
-│  Sparse Append Counter:                                     │
+│  Obelisk Sequencer:                                     │
 │    Logical size: 1 GB (1 byte per VLSN)                    │
 │    Physical size: ~4-8 KB (sparse file!)                   │
 │    Filesystem: Stores extent map, not zeros                 │
@@ -1134,7 +1134,7 @@ extern "C" fn sigbus_handler(_: libc::c_int) {
 │   Recovery Time (After Crash)                               │
 ├─────────────────────────────────────────────────────────────┤
 │                                                             │
-│  Sparse Append Counter:                                     │
+│  Obelisk Sequencer:                                     │
 │    1. Open file                         ~1 µs               │
 │    2. stat() to get size                ~1 µs               │
 │    3. vlsn = file_size                  ~1 ns               │
@@ -1172,7 +1172,7 @@ extern "C" fn sigbus_handler(_: libc::c_int) {
 │   Memory Footprint                                          │
 ├─────────────────────────────────────────────────────────────┤
 │                                                             │
-│  Sparse Append Counter:                                     │
+│  Obelisk Sequencer:                                     │
 │    • File descriptor: ~1 KB                                 │
 │    • Page cache: 0-4 KB (just current write position)      │
 │    • Kernel buffers: ~4-8 KB                                │
@@ -1246,7 +1246,7 @@ extern "C" fn sigbus_handler(_: libc::c_int) {
 │   Multi-threaded Write Performance                          │
 ├─────────────────────────────────────────────────────────────┤
 │                                                             │
-│  Sparse Append Counter:                                     │
+│  Obelisk Sequencer:                                     │
 │    • Atomic counter: Good (cache line contention)           │
 │    • File writes: Serialized (mutex on file descriptor)     │
 │    • Bottleneck: write() syscall (user→kernel transition)   │
@@ -1280,7 +1280,7 @@ extern "C" fn sigbus_handler(_: libc::c_int) {
 │   Cross-Platform Behavior                                   │
 ├─────────────────────────────────────────────────────────────┤
 │                                                             │
-│  Sparse Append Counter:                                     │
+│  Obelisk Sequencer:                                     │
 │    Linux:   ✅ Excellent (ext4, xfs, btrfs all support)     │
 │    macOS:   ✅ Good (APFS, HFS+ support)                    │
 │    Windows: ✅ Good (NTFS supports sparse)                  │
@@ -1315,7 +1315,7 @@ extern "C" fn sigbus_handler(_: libc::c_int) {
 │   Error Scenarios & Recovery                                │
 ├─────────────────────────────────────────────────────────────┤
 │                                                             │
-│  Sparse Append Counter:                                     │
+│  Obelisk Sequencer:                                     │
 │    Disk full:                                               │
 │      • write() returns ENOSPC immediately                   │
 │      • File size unchanged                                  │
@@ -1370,7 +1370,7 @@ extern "C" fn sigbus_handler(_: libc::c_int) {
 **When to Use Each:**
 
 ```
-Use Sparse Append Counter when:
+Use Obelisk Sequencer when:
   ✅ Durability guarantees are critical
   ✅ Predictable fsync() behavior required
   ✅ Cross-platform compatibility needed (Linux/macOS/Windows)
@@ -1444,7 +1444,7 @@ Use Periodic Checkpoint when:
 
 **Recommendations:**
 
-**For most production use cases: Sparse Append Counter** (Strategy 2) ⭐
+**For most production use cases: Obelisk Sequencer** (Strategy 2) ⭐
 - ✅ Perfect balance of durability and performance (~1-2 µs writes)
 - ✅ Minimal disk usage with sparse files (~8 KB for billions of VLSNs)
 - ✅ Instant recovery (just read file size, ~2 µs)
@@ -1517,10 +1517,10 @@ Use Periodic Checkpoint when:
 ```
 If you need:                        → Choose:
 ────────────────────────────────────────────────────
-Guaranteed durability               → Sparse Append Counter
-Cross-platform compatibility        → Sparse Append Counter
-Simple, understandable code         → Sparse Append Counter
-Predictable failure modes           → Sparse Append Counter
+Guaranteed durability               → Obelisk Sequencer
+Cross-platform compatibility        → Obelisk Sequencer
+Simple, understandable code         → Obelisk Sequencer
+Predictable failure modes           → Obelisk Sequencer
 
 Ultra-low latency (<100 ns)         → Fixed-Size Mmap
 Single-threaded high throughput     → Fixed-Size Mmap
@@ -1533,7 +1533,7 @@ Can pre-allocate disk space         → Mmap Bitmap
 Recovery time doesn't matter        → Mmap Bitmap
 ```
 
-**About the Sparse Append Counter Pattern:**
+**About the Obelisk Sequencer Pattern:**
 
 This technique was invented specifically for DLog's VLSN persistence requirements. 
 While sparse files and append-only logs are well-known individually, the specific 
@@ -1548,7 +1548,7 @@ Think of it as **`std::sync::atomic::AtomicU64` with persistence**.
 let counter = AtomicU64::new(0);
 counter.fetch_add(1, Ordering::SeqCst);  // Fast, but volatile
 
-// Sparse Append Counter (survives crashes):
+// Obelisk Sequencer (survives crashes):
 let counter = SparseAppendCounter::new("counter.dat")?;
 counter.fetch_add(1)?;  // Slightly slower, but durable!
 ```
@@ -1586,7 +1586,7 @@ for use in any Rust project needing durable counters.
 
 **What is Snowflake?**
 
-Snowflake is Twitter's distributed unique ID generator algorithm (created 2010), and it's one of the most popular use cases for durable counters like the Sparse Append Counter.
+Snowflake is Twitter's distributed unique ID generator algorithm (created 2010), and it's one of the most popular use cases for durable counters like the Obelisk Sequencer.
 
 **Structure (64-bit ID):**
 
@@ -1628,7 +1628,7 @@ impl SnowflakeGenerator {
     pub fn next_id(&self) -> Result<u64> {
         let mut timestamp = Self::current_millis() - self.epoch;
         
-        // Get sequence number (durable with Sparse Append Counter!)
+        // Get sequence number (durable with Obelisk Sequencer!)
         let mut seq = self.sequence.fetch_add(1)?;
         
         // Reset sequence every millisecond
@@ -1655,7 +1655,7 @@ impl SnowflakeGenerator {
 }
 ```
 
-**Why Sparse Append Counter is Perfect for Snowflake:**
+**Why Obelisk Sequencer is Perfect for Snowflake:**
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
@@ -1669,7 +1669,7 @@ impl SnowflakeGenerator {
 │    4. Generate ID: 175928847299117000 (seq = 0)            │
 │    ❌ DUPLICATE ID! (if within same millisecond)            │
 │                                                             │
-│  With Sparse Append Counter:                                │
+│  With Obelisk Sequencer:                                │
 │    1. Generate ID: 175928847299117063 (seq = 7)            │
 │    2. Sequence persisted to disk ✅                         │
 │    3. Crash! 💥                                             │
@@ -1809,7 +1809,7 @@ fn extract_timestamp(snowflake_id: u64) -> u64 {
 
 **Bottom Line:**
 
-Snowflake IDs are the industry standard for distributed, time-ordered unique IDs. The Sparse Append Counter makes them **crash-safe**, preventing duplicate ID generation after restarts - critical for production systems.
+Snowflake IDs are the industry standard for distributed, time-ordered unique IDs. The Obelisk Sequencer makes them **crash-safe**, preventing duplicate ID generation after restarts - critical for production systems.
 
 ---
 
@@ -2479,7 +2479,7 @@ Sequential only!
 3. **VLSN routing is deterministic** - Same VLSN always goes to same partition
 4. **Client-managed keys don't change DLog's consistency model**
 5. **Choose pattern based on your ordering and isolation needs**
-6. **Sparse Append Counter pattern** - A **persistent atomic counter primitive** ⭐
+6. **Obelisk Sequencer pattern** - A **persistent atomic counter primitive** ⭐
    - Like `AtomicU64`, but crash-safe!
    - General-purpose building block for durable counters
    - Could be extracted as standalone Rust crate
@@ -2492,7 +2492,7 @@ Sequential only!
 
 **Novel Contribution:**
 
-This document introduces the **Sparse Append Counter pattern** - a **persistent atomic counter primitive**.
+This document introduces the **Obelisk Sequencer pattern** - a **persistent atomic counter primitive**.
 
 **What it is:**
 
@@ -2502,7 +2502,7 @@ A general-purpose building block for durable monotonic counters - think `std::sy
 // Volatile atomic counter:
 AtomicU64::fetch_add(1)  →  Lost on crash ❌
 
-// Sparse Append Counter:
+// Obelisk Sequencer:
 SparseAppendCounter::fetch_add(1)  →  Survives crashes ✅
 ```
 

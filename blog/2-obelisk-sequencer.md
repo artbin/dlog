@@ -1,4 +1,4 @@
-# The Sparse Append Counter: A Novel Persistent Atomic Primitive
+# The Obelisk Sequencer: A Novel Persistent Atomic Primitive
 
 **How a simple insight about sparse files enables crash-safe monotonic counters with microsecond performance**
 
@@ -98,7 +98,7 @@ Also, you still need `msync()` for durability, which brings back fsync latency.
 
 **Can we have all three?**
 
-## The Sparse Append Counter Insight
+## The Obelisk Sequencer Insight
 
 Here's a radical idea: **What if the file size IS the counter value?**
 
@@ -227,12 +227,12 @@ Let's benchmark against alternatives:
 │    └─ BUT: loses data on crash! ✗                  │
 │  Mmap (no msync)         │      1s │   1M ops/s    │
 │    └─ BUT: SIGBUS risk! ✗                          │
-│  Sparse Append Counter   │      2s │ 500K ops/s ✅ │
+│  Obelisk Sequencer   │      2s │ 500K ops/s ✅ │
 │    └─ Crash-safe! ✅                               │
 └────────────────────────────────────────────────────┘
 ```
 
-**Sparse Append Counter is the only method that is both fast AND crash-safe.**
+**Obelisk Sequencer is the only method that is both fast AND crash-safe.**
 
 For DLog's use case (generating IDs for distributed coordinators), 500K ops/sec per counter is plenty—we run **1024 coordinators in parallel** for 500M+ ops/sec total.
 
@@ -247,7 +247,7 @@ WAL Recovery:
 3. Rebuild indexes (60 seconds)
 Total: ~100 seconds downtime
 
-Sparse Append Counter Recovery:
+Obelisk Sequencer Recovery:
 1. stat() the file (1 microsecond)
 Total: ~1 microsecond downtime ✅
 ```
@@ -349,7 +349,7 @@ PostgreSQL sequence (single node):
 - Distributed: No
 - Recovery: WAL replay (seconds)
 
-DLog Sparse Append Counter (1024 distributed):
+DLog Obelisk Sequencer (1024 distributed):
 - Throughput: 500K/sec × 1024 = 512M/sec ✅
 - Crash-safe: Yes ✅
 - Distributed: Yes ✅
@@ -365,7 +365,7 @@ Redis INCR (single node):
 - Distributed: Requires Redis Cluster (complex)
 - Recovery: AOF replay (slow)
 
-DLog Sparse Append Counter:
+DLog Obelisk Sequencer:
 - Throughput: 512M/sec (distributed) ✅
 - Crash-safe: Always ✅
 - Distributed: Native ✅
@@ -381,7 +381,7 @@ Zookeeper counter (Raft-based):
 - Distributed: Yes (but slow)
 - Recovery: Raft snapshot + log replay
 
-DLog Sparse Append Counter:
+DLog Obelisk Sequencer:
 - Throughput: 512M/sec ✅
 - Crash-safe: Yes ✅
 - Distributed: Yes (and fast) ✅
@@ -415,7 +415,7 @@ DLog Sparse Append Counter:
 
 ## A Standalone Crate?
 
-The Sparse Append Counter is useful beyond DLog. We're considering releasing it as a standalone Rust crate:
+The Obelisk Sequencer is useful beyond DLog. We're considering releasing it as a standalone Rust crate:
 
 ```toml
 [dependencies]
@@ -443,7 +443,7 @@ fn main() -> Result<()> {
 
 ## Conclusion
 
-The Sparse Append Counter demonstrates that **simple ideas can solve hard problems**.
+The Obelisk Sequencer demonstrates that **simple ideas can solve hard problems**.
 
 By leveraging sparse files—a feature present in every modern filesystem—we built a persistent atomic counter that is:
 - ⚡ **Fast** (1-2µs per increment)
@@ -454,7 +454,7 @@ By leveraging sparse files—a feature present in every modern filesystem—we b
 
 This primitive enables DLog's distributed coordinators to achieve **28 billion operations per second** without central bottlenecks.
 
-In the next post, we'll show how combining Sparse Append Counters with Snowflake IDs eliminates ALL coordinators in distributed systems.
+In the next post, we'll show how combining Obelisk Sequencers with Snowflake IDs eliminates ALL coordinators in distributed systems.
 
 ---
 

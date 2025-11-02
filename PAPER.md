@@ -2,7 +2,7 @@
 
 **Abstract**
 
-We present DLog, a unified distributed data platform that introduces several novel architectural innovations to achieve unprecedented scalability and performance. DLog eliminates traditional coordination bottlenecks through a new primitive called the Sparse Append Counter, enabling distributed coordinators that scale linearly without central points of contention. Combined with a Dual Raft architecture, per-record CopySet replication, cryptographic verification with BLAKE3, multi-model database support grounded in category theory, and a pure functional query system, DLog achieves 28+ billion operations per second across all service types—orders of magnitude higher than existing systems. 
+We present DLog, a unified distributed data platform that introduces several novel architectural innovations to achieve unprecedented scalability and performance. DLog eliminates traditional coordination bottlenecks through a new primitive called the Obelisk Sequencer, enabling distributed coordinators that scale linearly without central points of contention. Combined with a Dual Raft architecture, per-record CopySet replication, cryptographic verification with BLAKE3, multi-model database support grounded in category theory, and a pure functional query system, DLog achieves 28+ billion operations per second across all service types—orders of magnitude higher than existing systems. 
 
 We demonstrate how DLog's architecture enables it to serve simultaneously as a high-throughput distributed log, a transactional data store, a multi-model database (supporting relational, graph, document, key-value, and RDF models), an immutable knowledge database with temporal queries, a tamper-proof cryptographically verified log, a stream processing platform with functional programming primitives, and an observability backend—all while maintaining strong consistency guarantees, exactly-once semantics, and mathematical rigor through category theory. DLog includes Batuta, a novel programming language that combines Lisp macros, Elixir-style actor model, Zig-style explicit error handling, and Pony-style reference capabilities, compiling to both native code and WebAssembly for universal deployment. Implemented in Rust and built on Apache Arrow, DLog represents a new generation of distributed systems that unify traditionally separate infrastructure components into a single, mathematically sound, cryptographically verifiable platform with a type-safe, high-level programming language.
 
@@ -32,9 +32,9 @@ This paper makes the following contributions:
 
 **Core Coordination Primitives:**
 
-1. **Sparse Append Counter**: A novel persistent atomic counter primitive that enables crash-safe, high-performance monotonic ID generation with minimal disk overhead.
+1. **Obelisk Sequencer**: A novel persistent atomic counter primitive that enables crash-safe, high-performance monotonic ID generation with minimal disk overhead.
 
-2. **Distributed Coordinators via Snowflake IDs**: An architectural pattern that eliminates all centralized coordinators by combining Snowflake-style distributed IDs with Sparse Append Counters, achieving linear horizontal scalability.
+2. **Distributed Coordinators via Snowflake IDs**: An architectural pattern that eliminates all centralized coordinators by combining Snowflake-style distributed IDs with Obelisk Sequencers, achieving linear horizontal scalability.
 
 **Consensus and Replication:**
 
@@ -228,15 +228,15 @@ Metadata updates are propagated through a gossip protocol, ensuring eventual con
 
 ## 4. Novel Coordination Primitives
 
-### 4.1 The Sparse Append Counter
+### 4.1 The Obelisk Sequencer
 
-The Sparse Append Counter is a persistent atomic counter that achieves crash-safety through a novel storage technique. Traditional approaches face a fundamental tradeoff:
+The Obelisk Sequencer is a persistent atomic counter that achieves crash-safety through a novel storage technique. Traditional approaches face a fundamental tradeoff:
 
 - **Write-ahead log**: Durable but expensive (fsync per increment)
 - **Periodic snapshots**: Fast but lose data on crash
 - **Memory-mapped files**: Fast reads/writes but SIGBUS risk on disk full
 
-The Sparse Append Counter uses a sparse file where the **file size equals the counter value**. To increment:
+The Obelisk Sequencer uses a sparse file where the **file size equals the counter value**. To increment:
 
 1. Append a single zero byte to the file
 2. Call fsync() to ensure durability
@@ -267,13 +267,13 @@ Properties:
 - Globally unique: Unique across all workers
 - High throughput: 4096 IDs per millisecond per worker
 
-Traditional Snowflake implementations store sequence numbers in memory, losing crash-safety. DLog combines Snowflake IDs with Sparse Append Counters:
+Traditional Snowflake implementations store sequence numbers in memory, losing crash-safety. DLog combines Snowflake IDs with Obelisk Sequencers:
 
 ```
 [41 bits: timestamp_ms] [10 bits: coordinator_id] [13 bits: durable_sequence]
 ```
 
-The sequence counter persists in a Sparse Append Counter file, providing:
+The sequence counter persists in a Obelisk Sequencer file, providing:
 - **Crash-Safety**: No duplicate IDs after restart
 - **High Performance**: 1-2 microseconds per ID generation
 - **Linear Scalability**: 1024 coordinators × 4M IDs/sec = 4+ billion IDs/sec
@@ -290,7 +290,7 @@ Traditional distributed systems rely on centralized coordinators elected through
 
 1. Deploy N coordinator instances (typically 1024)
 2. Assign each a unique coordinator_id (0-1023)
-3. Each uses Sparse Append Counter for sequence numbers
+3. Each uses Obelisk Sequencer for sequence numbers
 4. Clients hash requests to coordinator_id = hash(key) % N
 5. Each coordinator generates Snowflake IDs independently
 
@@ -300,7 +300,7 @@ Traditional distributed systems rely on centralized coordinators elected through
 - **Instant Failover**: Client simply routes to different coordinator
 - **Linear Scalability**: Adding coordinators proportionally increases capacity
 - **No Cross-Coordinator Communication**: Each operates independently
-- **Crash-Safe**: Sparse Append Counter ensures no ID reuse
+- **Crash-Safe**: Obelisk Sequencer ensures no ID reuse
 
 This pattern applies to all DLog coordinators:
 - Transaction coordinators (4B tx/sec)
@@ -1128,9 +1128,9 @@ All experiments conducted on:
 
 ## 12. Discussion
 
-### 12.1 Sparse Append Counter Trade-offs
+### 12.1 Obelisk Sequencer Trade-offs
 
-The Sparse Append Counter provides an elegant solution to persistent atomic counters, but has limitations:
+The Obelisk Sequencer provides an elegant solution to persistent atomic counters, but has limitations:
 
 **Advantages**:
 - Crash-safe without complex log replay
@@ -1152,7 +1152,7 @@ Traditional distributed systems use consensus (Paxos, Raft) to elect leaders for
 
 **Key Insight**: Consensus is needed only when multiple nodes must agree on a single value. If nodes can independently generate unique values that are globally comparable, consensus becomes unnecessary.
 
-Snowflake IDs enable this by encoding coordinator identity in the ID itself. Combined with Sparse Append Counters for crash-safety, coordinators become stateless and independently operable.
+Snowflake IDs enable this by encoding coordinator identity in the ID itself. Combined with Obelisk Sequencers for crash-safety, coordinators become stateless and independently operable.
 
 **Trade-offs**:
 - **Simplicity**: No leader election, no split-brain scenarios, no complex failure modes
@@ -1253,7 +1253,7 @@ However, this approach requires careful attention to resource isolation to preve
 
 **1. Start with Strong Primitives**:
 
-The Sparse Append Counter emerged from rethinking persistent atomic counters. Investing in novel primitives pays dividends across the architecture.
+The Obelisk Sequencer emerged from rethinking persistent atomic counters. Investing in novel primitives pays dividends across the architecture.
 
 **2. Eliminate Coordination, Don't Optimize It**:
 
@@ -1474,8 +1474,8 @@ DLog represents a fundamental rethinking of distributed data systems. Through no
 **Key Contributions:**
 
 **Coordination Primitives:**
-1. **Sparse Append Counter**: A persistent atomic counter primitive enabling crash-safe monotonic ID generation with minimal overhead.
-2. **Distributed Coordinators**: Elimination of all centralized coordinators through Snowflake IDs + Sparse Append Counters, achieving linear horizontal scalability.
+1. **Obelisk Sequencer**: A persistent atomic counter primitive enabling crash-safe monotonic ID generation with minimal overhead.
+2. **Distributed Coordinators**: Elimination of all centralized coordinators through Snowflake IDs + Obelisk Sequencers, achieving linear horizontal scalability.
 
 **Consensus and Replication:**
 3. **Dual Raft Architecture**: Separation of cluster-wide and partition-specific consensus, enabling parallel failover and reducing coordination overhead.
@@ -1513,7 +1513,7 @@ DLog demonstrates that distributed systems can achieve:
 - **Unified Platform**: Eliminating operational complexity of managing 5+ separate systems.
 - **Extreme Performance**: Linear scalability through elimination of coordination bottlenecks.
 
-The open-source implementation in Rust provides a foundation for future research and production deployments. We believe DLog's architectural patterns—particularly the Sparse Append Counter, Distributed Coordinator pattern, category-theoretic multi-model support, and functional query system—will influence future distributed systems design.
+The open-source implementation in Rust provides a foundation for future research and production deployments. We believe DLog's architectural patterns—particularly the Obelisk Sequencer, Distributed Coordinator pattern, category-theoretic multi-model support, and functional query system—will influence future distributed systems design.
 
 As data volumes grow exponentially and use cases diversify (real-time analytics, machine learning, regulatory compliance, complex graph queries), unified platforms like DLog become essential. DLog's architecture provides a blueprint for building systems that are simultaneously fast, safe, mathematically sound, and operationally simple.
 

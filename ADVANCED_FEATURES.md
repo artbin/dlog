@@ -6,7 +6,7 @@ This document explores advanced features from other distributed log systems and 
 
 DLog's unique architecture provides significant advantages for implementing these features:
 
-### 🔧 Sparse Append Counter Primitive
+### 🔧 Obelisk Sequencer Primitive
 
 A **persistent atomic counter** (like `AtomicU64`, but crash-safe) that enables:
 - ✅ Transaction IDs (no duplicates after coordinator crashes)
@@ -18,7 +18,7 @@ A **persistent atomic counter** (like `AtomicU64`, but crash-safe) that enables:
 
 **Performance:** ~1-2 µs per ID generation, instant recovery (~2 µs)
 
-**Revolutionary combination:** Snowflake IDs + Sparse Append Counter = **Distributed coordinators**
+**Revolutionary combination:** Snowflake IDs + Obelisk Sequencer = **Distributed coordinators**
 - Transaction Coordinator: 4+ billion tx/sec (vs Kafka's 10K tx/sec)
 - 1024 independent coordinators, no coordination needed
 - Client-side routing, no election overhead
@@ -575,7 +575,7 @@ impl TransactionCoordinator {
 ✅ **Horizontally scalable:** Add more coordinators = more throughput
 ✅ **No single bottleneck:** Each coordinator independent
 ✅ **4+ billion transactions/sec** theoretical limit (1024 coordinators × 4M tx/sec each)
-✅ **Crash-safe:** Sparse Append Counter survives coordinator restarts
+✅ **Crash-safe:** Obelisk Sequencer survives coordinator restarts
 ✅ **Time-ordered:** Can extract transaction age from ID
 ✅ **Fast:** ~1-2 µs ID generation per coordinator
 ✅ **No coordinator election:** Any node can be a coordinator
@@ -644,7 +644,7 @@ Each partition has its own Raft cluster:
 └──────────────────────────────────────────────────────────┘
 ```
 
-See [CLIENT_PARTITIONING_PATTERNS.md](CLIENT_PARTITIONING_PATTERNS.md) for Snowflake ID and Sparse Append Counter details.
+See [CLIENT_PARTITIONING_PATTERNS.md](CLIENT_PARTITIONING_PATTERNS.md) for Snowflake ID and Obelisk Sequencer details.
 
 #### Challenges
 
@@ -1164,7 +1164,7 @@ impl IdempotentProducer {
 - ✅ 1024 independent session managers (no bottleneck)
 - ✅ 4M sessions/sec per manager = 4B sessions/sec total
 - ✅ No session ID collisions (Snowflake guarantees uniqueness)
-- ✅ Crash-safe via Sparse Append Counter
+- ✅ Crash-safe via Obelisk Sequencer
 - ✅ Survives sequencer failover
 - ✅ No coordinator election needed
 
@@ -1484,7 +1484,7 @@ Transactions:
 │    • Distributed coordinators (4B tx/sec) ⭐              │
 │    • Distributed session managers (4B sessions/sec) ⭐     │
 │    • Snowflake IDs (no collisions, crash-safe)            │
-│    • Sparse Append Counter (automatic uniqueness)          │
+│    • Obelisk Sequencer (automatic uniqueness)          │
 │    • Percolator MVCC (production-grade transactions)       │
 │    • Distributed TSO (8000x faster than TiKV)             │
 │                                                            │
@@ -1497,7 +1497,7 @@ Transactions:
 
 1. **Distributed Session Managers**: No single bottleneck for producer sessions
 2. **Snowflake Session IDs**: Globally unique, time-ordered, no coordination
-3. **Sparse Append Counter**: Crash-safe sequence generation
+3. **Obelisk Sequencer**: Crash-safe sequence generation
 4. **Percolator Integration**: Production-grade MVCC from TiKV
 5. **Distributed TSO**: Eliminates TiKV's timestamp bottleneck
 
@@ -2599,7 +2599,7 @@ impl SchemaRegistry {
 }
 ```
 
-**Why Sparse Append Counter for Schema IDs:**
+**Why Obelisk Sequencer for Schema IDs:**
 - ✅ No duplicate schema IDs after registry restart
 - ✅ Fast ID generation (~1-2 µs)
 - ✅ Monotonic, sortable IDs (older schemas have lower IDs)
@@ -2738,7 +2738,7 @@ Smart Client Pattern:
   • No proxy overhead
 ```
 
-**2. Sparse Append Counter for Generation IDs:**
+**2. Obelisk Sequencer for Generation IDs:**
 - ✅ No duplicate generation IDs after coordinator crashes
 - ✅ Consumers can detect stale assignments
 - ✅ Idempotent rebalancing
@@ -3044,7 +3044,7 @@ pub enum ChangeType {
 }
 ```
 
-**Why Sparse Append Counter for CDC Event IDs:**
+**Why Obelisk Sequencer for CDC Event IDs:**
 - ✅ No duplicate event IDs after CDC connector restarts
 - ✅ Monotonic ordering (event 1000 happened before 1001)
 - ✅ Can track "last processed event ID" for resume
@@ -6868,7 +6868,7 @@ These advanced features represent the cutting edge of distributed log systems. B
 
 Each feature will be carefully designed to integrate with **DLog's unique architecture**:
 
-**1. Sparse Append Counter Primitive** ⭐
+**1. Obelisk Sequencer Primitive** ⭐
 - Transaction IDs, Session IDs, Schema IDs, Event IDs
 - ~1-2 µs generation, instant recovery
 - Like `AtomicU64`, but crash-safe
@@ -6918,7 +6918,7 @@ let session_id = session_counter.fetch_add(1)?;  // No duplicates
 let schema_id = schema_counter.fetch_add(1)?;  // Monotonic IDs
 ```
 
-**The Sparse Append Counter primitive** alone eliminates entire classes of bugs related to:
+**The Obelisk Sequencer primitive** alone eliminates entire classes of bugs related to:
 - Duplicate transaction IDs after crashes
 - Stale producer sessions
 - Schema ID collisions
@@ -6949,7 +6949,7 @@ Traditional systems have **centralized bottlenecks** for transactions:
 │       + 1024 distributed TSO nodes (4B timestamps/s)   │
 │       + 1024 distributed coordinators (4B tx/s)        │
 │       + Client-side routing, no coordination           │
-│       + Sparse Append Counter for crash-safety         │
+│       + Obelisk Sequencer for crash-safety         │
 │                                                        │
 │  Result: 8000x faster than TiKV, 40,000x than Kafka!  │
 └────────────────────────────────────────────────────────┘
@@ -6959,7 +6959,7 @@ Traditional systems have **centralized bottlenecks** for transactions:
 
 ### Universal Pattern: Distributed Coordinators via Snowflake IDs
 
-**The principle is simple:** Any coordinator that assigns IDs can be distributed using Snowflake IDs + Sparse Append Counter.
+**The principle is simple:** Any coordinator that assigns IDs can be distributed using Snowflake IDs + Obelisk Sequencer.
 
 ```
 ┌──────────────────────────────────────────────────────────────┐
@@ -7232,7 +7232,7 @@ let id = coordinators[coordinator_id].generate_id().await?;
 - ✅ Horizontally scalable (add more coordinators)
 - ✅ No coordination between coordinators
 - ✅ No election overhead
-- ✅ Crash-safe (Sparse Append Counter)
+- ✅ Crash-safe (Obelisk Sequencer)
 - ✅ Time-ordered IDs
 - ✅ ~1-2 µs latency per ID
 - ✅ 4M+ ops/sec per coordinator
@@ -7252,7 +7252,7 @@ let id = coordinators[coordinator_id].generate_id().await?;
 - Each has 4M+ ops/sec capacity
 - NO system-wide bottlenecks
 
-**Key insight:** Snowflake IDs + Sparse Append Counter = **Distributed coordination without coordination!**
+**Key insight:** Snowflake IDs + Obelisk Sequencer = **Distributed coordination without coordination!**
 
 This pattern eliminates EVERY coordination bottleneck in the system!
 
@@ -7366,7 +7366,7 @@ The goal is not to blindly copy features, but to learn from proven designs and *
 ## References
 
 - [ARCHITECTURE.md](ARCHITECTURE.md) - Complete DLog architecture
-- [CLIENT_PARTITIONING_PATTERNS.md](CLIENT_PARTITIONING_PATTERNS.md) - Sparse Append Counter primitive
+- [CLIENT_PARTITIONING_PATTERNS.md](CLIENT_PARTITIONING_PATTERNS.md) - Obelisk Sequencer primitive
 - [EPOCHS.md](EPOCHS.md) - Epoch system for failover safety
 - [DATA_PATH.md](DATA_PATH.md) - Write and read paths
 - [IMPLEMENTATION_PLAN.md](IMPLEMENTATION_PLAN.md) - Development roadmap
@@ -7377,7 +7377,7 @@ The goal is not to blindly copy features, but to learn from proven designs and *
 **Last Updated**: 2025-11-01
 **Target**: Progressive implementation across 2026
 
-**Key Innovation**: DLog's **Sparse Append Counter primitive** simplifies implementation of nearly every advanced feature by providing crash-safe, durable, monotonic IDs with ~1-2 µs generation latency.
+**Key Innovation**: DLog's **Obelisk Sequencer primitive** simplifies implementation of nearly every advanced feature by providing crash-safe, durable, monotonic IDs with ~1-2 µs generation latency.
 
 For questions or suggestions, please open a GitHub issue or discussion.
 

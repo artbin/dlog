@@ -1419,7 +1419,7 @@ batuta> (profile
 ### Direct Access to DLog Primitives
 
 ```clojure
-;; Sparse Append Counter
+;; Obelisk Sequencer
 (def counter (dlog/sparse-counter "my-counter"))
 (dlog/increment counter)
 (dlog/get-value counter)  ; => 42

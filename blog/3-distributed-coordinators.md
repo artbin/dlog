@@ -631,6 +631,6 @@ In the next post, we'll show how all these innovations come together to achieve 
 
 ---
 
-*← [Previous: The Sparse Append Counter](2-sparse-append-counter.md)*
+*← [Previous: The Obelisk Sequencer](2-obelisk-sequencer.md)*
 *→ [Next: 28 Billion Operations Per Second](4-28-billion-ops.md)*
 

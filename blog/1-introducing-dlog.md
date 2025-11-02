@@ -338,5 +338,5 @@ Interested in using DLog at your company? Reach out: hello@dlog.io
 
 ---
 
-*Next post: [The Sparse Append Counter: A Novel Persistent Atomic Primitive →](2-sparse-append-counter.md)*
+*Next post: [The Obelisk Sequencer: A Novel Persistent Atomic Primitive →](2-obelisk-sequencer.md)*
 

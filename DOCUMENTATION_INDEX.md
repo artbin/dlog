@@ -18,7 +18,7 @@ DLog unifies cryptographic verification, actor-based concurrency, functional pro
 - **[PAPER](PAPER.md)** ⭐ - **Academic research paper** on DLog's novel contributions
 - **[Blog Series](blog/README.md)** 🎯 - **5-part technical blog series** explaining DLog
   - [1. Introducing DLog](blog/1-introducing-dlog.md) - Why we need unified infrastructure
-  - [2. Sparse Append Counter](blog/2-sparse-append-counter.md) - Novel persistent atomic primitive
+  - [2. Obelisk Sequencer](blog/2-obelisk-sequencer.md) - Novel persistent atomic primitive
   - [3. Distributed Coordinators](blog/3-distributed-coordinators.md) - Eliminating bottlenecks
   - [4. 28 Billion Ops/Sec](blog/4-28-billion-ops.md) - Architectural deep-dive
   - [5. Building in Rust](blog/5-rust-infrastructure.md) - Lessons learned
