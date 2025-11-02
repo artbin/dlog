@@ -1,4 +1,4 @@
-# The Obelisk Sequencer: A Novel Persistent Atomic Primitive
+# The 🗿 Obelisk Sequencer: A Novel Persistent Atomic Primitive
 
 **How a simple insight about sparse files enables crash-safe monotonic counters with microsecond performance**
 
@@ -98,7 +98,7 @@ Also, you still need `msync()` for durability, which brings back fsync latency.
 
 **Can we have all three?**
 
-## The Obelisk Sequencer Insight
+## The 🗿 Obelisk Sequencer Insight
 
 Here's a radical idea: **What if the file size IS the counter value?**
 

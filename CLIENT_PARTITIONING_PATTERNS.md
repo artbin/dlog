@@ -440,7 +440,7 @@ impl PeriodicCheckpointVLSN {
 - ✅ Low overhead (checkpoint every N records)
 - ⚠️ May lose up to 1000 VLSNs on crash (depending on interval)
 
-#### Strategy 2: Obelisk Sequencer Pattern (Optimal) ⭐
+#### Strategy 2: 🗿 Obelisk Sequencer Pattern (Optimal) ⭐
 
 **A persistent atomic counter primitive.**
 

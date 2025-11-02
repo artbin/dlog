@@ -20,7 +20,7 @@ A 10-part technical blog series explaining DLog's architecture, innovations, and
 
 ---
 
-### [2. The Obelisk Sequencer: A Novel Persistent Atomic Primitive](2-obelisk-sequencer.md)
+### [2. The 🗿 Obelisk Sequencer: A Novel Persistent Atomic Primitive](2-obelisk-sequencer.md)
 *How a simple insight about sparse files enables crash-safe counters*
 
 **Key Topics**:

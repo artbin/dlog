@@ -47,7 +47,7 @@ DLog has evolved from a distributed log into a **comprehensive computing platfor
 
 ### 🎯 Novel Coordination Primitives
 
-- **Obelisk Sequencer**: Crash-safe persistent atomic counters with minimal disk overhead (~1-2μs per increment)
+- **🗿 Obelisk Sequencer**: Crash-safe persistent atomic counters with minimal disk overhead (~1-2μs per increment)
 - **Distributed Coordinators**: Eliminate all centralized bottlenecks via Snowflake IDs
   - 4B+ transactions/sec (8,000× faster than TiKV)
   - 4B+ timestamps/sec (distributed TSO)

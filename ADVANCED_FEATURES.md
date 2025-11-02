@@ -6,7 +6,7 @@ This document explores advanced features from other distributed log systems and 
 
 DLog's unique architecture provides significant advantages for implementing these features:
 
-### 🔧 Obelisk Sequencer Primitive
+### 🗿 Obelisk Sequencer Primitive
 
 A **persistent atomic counter** (like `AtomicU64`, but crash-safe) that enables:
 - ✅ Transaction IDs (no duplicates after coordinator crashes)

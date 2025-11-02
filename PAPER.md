@@ -228,7 +228,7 @@ Metadata updates are propagated through a gossip protocol, ensuring eventual con
 
 ## 4. Novel Coordination Primitives
 
-### 4.1 The Obelisk Sequencer
+### 4.1 The 🗿 Obelisk Sequencer
 
 The Obelisk Sequencer is a persistent atomic counter that achieves crash-safety through a novel storage technique. Traditional approaches face a fundamental tradeoff:
 

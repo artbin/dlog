@@ -74,7 +74,7 @@ Most distributed systems face fundamental bottlenecks:
 
 DLog eliminates these bottlenecks through three core innovations:
 
-### 1. The Obelisk Sequencer
+### 1. The 🗿 Obelisk Sequencer
 
 A novel primitive for crash-safe, persistent atomic counters that enables:
 - Monotonic ID generation without coordination
