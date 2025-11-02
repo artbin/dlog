@@ -4,7 +4,7 @@
 
 **A unified infrastructure for building secure, fault-tolerant distributed systems with cryptographic verification, actor-based concurrency, and functional programming abstractions.**
 
-IMPORTANT: Project in research and design phase. Drafts only.
+IMPORTANT: Project in research and design phase. Drafts only. It feels like I'm putting my heart, soul, and mind into this project.
 
 [![Rust](https://img.shields.io/badge/rust-1.70%2B-orange.svg)](https://www.rust-lang.org/)
 [![License: MIT-0](https://img.shields.io/badge/license-MIT--0-blue.svg)](LICENSE)
@@ -25,8 +25,8 @@ Pyralog has evolved from a distributed log into a **comprehensive computing plat
 |--------|------------------|----------|
 | **🔐 Secure** | BLAKE3 Merkle trees, WireGuard + Rosenpass (quantum-resistant), zero-trust architecture, capability-based security, HSM integration, multi-signature transactions | Cryptographic verification, post-quantum security, Byzantine fault tolerance, audit trails, regulatory compliance (SEC, HIPAA, SOC2) |
 | **⚡ Parallel** | Actor model, functional query parallelism, SIMD optimizations, GPU acceleration, tensor operations | Message-passing concurrency, lock-free algorithms, 28B+ ops/sec, automatic parallelization |
-| **🌍 Distributed** | Raft/PBFT consensus, partition management, location transparency, supervision trees, topology-level reactivity | Fault tolerance, linear scalability, instant failover, no single point of failure |
-| **🔗 Decentralized** | Proof of Stake/Work, autonomous agents, peer discovery (flocks), deploy-* operators, perfect hash functions | Autonomous operation, open networks, self-organizing, censorship resistance |
+| **🕸️ Distributed** | Raft/PBFT consensus, partition management, location transparency, supervision trees, topology-level reactivity | Fault tolerance, linear scalability, instant failover, no single point of failure |
+| **🌐 Decentralized** | Proof of Stake/Work, autonomous agents, peer discovery (flocks), deploy-* operators, perfect hash functions | Autonomous operation, open networks, self-organizing, censorship resistance |
 
 **🎯 One Platform. Infinite Possibilities. Zero Compromises.**
 

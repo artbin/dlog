@@ -91,7 +91,7 @@ Pyralog's architecture consists of three Egyptian infrastructure primitives and 
 | **🗿 Obelisk Sequencer** | Monument | Crash-safe atomic counter | • Sparse files<br>• ~1-2μs latency<br>• Instant recovery |
 | **☀️ Pharaoh Network** | Sun/Ruler | Distributed coordination | • 1024 nodes<br>• No bottlenecks<br>• Linear scaling |
 | **🪲 Scarab IDs** | Sacred Beetle | Unique identifiers | • 64-bit IDs<br>• Time-ordered<br>• Zero coordination |
-| **🎼 Batuta** | Conductor's Baton | Query language | • Clojure + Elixir<br>• Actor-first<br>• Compiles to Rust |
+| **🎼 Batuta** | Conductor's Baton | Platform language | • Clojure + Elixir<br>• Actor-first<br>• Compiles to Rust |
 
 **Plus the grammar foundation**: 🌲 [Sulise Evergreen](#-sulise-evergreen) (modular grammar toolkit)
 
