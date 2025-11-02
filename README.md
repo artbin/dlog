@@ -134,7 +134,7 @@ DLog has evolved from a distributed log into a **comprehensive computing platfor
 - **Security & Compliance**: SOC2, HIPAA, GDPR, SEC 17a-4, FDA 21 CFR Part 11 compliant
 - **Enterprise Auth**: SSO (SAML, OAuth2, OIDC), LDAP/AD integration, MFA support
 - **RBAC & ACLs**: Fine-grained permissions, attribute-based access control (ABAC)
-- **Encryption**: AES-256 at rest, WireGuard in transit, KMS integration (AWS/GCP/Azure)
+- **Encryption**: AES-256-GCM or ChaCha20-Poly1305 at rest (auto-select based on CPU), WireGuard in transit, KMS integration (AWS/GCP/Azure)
 - **Quantum-Resistant Networking**: Rosenpass + WireGuard (NIST PQC, CNSA 2.0 compliant by 2030)
 - **Zero-Trust Networking**: Cryptokey routing, no IP-based trust, mutual authentication for all connections
 - **DPI Resistance**: Censorship-resistant protocol (95% GFW bypass), enterprise firewall traversal

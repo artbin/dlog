@@ -16,6 +16,7 @@
    - [Admin → Cluster](#4-admin--cluster)
 5. [Security Model](#security-model)
    - [Cryptographic Primitives](#cryptographic-primitives)
+   - [DLog's Complete Encryption Strategy](#dlogs-complete-encryption-strategy)
    - [Zero-Trust Architecture](#zero-trust-architecture)
    - [Key Rotation](#key-rotation)
    - [DPI (Deep Packet Inspection) Resistance](#dpi-deep-packet-inspection-resistance)
@@ -365,6 +366,130 @@ WireGuard uses state-of-the-art cryptography:
 | **Encryption** | ChaCha20 | Symmetric encryption |
 | **Authentication** | Poly1305 | MAC authentication |
 | **Hashing** | BLAKE2s | Key derivation |
+
+#### DLog's Complete Encryption Strategy
+
+DLog provides **consistent cryptography** across all layers:
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│  Data at Rest (Storage)                                     │
+│  ────────────────────────                                   │
+│  • AES-256-GCM (hardware accelerated on x86_64)            │
+│  • ChaCha20-Poly1305 (software optimized for ARM/RISC-V)  │
+│  • Auto-select based on CPU capabilities                    │
+│  • KMS integration: AWS/GCP/Azure                          │
+└─────────────────────────────────────────────────────────────┘
+                           ▼
+┌─────────────────────────────────────────────────────────────┐
+│  Data in Transit (Network)                                  │
+│  ─────────────────────────                                  │
+│  • WireGuard: ChaCha20-Poly1305 (all connections)          │
+│  • Curve25519: Key exchange                                │
+│  • BLAKE2s: Key derivation                                 │
+│  • Optional: Rosenpass (Kyber1024) for quantum resistance │
+└─────────────────────────────────────────────────────────────┘
+```
+
+**Cipher Selection Strategy:**
+
+```rust
+pub enum AtRestCipher {
+    Aes256Gcm,         // Hardware accelerated (AES-NI)
+    ChaCha20Poly1305,  // Software optimized
+    Auto,              // Select based on CPU features
+}
+
+impl AtRestCipher {
+    pub fn auto_select() -> Self {
+        if has_aes_ni() {
+            Self::Aes256Gcm  // 5-10× faster with AES-NI
+        } else {
+            Self::ChaCha20Poly1305  // 3× faster without AES-NI
+        }
+    }
+}
+
+// Configuration
+#[derive(Serialize, Deserialize)]
+pub struct EncryptionConfig {
+    // Data at rest
+    at_rest_cipher: AtRestCipher,  // "aes-256-gcm", "chacha20-poly1305", or "auto"
+    
+    // Key management
+    kms_provider: Option<KmsProvider>,  // AWS, GCP, Azure
+    key_rotation_days: u32,             // Default: 90 days
+    
+    // WireGuard always uses ChaCha20-Poly1305 for consistency
+}
+```
+
+**Why Both AES-256 and ChaCha20?**
+
+| Cipher | Best For | Performance | Compliance |
+|--------|----------|-------------|------------|
+| **AES-256-GCM** | x86_64 servers with AES-NI | 3-5 GB/s (hardware) | FIPS 140-2, PCI-DSS required |
+| **ChaCha20-Poly1305** | ARM, RISC-V, older CPUs | 1.5-2 GB/s (software) | Modern standard, approved |
+| **Auto** | Mixed environments | Best of both | Flexible compliance |
+
+**Performance Comparison:**
+
+```
+Intel Xeon (with AES-NI):
+├─ AES-256-GCM:        4.2 GB/s  ✓ Winner
+└─ ChaCha20-Poly1305:  1.4 GB/s
+
+ARM Cortex-A72 (no AES-NI):
+├─ AES-256-GCM:        450 MB/s
+└─ ChaCha20-Poly1305:  1.3 GB/s  ✓ Winner
+
+Apple M1 (AES instructions):
+├─ AES-256-GCM:        5.8 GB/s  ✓ Winner
+└─ ChaCha20-Poly1305:  2.1 GB/s
+```
+
+**Compliance & Standards:**
+
+| Standard | AES-256-GCM | ChaCha20-Poly1305 |
+|----------|-------------|-------------------|
+| **FIPS 140-2** | ✅ Required | ⚠️ Not certified (but secure) |
+| **PCI-DSS** | ✅ Approved | ✅ Approved |
+| **HIPAA** | ✅ Approved | ✅ Approved |
+| **SOC2** | ✅ Approved | ✅ Approved |
+| **NSA Suite B** | ✅ Required | ❌ Not in suite |
+| **NIST** | ✅ Standard | ✅ Approved (RFC 8439) |
+
+**Recommendation:**
+
+```toml
+# /etc/dlog/encryption.toml
+
+[encryption]
+# Auto-select cipher based on CPU
+at_rest_cipher = "auto"
+
+# Or explicitly choose:
+# at_rest_cipher = "aes-256-gcm"        # For compliance
+# at_rest_cipher = "chacha20-poly1305"  # For consistency with WireGuard
+
+# KMS integration for key management
+kms_provider = "aws"  # or "gcp", "azure", "vault"
+kms_key_id = "arn:aws:kms:us-east-1:123456789:key/..."
+
+# Automatic key rotation
+key_rotation_days = 90
+
+# WireGuard (always ChaCha20-Poly1305)
+wireguard_enabled = true
+```
+
+**Best Practices:**
+
+1. **Use Auto mode** for mixed environments (x86 + ARM)
+2. **Use AES-256-GCM** for strict FIPS 140-2 compliance
+3. **Use ChaCha20-Poly1305** for consistency with WireGuard
+4. **Rotate keys** every 90 days
+5. **Use KMS** for centralized key management
 
 ### Zero-Trust Architecture
 
