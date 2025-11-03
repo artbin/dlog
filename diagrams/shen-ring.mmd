@@ -34,12 +34,13 @@ graph TB
     
     subgraph "🗿 Pharaoh Network Layer"
         OBELISK[🗿 Obelisk Nodes<br/>Atomic Counters]
+        OBELISK_STORAGE[Sparse Files<br/>Counter Storage]
         SCARAB[🪲 Scarab IDs<br/>Unique Identifiers]
     end
     
     subgraph "🔺 Pyramid Storage & Consensus"
         PYRAMID_RAFT[Raft Consensus<br/>Per Partition]
-        STORAGE[Log Storage<br/>Segments & Indexes]
+        PYRAMID_STORAGE[LSM Storage<br/>Segments & Indexes]
     end
     
     %% Client to Shen
@@ -68,18 +69,21 @@ graph TB
     OURO_ACK --> OURO_HEAD
     
     %% Rings to Pharaoh Network (Obelisk)
-    ANKH_ROUTE --> OBELISK
-    OURO_HEAD --> OBELISK
-    OBELISK --> SCARAB
+    ANKH_ROUTE -->|Request IDs| OBELISK
+    OURO_HEAD -->|Request IDs| OBELISK
+    
+    %% Obelisk internals
+    OBELISK --> OBELISK_STORAGE
+    OBELISK_STORAGE -->|Generate| SCARAB
     
     %% Rings to Pyramid Storage & Consensus
     OURO_HEAD --> PYRAMID_RAFT
-    PYRAMID_RAFT --> STORAGE
-    OURO_TAIL --> STORAGE
-    SCARAB --> STORAGE
+    PYRAMID_RAFT --> PYRAMID_STORAGE
+    OURO_TAIL --> PYRAMID_STORAGE
+    SCARAB -->|Used by| PYRAMID_STORAGE
     
     %% Return path
-    STORAGE -.->|data| SHEN_API
+    PYRAMID_STORAGE -.->|data| SHEN_API
     SHEN_API -.->|response| CLIENT
     
     %% Styling
@@ -88,7 +92,8 @@ graph TB
     classDef sundial fill:#7CB342,stroke:#558B2F,color:#fff
     classDef cartouche fill:#9C27B0,stroke:#6A1B9A,color:#fff
     classDef ouroboros fill:#E53935,stroke:#C62828,color:#fff
-    classDef storage fill:#757575,stroke:#424242,color:#fff
+    classDef obelisk_storage fill:#8B4513,stroke:#5D2E0C,color:#fff
+    classDef pyramid_storage fill:#757575,stroke:#424242,color:#fff
     classDef client fill:#FF9800,stroke:#F57C00,color:#fff
     
     class SHEN_API shen
@@ -96,6 +101,7 @@ graph TB
     class SUNDIAL_GOSSIP,SUNDIAL_STATE,SUNDIAL_DETECT sundial
     class CARTOUCHE_TOKEN,CARTOUCHE_QUEUE,CARTOUCHE_REGEN cartouche
     class OURO_HEAD,OURO_MIDDLE,OURO_TAIL,OURO_ACK ouroboros
-    class OBELISK,SCARAB,STORAGE storage
+    class OBELISK,SCARAB,OBELISK_STORAGE obelisk_storage
+    class PYRAMID_RAFT,PYRAMID_STORAGE pyramid_storage
     class CLIENT client
 

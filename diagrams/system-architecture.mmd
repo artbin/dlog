@@ -23,11 +23,12 @@ graph TB
     
     subgraph "🗿 Obelisk Nodes - ☀️ Pharaoh Network"
         OBELISK[Obelisk Nodes<br/>Crash-Safe Counters]
+        OBELISK_SPARSE[Sparse Files<br/>Counter Storage]
         PHARAOH[Pharaoh Network<br/>Coordination Layer]
         SCARAB[🪲 Scarab IDs<br/>Unique Identifiers]
     end
     
-    subgraph "Storage Layer"
+    subgraph "Pyramid Storage Layer"
         LSM[LSM Tree]
         SEGMENTS[Segments]
         INDEX[Indexes]
@@ -71,8 +72,9 @@ graph TB
     PYRAMID_STORAGE --> LSM
     
     %% Pyramid requests from Pharaoh Network
-    SHEN --> OBELISK
-    OBELISK --> SCARAB
+    SHEN -->|Request IDs| OBELISK
+    OBELISK --> OBELISK_SPARSE
+    OBELISK_SPARSE -->|Generate| SCARAB
     
     %% Storage internals
     LSM --> SEGMENTS
@@ -93,13 +95,15 @@ graph TB
     
     %% Styling
     classDef primitive fill:#4A90E2,stroke:#2E5C8A,color:#fff
-    classDef storage fill:#7CB342,stroke:#558B2F,color:#fff
+    classDef obelisk_storage fill:#8B4513,stroke:#5D2E0C,color:#fff
+    classDef pyramid_storage fill:#7CB342,stroke:#558B2F,color:#fff
     classDef consensus fill:#F57C00,stroke:#E65100,color:#fff
     classDef application fill:#9C27B0,stroke:#6A1B9A,color:#fff
     classDef ring fill:#FFD700,stroke:#FFA000,color:#000
     
     class OBELISK,PHARAOH,SCARAB primitive
-    class LSM,SEGMENTS,INDEX,PPHM,TIERED storage
+    class OBELISK_SPARSE obelisk_storage
+    class LSM,SEGMENTS,INDEX,PPHM,TIERED,PYRAMID_STORAGE,PYRAMID_RAFT pyramid_storage
     class RAFT,QUORUM,COPYSET consensus
     class APP,BATUTA,QUERY,ACTORS,SUPERVISION,TOPOLOGY application
     class SHEN,ANKH,SUNDIAL,CARTOUCHE,OUROBOROS ring
