@@ -60,33 +60,45 @@ Pyralog has evolved from a distributed log into a **comprehensive computing plat
 
 ## 🚀 Revolutionary Features
 
-### 🎯 Novel Coordination Primitives
+### 🎯 Novel System Architecture
 
-- **Two-Tier Architecture** (within a single Pyralog Cluster):
-  - **🗿 Obelisk Nodes** form the **☀️ Pharaoh Network** (coordination layer, lightweight)
-  - **🔺 Pyramid Nodes** form the **compute/storage tier** (storage, consensus & compute layer, heavy)
-  - Both scale horizontally and independently within the cluster
-  - Separation enables optimal resource efficiency
-  - See [NODES.md](NODES.md) for node architecture
-  - See [DECENTRALIZED.md](DECENTRALIZED.md) for cluster vs network hierarchy
-- **🗿 Obelisk Nodes**: Pharaoh Network nodes with crash-safe atomic counters (~1-2μs per increment)
-- **☀️ Pharaoh Network**: Eliminate all centralized bottlenecks via 🪲 Scarab IDs
-  - 4B+ operations/sec across network (IDs, sessions, transactions, timestamps)
-  - Lightweight coordination layer (scales horizontally)
-  - No data storage (pure coordination)
-- **🔺 Pyramid Nodes**: Pyralog cluster nodes for storage, consensus, and compute
-  - LSM storage, Raft consensus per partition, actor systems
+#### Two-Tier Node Architecture
+
+**🔺 Pyralog Cluster** = Single datacenter deployment with two node types:
+
+- **🗿 Obelisk Nodes**:
+  - **Coordination-free** ID generation (~1-2μs per ID)
+  - Crash-safe sparse file counters (file size = counter value)
+  - No Raft, no consensus, no coordination between nodes
+  - Scales horizontally (add nodes freely)
+    - **☀️ Pharaoh Network** (Cluster of Obelisk Nodes):
+    - Eliminates all centralized bottlenecks via 🪲 Scarab IDs
+    - 4B+ operations/sec across network (IDs, sessions, transactions, timestamps)
+    - Lightweight coordination layer (pure coordination, no data storage)
+    - Each Pyramid node requests IDs from any Obelisk node
+    - Linear scalability (add more Obelisk nodes for more throughput)
+  
+- **🔺 Pyramid Nodes**:
+  - LSM storage + Raft consensus per partition
   - Serve all read/write requests
-  - Independent scaling for capacity
+  - Actor systems, query execution, Batuta programs
   - 500M writes/sec per cluster
-- **No Leader Elections**: Instant failover, linear scalability
-- **𓍶 Shen Ring Architecture**: Five ring patterns for fault tolerance
-  - ☥ **Ankh Ring**: Consistent hashing (O(log N) partition lookup)
-  - ⭕ **Sundial Circle**: Gossip-based membership (O(log N) convergence)
-  - 𓍹𓍺 **Cartouche Ring**: Token-based coordination (FIFO fairness)
-  - 🐍 **Ouroboros Circle**: Chain replication (linearizable reads/writes)
-  - 𓍶 **Shen Ring**: Unified log interface (binds all patterns)
-  - See [SHEN_RING.md](SHEN_RING.md) for complete architecture
+  - Scales horizontally for capacity
+
+**Key Innovation**: 🗿 **Obelisk Sequencer** - coordination-free atomic counters using sparse files (file size = counter value). Separate coordination from storage/consensus for independent scaling.  
+📖 See [NODES.md](NODES.md) for complete architecture
+
+#### 𓍶 Shen Ring: Unified Distributed Patterns
+
+Five ring patterns that work together as **The One Ring**:
+
+- ☥ **Ankh Ring**: Consistent hashing for partition assignment
+- ⭕ **Sundial Circle**: Gossip protocol for cluster membership
+- 𓍹𓍺 **Cartouche Ring**: Token-based mutual exclusion
+- 🐍 **Ouroboros Circle**: Chain replication for durability
+- 𓍶 **Shen Ring**: Unified log interface (binds all patterns)
+
+📖 See [SHEN_RING.md](SHEN_RING.md) for algorithms and implementation
 
 ### 🔐 Cryptographic Verification
 
@@ -215,13 +227,17 @@ Pyralog has evolved from a distributed log into a **comprehensive computing plat
 
 ### 🔗 Decentralized Autonomous Systems
 
-- **5 Consensus Mechanisms**: Raft, PBFT, Tendermint, Proof of Work, Proof of Stake
-- **Autonomous Operation**: Self-healing, self-optimizing, self-configuring, self-protecting
-- **Smart Contracts for Databases**: Constraints as contracts, trigger-based automation, ACL enforcement
-- **Economic Incentives**: Token economics, storage mining, bandwidth rewards, stake-based governance
-- **On-Chain Governance**: Proposal system, weighted voting, time-locked upgrades
-- **Byzantine Fault Tolerance**: Tolerate up to 1/3 malicious nodes
-- **Peer Discovery**: Gossip protocols, DHT-based routing, epidemic broadcast
+#### 🌐 Pyralog Network: Multi-Cluster Architecture
+
+**🌐 Pyralog Network** = Multiple Pyralog Clusters forming a Decentralized Autonomous Database:
+
+- **Global Distribution**: Multi-datacenter, multi-organization deployment
+- **Eventual Consistency**: Strong consistency within clusters, eventual across network
+- **Autonomous Operation**: No single point of control, self-governing
+- **Byzantine Fault Tolerance**: Tolerate malicious nodes and clusters
+
+📖 See [DECENTRALIZED.md](DECENTRALIZED.md) and [DADBS.md](DADBS.md) for complete architecture
+
 
 ### 🔍 Perfect Hash Functions
 
