@@ -5,20 +5,25 @@ graph TB
         QUERY[Query Engine]
     end
     
-    subgraph "Shen Ring Layer - The One Ring 𓍶"
-        SHEN[Shen Ring<br/>Unified Log Interface]
-        
-        subgraph "The Five Rings"
-            ANKH[☥ Ankh Ring<br/>Consistent Hashing]
-            SUNDIAL[⭕ Sundial Circle<br/>Gossip Membership]
-            CARTOUCHE[𓍹𓍺 Cartouche Ring<br/>Token Coordination]
-            OUROBOROS[🐍 Ouroboros Circle<br/>Chain Replication]
+    subgraph "🔺 Pyramid Nodes - Pyralog Cluster"
+        subgraph "Shen Ring Layer - The One Ring 𓍶"
+            SHEN[Shen Ring<br/>Unified Log Interface]
+            
+            subgraph "The Five Rings"
+                ANKH[☥ Ankh Ring<br/>Consistent Hashing]
+                SUNDIAL[⭕ Sundial Circle<br/>Gossip Membership]
+                CARTOUCHE[𓍹𓍺 Cartouche Ring<br/>Token Coordination]
+                OUROBOROS[🐍 Ouroboros Circle<br/>Chain Replication]
+            end
         end
+        
+        PYRAMID_RAFT[Raft Consensus<br/>Per Partition]
+        PYRAMID_STORAGE[LSM Storage<br/>Segments & Indexes]
     end
     
-    subgraph "Coordination Primitives"
-        OBELISK[🗿 Obelisk Sequencer<br/>Crash-Safe Counters]
-        PHARAOH[☀️ Pharaoh Network<br/>Distributed Coordination]
+    subgraph "🗿 Obelisk Nodes - ☀️ Pharaoh Network"
+        OBELISK[Obelisk Nodes<br/>Crash-Safe Counters]
+        PHARAOH[Pharaoh Network<br/>Coordination Layer]
         SCARAB[🪲 Scarab IDs<br/>Unique Identifiers]
     end
     
@@ -59,10 +64,15 @@ graph TB
     CARTOUCHE --> PHARAOH
     OUROBOROS --> OBELISK
     
-    %% Coordination to Storage
-    OBELISK --> LSM
-    SCARAB --> LSM
-    PHARAOH --> RAFT
+    %% Pyramid internals
+    SHEN --> PYRAMID_RAFT
+    SHEN --> PYRAMID_STORAGE
+    PYRAMID_RAFT --> LSM
+    PYRAMID_STORAGE --> LSM
+    
+    %% Pyramid requests from Pharaoh Network
+    SHEN --> OBELISK
+    OBELISK --> SCARAB
     
     %% Storage internals
     LSM --> SEGMENTS

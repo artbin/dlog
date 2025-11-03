@@ -1,11 +1,11 @@
 graph LR
-    subgraph "Write Path"
+    subgraph "Write Path - 🔺 Pyramid Nodes"
         direction TB
         W_CLIENT[Producer]
-        W_SESSION[Session ID<br/>Obelisk]
+        W_SESSION[Request Session ID<br/>🗿 Obelisk]
         W_DEDUP[Dedup Check<br/>Cache]
         W_PARTITION[Partition<br/>Ankh Ring]
-        W_LEADER[Leader Check<br/>Raft]
+        W_LEADER[Leader Check<br/>Raft Consensus]
         W_CHAIN[Chain Head<br/>Ouroboros]
         W_MIDDLE[Middle Nodes]
         W_TAIL[Tail Node]
@@ -30,7 +30,7 @@ graph LR
         W_CHAIN --> W_RESPONSE
     end
     
-    subgraph "Read Path"
+    subgraph "Read Path - 🔺 Pyramid Nodes"
         direction TB
         R_CLIENT[Consumer]
         R_OFFSET[Offset Request]

@@ -82,18 +82,33 @@ Pyralog's branding draws from **ancient Egyptian civilization**—a culture that
 
 ---
 
-## 🏛️ The Four Pillars
+## 🏛️ The Two-Tier Architecture
 
-Pyralog's architecture consists of three Egyptian infrastructure primitives and one Latin interface language:
+Pyralog uses a **two-tier node architecture** with distinct layers:
 
+### Coordination Layer (☀️ Pharaoh Network)
 | Component | Symbol | What It Is | Key Features |
 |-----------|--------|------------|--------------|
-| **🗿 Obelisk Sequencer** | Monument | Crash-safe atomic counter | • Sparse files<br>• ~1-2μs latency<br>• Instant recovery |
-| **☀️ Pharaoh Network** | Sun/Ruler | Distributed coordination | • 1024 nodes<br>• No bottlenecks<br>• Linear scaling |
+| **🗿 Obelisk Nodes** | Monument | Pharaoh Network nodes | • Crash-safe counters<br>• ~1-2μs latency<br>• Scales horizontally |
+| **☀️ Pharaoh Network** | Sun/Ruler | Obelisk cluster | • 4B+ ops/sec<br>• No bottlenecks<br>• Pure coordination |
 | **🪲 Scarab IDs** | Sacred Beetle | Unique identifiers | • 64-bit IDs<br>• Time-ordered<br>• Zero coordination |
+
+### Storage, Consensus & Compute Layer (Pyralog Cluster)
+| Component | Symbol | What It Is | Key Features |
+|-----------|--------|------------|--------------|
+| **🔺 Pyramid Nodes** | Pyramid | Pyralog cluster nodes | • LSM storage<br>• Raft consensus<br>• Query execution |
+| **𓍶 Shen Ring** | Eternal Circle | Coordination patterns | • Five rings<br>• Fault tolerance<br>• Self-healing |
 | **🎼 Batuta** | Conductor's Baton | Platform language | • Clojure + Elixir<br>• Actor-first<br>• Compiles to Rust |
 
 **Plus the grammar foundation**: 🌲 [Sulise Evergreen](#-sulise-evergreen) (modular grammar toolkit)
+
+**Architecture Summary**:
+- **Obelisk nodes** (🗿) form the **Pharaoh Network** (☀️) - coordination layer
+- **Pyramid nodes** (🔺) form the **Pyralog cluster** - storage, consensus & compute layer
+- Pyramids run Raft per partition for consensus
+- Pyramids request Scarab IDs (🪲) from Obelisks for ID generation
+- Applications use **Batuta** (🎼) to interact with Pyramids
+- **Shen Ring** (𓍶) binds all patterns together
 
 ---
 
@@ -135,22 +150,30 @@ See [SHEN_RING.md](SHEN_RING.md) for complete architecture details.
 
 ---
 
-### 🗿 Obelisk Sequencer
+### 🗿 Obelisk Nodes
 
 **Egyptian Symbol**: Obelisk/Monument  
-**Technical Role**: Foundation primitive for crash-safe atomic operations
+**Technical Role**: Nodes in the ☀️ Pharaoh Network (coordination layer)
 
-**What It Does**:
+**What They Are**:
+- **Pharaoh Network nodes** providing distributed coordination
+- Lightweight nodes (scales horizontally) separate from data storage
+- Generate Scarab IDs using crash-safe atomic counters
+- Provide distributed primitives without bottlenecks
+
+**What They Do**:
 - Persistent atomic counters using sparse files
 - File size = counter value (genius simplicity)
 - Survives crashes with instant recovery
-- Powers Scarab IDs and transaction sequencing
+- Powers Scarab IDs, session IDs, transaction IDs, epochs
+- ~1-2μs latency per ID, 4B+ ops/sec cluster-wide
 
 **Why Obelisk?**
-- Single piece of stone = atomic operation
-- Tall and permanent = durable state
-- Marks important locations = observable checkpoints
+- Single piece of stone = atomic, focused role
+- Tall and permanent = durable coordination state
+- Marks important locations = coordination points
 - Lasted millennia = crash-safe guarantee
+- Visible from afar = accessible to all Pyramid nodes
 
 **Usage Example**:
 ```rust
@@ -163,19 +186,29 @@ let id = counter.increment()?;  // Crash-safe!
 ### ☀️ Pharaoh Network
 
 **Egyptian Symbol**: Sun God Ra / Pharaoh  
-**Technical Role**: Distributed coordination without centralized bottlenecks
+**Technical Role**: Cluster of 🗿 Obelisk nodes providing distributed coordination
+
+**What It Is**:
+- **Coordination layer** separate from storage layer
+- Cluster of 🗿 Obelisk nodes (scales horizontally)
+- Provides distributed primitives to all 🔺 Pyramid nodes
+- Lightweight, focused on ID generation and coordination
 
 **What It Does**:
-- 1024 independent coordinator nodes
-- Inspired by Twitter's Snowflake architecture
-- Each node autonomous, no single point of failure
-- Linear horizontal scalability
+- Scarab ID generation (unique, time-ordered IDs)
+- Session ID allocation (exactly-once semantics)
+- Epoch management (partition leadership)
+- Transaction ID generation
+- Distributed timestamp service (TSO)
+- 4B+ operations/sec across network
+- No data storage (pure coordination)
 
 **Why Pharaoh/Sun?**
-- Pharaohs = distributed authority
-- Sun rays = reaching all points simultaneously
-- Ra = divine power without physical presence
-- Royal seals = coordination tokens
+- Pharaohs = distributed authority, rules over all
+- Sun rays = reaching all points (Pyramids) simultaneously
+- Ra = divine coordination without bottlenecks
+- Central but not centralized = visible to all, no single point of failure
+- Light and warmth = enables the system to function
 
 **Usage Example**:
 ```rust
@@ -206,6 +239,47 @@ let id = coordinator.assign_scarab_id()?;
 ```rust
 let generator = ScarabGenerator::new(worker_id, sequencer);
 let id = generator.next()?;  // Globally unique!
+```
+
+---
+
+### 🔺 Pyramid Nodes
+
+**Egyptian Symbol**: Pyramid/Monument  
+**Technical Role**: Nodes in the Pyralog cluster (storage, consensus & compute layer)
+
+**What They Are**:
+- **Pyralog cluster nodes** for storage, consensus, and compute
+- Main database nodes (scales horizontally)
+- Each Pyramid owns multiple partitions
+- Heavy-weight nodes with storage, consensus, compute, and memory
+
+**What They Do**:
+- Store data in LSM trees (segments, indexes, WAL)
+- Run Raft consensus per partition (data replication and consistency)
+- Serve read/write requests from clients
+- Execute SQL queries (DataFusion)
+- Run Batuta programs and actor systems
+- Chain replication (Ouroboros Circle)
+- Request Scarab IDs from Pharaoh Network
+- Independent scaling for storage and compute capacity
+
+**Why Pyramid?**
+- Massive monuments = large-scale data storage
+- Built to last forever = durable, persistent state
+- Store treasures = valuable user data
+- Many built over time = scalable cluster (many nodes)
+- Foundation of civilization = foundation of the platform
+- Visible achievement = the actual database users interact with
+
+**Usage Example**:
+```rust
+// Pyramid node configuration
+let pyramid = PyramidNode::new(node_id, config)
+    .with_pharaoh_network(pharaoh_endpoints)  // Connect to Obelisk nodes
+    .with_storage(lsm_config)
+    .with_raft(raft_config)
+    .build()?;
 ```
 
 ---
@@ -555,11 +629,12 @@ to recover the counter value instantly.
 | Icon | Represents | Use When |
 |------|------------|----------|
 | 🔺 | Pyralog Platform | Mentioning entire system |
-| 🗿 | Obelisk Sequencer | Discussing crash-safety |
-| ☀️ | Pharaoh Network | Discussing coordination |
-| 🪲 | Scarab IDs | Discussing unique identifiers |
-| 🎼 | Batuta Language | Discussing queries/interface |
-| 🌲 | Sulise Evergreen | Discussing language development/theory |
+| 🗿 | Obelisk Nodes | Pharaoh Network nodes, coordination, crash-safe counters |
+| ☀️ | Pharaoh Network | Coordination layer, cluster of Obelisk nodes |
+| 🪲 | Scarab IDs | Unique identifiers, time-ordered IDs |
+| 🔺 | Pyramid Nodes | Pyralog cluster nodes, storage & compute |
+| 🎼 | Batuta Language | Queries/interface, programming language |
+| 🌲 | Sulise Evergreen | Language development/theory, grammar toolkit |
 
 **Ring Architecture**:
 

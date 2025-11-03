@@ -32,9 +32,13 @@ graph TB
         OURO_ACK[Acknowledgment Path]
     end
     
-    subgraph "Storage Foundation"
-        OBELISK[🗿 Obelisk Sequencer<br/>Atomic Counters]
+    subgraph "🗿 Pharaoh Network Layer"
+        OBELISK[🗿 Obelisk Nodes<br/>Atomic Counters]
         SCARAB[🪲 Scarab IDs<br/>Unique Identifiers]
+    end
+    
+    subgraph "🔺 Pyramid Storage & Consensus"
+        PYRAMID_RAFT[Raft Consensus<br/>Per Partition]
         STORAGE[Log Storage<br/>Segments & Indexes]
     end
     
@@ -63,12 +67,16 @@ graph TB
     OURO_TAIL -->|ack| OURO_ACK
     OURO_ACK --> OURO_HEAD
     
-    %% Rings to Storage
-    ANKH_ROUTE --> SCARAB
+    %% Rings to Pharaoh Network (Obelisk)
+    ANKH_ROUTE --> OBELISK
     OURO_HEAD --> OBELISK
+    OBELISK --> SCARAB
+    
+    %% Rings to Pyramid Storage & Consensus
+    OURO_HEAD --> PYRAMID_RAFT
+    PYRAMID_RAFT --> STORAGE
     OURO_TAIL --> STORAGE
     SCARAB --> STORAGE
-    OBELISK --> STORAGE
     
     %% Return path
     STORAGE -.->|data| SHEN_API

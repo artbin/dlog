@@ -51,11 +51,22 @@ Pyralog has evolved from a distributed log into a **comprehensive computing plat
 
 ### 🎯 Novel Coordination Primitives
 
-- **🗿 Obelisk Sequencer**: Crash-safe persistent atomic counters with minimal disk overhead (~1-2μs per increment)
+- **Two-Tier Architecture**:
+  - **🗿 Obelisk Nodes** form the **☀️ Pharaoh Network** (coordination layer, lightweight)
+  - **🔺 Pyramid Nodes** form the **Pyralog Cluster** (storage, consensus & compute layer, heavy)
+  - Both scale horizontally and independently
+  - Separation enables optimal resource efficiency
+  - See [NODES.md](NODES.md) for complete architecture
+- **🗿 Obelisk Nodes**: Pharaoh Network nodes with crash-safe atomic counters (~1-2μs per increment)
 - **☀️ Pharaoh Network**: Eliminate all centralized bottlenecks via 🪲 Scarab IDs
-  - 4B+ transactions/sec (8,000× faster than TiKV)
-  - 4B+ timestamps/sec (distributed TSO)
-  - 28B+ total operations/sec across all services
+  - 4B+ operations/sec across network (transactions, timestamps, IDs, epochs)
+  - Lightweight coordination layer (scales horizontally)
+  - No data storage (pure coordination)
+- **🔺 Pyramid Nodes**: Pyralog cluster nodes for storage, consensus, and compute
+  - LSM storage, Raft consensus per partition, actor systems
+  - Serve all read/write requests
+  - Independent scaling for capacity
+  - 500M writes/sec per cluster
 - **No Leader Elections**: Instant failover, linear scalability
 - **𓍶 Shen Ring Architecture**: Five ring patterns for fault tolerance
   - ☥ **Ankh Ring**: Consistent hashing (O(log N) partition lookup)
