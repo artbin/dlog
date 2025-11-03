@@ -1,6 +1,6 @@
 # 🔺 Pyralog - Platform for Secure, Parallel, Distributed, and Decentralized Computing
 
-> **Built to last millennia** · 🗿 Obelisk · ☀️ Pharaoh · 🪲 Scarab · 🎼 Batuta
+> **Built to last millennia** · 🗿 Obelisk · ☀️ Pharaoh · 🪲 Scarab · 𓍶 Shen Ring · 🎼 Batuta
 
 **A unified infrastructure for building secure, fault-tolerant distributed systems with cryptographic verification, actor-based concurrency, and functional programming abstractions.**
 
@@ -55,6 +55,13 @@ Pyralog has evolved from a distributed log into a **comprehensive computing plat
   - 4B+ timestamps/sec (distributed TSO)
   - 28B+ total operations/sec across all services
 - **No Leader Elections**: Instant failover, linear scalability
+- **𓍶 Shen Ring Architecture**: Five ring patterns for fault tolerance
+  - ☥ **Ankh Ring**: Consistent hashing (O(log N) partition lookup)
+  - ⭕ **Sundial Circle**: Gossip-based membership (O(log N) convergence)
+  - 𓍹𓍺 **Cartouche Ring**: Token-based coordination (FIFO fairness)
+  - 🐍 **Ouroboros Circle**: Chain replication (linearizable reads/writes)
+  - 𓍶 **Shen Ring**: Unified log interface (binds all patterns)
+  - See [SHEN_RING.md](SHEN_RING.md) for complete architecture
 
 ### 🔐 Cryptographic Verification
 

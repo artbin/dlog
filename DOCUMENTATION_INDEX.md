@@ -81,6 +81,16 @@ Pyralog unifies cryptographic verification, actor-based concurrency, functional 
   - Performance optimizations
   - Failure scenarios
 
+- [SHEN_RING.md](SHEN_RING.md) ⭐ **Ring Architecture**
+  - The Five Rings (Ankh, Sundial, Cartouche, Ouroboros, Shen)
+  - Consistent hashing (partition assignment)
+  - Gossip protocol (cluster membership)
+  - Token coordination (mutual exclusion)
+  - Chain replication (data durability)
+  - Unified log interface
+  - Fault tolerance and recovery
+  - Performance characteristics
+
 #### Design Philosophy
 - [DESIGN.md](DESIGN.md)
   - Research summary (Redpanda + LogDevice)

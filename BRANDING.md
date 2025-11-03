@@ -97,6 +97,44 @@ Pyralog's architecture consists of three Egyptian infrastructure primitives and 
 
 ---
 
+## 𓍶 The Shen Ring Architecture
+
+**The eternal circle that binds all patterns together**
+
+Pyralog's distributed system is built on **five ring patterns** that work together to provide fault tolerance, scalability, and consistency. The Shen Ring (𓍶 - symbol of eternity) unifies them all:
+
+| Ring | Symbol | Purpose | Pattern |
+|------|--------|---------|---------|
+| **Ankh Ring** | ☥ | Partition assignment | Consistent hashing |
+| **Sundial Circle** | ⭕ | Cluster membership | Gossip protocol |
+| **Cartouche Ring** | 𓍹𓍺 | Global coordination | Token passing |
+| **Ouroboros Circle** | 🐍 | Data replication | Chain replication |
+| **Shen Ring** | 𓍶 | Unified interface | Append-only log |
+
+**Architecture Flow**:
+```
+Application (Batuta 🎼)
+     ↓
+Shen Ring 𓍶 (The One Ring)
+     ↓
+┌────┴────┬────────┬────────┐
+↓         ↓        ↓        ↓
+Ankh ☥    Sundial⭕ Cartouche Ouroboros
+(hash)    (gossip) 𓍹𓍺(token) 🐍(chain)
+     ↓
+Storage Layer (Obelisk 🗿 + Scarab 🪲)
+```
+
+**Why Rings?**
+- **No single point of failure** - Every node is equal
+- **Predictable routing** - O(log N) or O(1) lookups
+- **Self-healing** - Automatic rebalancing on failures
+- **Egyptian symbolism** - Eternal circles (Shen 𓍶)
+
+See [SHEN_RING.md](SHEN_RING.md) for complete architecture details.
+
+---
+
 ### 🗿 Obelisk Sequencer
 
 **Egyptian Symbol**: Obelisk/Monument  
@@ -523,6 +561,16 @@ to recover the counter value instantly.
 | 🎼 | Batuta Language | Discussing queries/interface |
 | 🌲 | Sulise Evergreen | Discussing language development/theory |
 
+**Ring Architecture**:
+
+| Icon | Represents | Pattern | Use When |
+|------|------------|---------|----------|
+| 𓍶 | Shen Ring | Unified log interface | Discussing the complete system |
+| ☥ | Ankh Ring | Consistent hashing | Discussing partitioning, load distribution |
+| ⭕ | Sundial Circle | Gossip protocol | Discussing membership, failure detection |
+| 𓍹𓍺 | Cartouche Ring | Token coordination | Discussing mutual exclusion, transactions |
+| 🐍 | Ouroboros Circle | Chain replication | Discussing durability, consistency |
+
 **Feature Icons**:
 
 | Icon | Represents | Metaphor | Use When |
@@ -736,6 +784,15 @@ When creating Pyralog content, ensure:
 ---
 
 ## 📝 Version History
+
+- **v2.3** (2025-11-03): Added Shen Ring Architecture
+  - Introduced 𓍶 Shen Ring as the unifying "One Ring" pattern
+  - Added five ring implementations: ☥ Ankh, ⭕ Sundial, 𓍹𓍺 Cartouche, 🐍 Ouroboros, 𓍶 Shen
+  - Created comprehensive [SHEN_RING.md](SHEN_RING.md) documentation
+  - Added ring architecture section to branding guide
+  - Updated README.md and DOCUMENTATION_INDEX.md
+  - Ring patterns: consistent hashing, gossip, token coordination, chain replication
+  - Egyptian symbolism: eternal circles (Shen 𓍶 = eternity/infinity)
 
 - **v2.2** (2025-11-02): Added feature-level icons
   - Added 🎭 Theater Masks for Actor Model (theater performers = actors)
