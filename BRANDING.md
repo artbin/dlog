@@ -94,7 +94,7 @@ Pyralog has two levels of architectural organization:
   
 - **🌐 Pyralog Network**: Multiple Pyralog Clusters forming a Decentralized Autonomous Database
   - Global distribution, eventual consistency, Byzantine fault tolerance
-  - See [DADBS.md](DADBS.md) and [CLUSTER_VS_NETWORK.md](CLUSTER_VS_NETWORK.md)
+  - See [DADBS.md](DADBS.md) and [DECENTRALIZED.md](DECENTRALIZED.md)
 
 ### 🏛️ Level 2: Two-Tier Node Architecture (within a cluster)
 

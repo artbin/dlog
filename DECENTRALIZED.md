@@ -644,9 +644,242 @@ impl Circuit for TransactionCircuit {
 - ❌ Cannot do trusted setup (use STARKs)
 
 **Alternatives**:
-- **zk-STARKs**: No trusted setup, larger proofs (~100KB), faster proving
+- **zk-STARKs**: No trusted setup, larger proofs (~100KB), faster proving (see below)
 - **Bulletproofs**: No trusted setup, slower verification
 - **PLONK**: Universal trusted setup (reusable)
+
+---
+
+#### zk-STARKs (Zero-Knowledge Scalable Transparent Arguments of Knowledge)
+
+**What it is**: Like zk-SNARKs but with **no trusted setup** and better scalability properties.
+
+**Key Differences from zk-SNARKs**:
+- **Transparent**: No trusted setup ceremony required
+- **Scalable**: Proof generation scales better (logarithmic)
+- **Larger proofs**: ~100-200KB (vs 200-500 bytes for SNARKs)
+- **Post-quantum secure**: Resistant to quantum computers
+- **Faster proving**: For large computations
+
+**Key Properties**:
+- **Zero-Knowledge**: Proves statement without revealing data
+- **Scalable**: Proving time grows ~O(n log n) vs O(n²) for SNARKs
+- **Transparent**: No secret parameters, fully auditable
+- **Sound**: Information-theoretically secure
+- **Post-quantum**: Based on collision-resistant hash functions
+
+**Why "Transparent" Matters**:
+```rust
+// zk-SNARKs: Trusted setup required
+let (proving_key, verifying_key) = trusted_setup(&circuit);
+// ⚠️ If setup participants collude, can create fake proofs!
+
+// zk-STARKs: No trusted setup
+let prover = StarkProver::new();  // No ceremony needed! ✅
+```
+
+**Use Cases in Pyralog Network**:
+
+1. **Public Permissionless Networks**:
+   ```rust
+   pub struct PublicNetworkProof {
+       /// STARK proof (no trusted setup needed)
+       proof: StarkProof,
+       /// Public inputs
+       public_inputs: Vec<u64>,
+   }
+   ```
+   - No need to trust setup ceremony
+   - Anyone can verify transparency
+   - Critical for public networks
+
+2. **Large-Scale Batch Verification**:
+   ```rust
+   pub struct MassiveBatchProof {
+       /// Proof covering 1M+ transactions
+       proof: StarkProof,  // ~150KB
+       /// Transaction root
+       tx_root: Hash,
+   }
+   ```
+   - Better scaling for huge batches (1M+ transactions)
+   - Faster proving than SNARKs for large circuits
+   - Still compact verification
+
+3. **Post-Quantum Security**:
+   ```rust
+   pub struct QuantumResistantProof {
+       /// Secure even against quantum computers
+       proof: StarkProof,
+       /// Data hash
+       data_hash: Hash,
+   }
+   ```
+   - Future-proof against quantum attacks
+   - Based on hash functions (not elliptic curves)
+   - Long-term security guarantee
+
+4. **Verifiable Distributed Computation**:
+   ```rust
+   pub struct DistributedComputationProof {
+       /// Proof that computation across 100 nodes is correct
+       proof: StarkProof,
+       /// Computation result
+       result: ComputationResult,
+   }
+   ```
+   - Prove correctness of multi-node computation
+   - No coordinator trust needed
+   - Scales to massive parallel workloads
+
+5. **Recursive Proof Composition**:
+   ```rust
+   pub struct RecursiveProof {
+       /// Proof that verifies other proofs
+       proof: StarkProof,
+       /// Sub-proofs being verified
+       sub_proof_count: usize,
+   }
+   ```
+   - Prove "I verified 1000 other proofs correctly"
+   - Enables proof trees/chains
+   - Constant verification time
+
+6. **Cross-Cluster State Synchronization**:
+   ```rust
+   pub struct StateSyncProof {
+       /// Proof of state transition across N blocks
+       proof: StarkProof,
+       /// Old state root
+       old_state: Hash,
+       /// New state root
+       new_state: Hash,
+   }
+   ```
+   - Prove state evolved correctly over time
+   - Light clients sync without replaying
+   - Compact representation of history
+
+**Implementation Example (conceptual)**:
+```rust
+use winterfell::{StarkProof, Air, ProofOptions};
+
+pub struct StarkProver {
+    options: ProofOptions,
+}
+
+impl StarkProver {
+    pub fn new() -> Self {
+        Self {
+            options: ProofOptions::new(
+                32,  // Number of queries
+                8,   // Blowup factor
+                0,   // Grinding factor
+                FieldExtension::None,
+                8,   // FRI folding factor
+                128, // FRI max remainder degree
+            ),
+        }
+    }
+    
+    pub fn prove_computation<A: Air>(
+        &self,
+        air: A,
+        trace: TraceTable,
+    ) -> StarkProof {
+        // Generate STARK proof
+        winterfell::prove(air, trace, &self.options)
+    }
+    
+    pub fn verify_computation<A: Air>(
+        &self,
+        air: A,
+        public_inputs: PublicInputs,
+        proof: &StarkProof,
+    ) -> bool {
+        winterfell::verify(air, public_inputs, proof, &self.options)
+            .is_ok()
+    }
+}
+
+// Define AIR (Algebraic Intermediate Representation)
+pub struct TransactionAir {
+    // Constraints for transaction validity
+}
+
+impl Air for TransactionAir {
+    fn get_periodic_column_values(&self) -> Vec<Vec<FieldElement>> {
+        // Define periodic columns
+        vec![]
+    }
+    
+    fn get_assertions(&self) -> Vec<Assertion> {
+        // Define assertions (boundary constraints)
+        vec![]
+    }
+    
+    fn evaluate_transition<E: FieldElement>(
+        &self,
+        frame: &EvaluationFrame<E>,
+        result: &mut [E],
+    ) {
+        // Define state transition constraints
+        // e.g., balance_after = balance_before - amount
+    }
+}
+```
+
+**Performance Characteristics**:
+
+| Aspect | zk-SNARKs | zk-STARKs | Winner |
+|--------|-----------|-----------|--------|
+| **Proof Size** | 200-500 bytes | 100-200 KB | SNARKs |
+| **Proof Time** | 1-10 seconds | 0.5-5 seconds | STARKs |
+| **Verify Time** | 1-5 ms | 10-50 ms | SNARKs |
+| **Trusted Setup** | Required | None | STARKs |
+| **Post-Quantum** | ❌ Vulnerable | ✅ Secure | STARKs |
+| **Recursion** | Expensive | Efficient | STARKs |
+| **Maturity** | High (10+ years) | Medium (5+ years) | SNARKs |
+
+**Trade-offs**:
+
+✅ **Advantages**:
+- No trusted setup (transparent)
+- Post-quantum secure
+- Faster proving for large computations
+- Better recursion support
+- Scales to massive circuits
+- Fully auditable
+
+❌ **Disadvantages**:
+- Much larger proofs (100-200KB vs 500 bytes)
+- Slower verification (10-50ms vs 1-5ms)
+- Higher bandwidth requirements
+- More complex cryptography
+- Less mature tooling
+
+**When to Use zk-STARKs**:
+- ✅ Public/permissionless network (no trusted setup)
+- ✅ Post-quantum security required
+- ✅ Very large computations (1M+ constraints)
+- ✅ Recursive proof composition
+- ✅ Long-term security critical
+- ✅ Can afford larger proofs (100KB+)
+- ❌ Bandwidth constrained (use SNARKs)
+- ❌ Need fastest verification (use SNARKs)
+
+**SNARKs vs STARKs Decision Matrix**:
+
+```
+If bandwidth is limited → Use SNARKs (500 bytes)
+If verification must be <5ms → Use SNARKs
+If need trusted setup → Use SNARKs (easier)
+If computation is huge (1M+ gates) → Use STARKs
+If no trusted parties available → Use STARKs
+If post-quantum security needed → Use STARKs
+If recursive proofs needed → Use STARKs
+If long-term (20+ years) → Use STARKs
+```
 
 **Integration with Pyralog Network**:
 ```rust
@@ -656,19 +889,58 @@ pub enum NetworkConsensus {
     Tendermint(TendermintNetwork),
     PoW(PoWNetwork),
     PoS(PoSNetwork),
-    /// zk-SNARK enhanced consensus
-    ZkRollup(ZkRollupNetwork),
+    /// zk-SNARK enhanced consensus (trusted setup, small proofs)
+    ZkSnarkRollup(ZkSnarkRollupNetwork),
+    /// zk-STARK enhanced consensus (no setup, larger proofs)
+    ZkStarkRollup(ZkStarkRollupNetwork),
 }
 
-pub struct ZkRollupNetwork {
+pub struct ZkSnarkRollupNetwork {
     /// Base consensus (e.g., PoS)
     base: Box<NetworkConsensus>,
     /// zk-SNARK prover
-    prover: ZkProver,
+    prover: SnarkProver,
     /// Batch size for rollups
     batch_size: usize,
 }
+
+pub struct ZkStarkRollupNetwork {
+    /// Base consensus (e.g., PoS)
+    base: Box<NetworkConsensus>,
+    /// zk-STARK prover (no trusted setup!)
+    prover: StarkProver,
+    /// Batch size for rollups (can be larger)
+    batch_size: usize,
+}
 ```
+
+**Hybrid Approach**:
+```rust
+pub struct HybridZkNetwork {
+    /// Use SNARKs for small proofs (bandwidth critical)
+    snark_prover: SnarkProver,
+    /// Use STARKs for large proofs (no trusted setup)
+    stark_prover: StarkProver,
+}
+
+impl HybridZkNetwork {
+    pub fn prove(&self, circuit_size: usize) -> Proof {
+        if circuit_size < 100_000 {
+            // Small circuit: Use SNARKs (fast verify, small proof)
+            Proof::Snark(self.snark_prover.prove())
+        } else {
+            // Large circuit: Use STARKs (better scaling)
+            Proof::Stark(self.stark_prover.prove())
+        }
+    }
+}
+```
+
+**Real-World Examples**:
+- **StarkWare**: Powers StarkNet (Ethereum L2)
+- **RISC Zero**: Verifiable general computation
+- **Polygon Miden**: STARK-based rollup
+- **Winterfell**: Rust STARK library (by Facebook)
 
 ---
 

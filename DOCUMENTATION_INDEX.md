@@ -27,7 +27,7 @@ Pyralog unifies cryptographic verification, actor-based concurrency, functional 
 ### Learning Pyralog
 - **[CORE_CONCEPTS](CORE_CONCEPTS.md)** - Fundamental concepts (LogId, Partitions, Records, Offsets, Epochs)
 - **[NODES](NODES.md)** ⭐ **Node Architecture** - Two-tier system (Obelisk nodes, Pyramid nodes, Pharaoh Network)
-- **[CLUSTER_VS_NETWORK](CLUSTER_VS_NETWORK.md)** ⭐ **NEW: Cluster vs Network** - Single cluster vs decentralized network hierarchy
+- **[DECENTRALIZED](DECENTRALIZED.md)** ⭐ **Decentralized Network** - Cluster vs Network hierarchy, consensus (PoW, PoS, zk-SNARKs, zk-STARKs)
 - **[ARCHITECTURE](ARCHITECTURE.md)** - Deep dive into system internals
 - **[DESIGN](DESIGN.md)** - Design decisions and rationale
 - **[BRANDING](BRANDING.md)** 🎨 - **Brand identity guide** (Egyptian theme, visual identity, terminology)

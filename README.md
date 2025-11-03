@@ -28,7 +28,7 @@ Pyralog has evolved from a distributed log into a **comprehensive computing plat
 - **🌐 Pyralog Network**: Multiple Pyralog Clusters forming a Decentralized Autonomous Database
   - Global distribution, eventual consistency, Byzantine fault tolerance
   - Multi-datacenter, multi-organization, censorship-resistant
-  - See [DADBS.md](DADBS.md) and [CLUSTER_VS_NETWORK.md](CLUSTER_VS_NETWORK.md)
+  - See [DADBS.md](DADBS.md) and [DECENTRALIZED.md](DECENTRALIZED.md)
 
 📊 **[View Architecture Diagrams](diagrams/)** - Visual representations of Pyralog's architecture and data flows
 
@@ -68,7 +68,7 @@ Pyralog has evolved from a distributed log into a **comprehensive computing plat
   - Both scale horizontally and independently within the cluster
   - Separation enables optimal resource efficiency
   - See [NODES.md](NODES.md) for node architecture
-  - See [CLUSTER_VS_NETWORK.md](CLUSTER_VS_NETWORK.md) for cluster vs network hierarchy
+  - See [DECENTRALIZED.md](DECENTRALIZED.md) for cluster vs network hierarchy
 - **🗿 Obelisk Nodes**: Pharaoh Network nodes with crash-safe atomic counters (~1-2μs per increment)
 - **☀️ Pharaoh Network**: Eliminate all centralized bottlenecks via 🪲 Scarab IDs
   - 4B+ operations/sec across network (IDs, sessions, transactions, timestamps)

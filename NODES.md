@@ -3,7 +3,7 @@
 **Understanding the two-tier node hierarchy within a Pyralog Cluster**
 
 > **Note**: This document describes the node architecture **within a single Pyralog Cluster** (one datacenter/region).  
-> For information about multiple Pyralog Clusters forming a Pyralog Network, see [CLUSTER_VS_NETWORK.md](CLUSTER_VS_NETWORK.md).
+> For information about multiple Pyralog Clusters forming a Pyralog Network, see [DECENTRALIZED.md](DECENTRALIZED.md).
 
 ---
 
