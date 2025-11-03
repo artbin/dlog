@@ -35,7 +35,7 @@ Within a **Pyralog Cluster**, there is a **two-tier architecture** with distinct
 │  • Generate Scarab IDs (unique identifiers)             │
 │  • Maintain crash-safe atomic counters                  │
 │  • Provide distributed coordination                     │
-│  • No data storage (lightweight)                        │
+│  • Store counters in sparse files (lightweight)         │
 └─────────────────────────────────────────────────────────┘
 ```
 
@@ -260,12 +260,12 @@ Key:
 
 | Concern | Obelisk Nodes | Pyramid Nodes |
 |---------|---------------|---------------|
-| **Data Storage** | ❌ No | ✅ Yes (LSM segments) |
+| **Data Storage** | ✅ Sparse files (counters) | ✅ LSM trees (user data) |
 | **ID Generation** | ✅ Yes (Scarab IDs) | ❌ Request from Obelisk |
 | **Query Execution** | ❌ No | ✅ Yes (reads/writes) |
 | **Consensus** | ✅ Small Raft (metadata only) | ✅ Large Raft (per partition) |
 | **Actor System** | ❌ No | ✅ Yes |
-| **Resource Usage** | Low (CPU, memory) | High (CPU, memory, disk) |
+| **Resource Usage** | Low (MB memory, sparse files) | High (GB memory, TB disk) |
 | **Scaling** | Horizontal (lightweight) | Horizontal (heavy) |
 
 ---
@@ -354,8 +354,9 @@ Key:
 ```
 ❌ Problems:
 - Coordination overhead on data nodes
-- Counter state competes for memory with data
+- Counter state competes for memory with user data
 - Scaling coordination requires scaling data nodes
+- Sparse file storage mixed with LSM storage
 - No clear separation of concerns
 ```
 
@@ -373,15 +374,19 @@ Key:
    - Pyramid nodes: Large, storage-focused
 
 3. Fault Isolation
-   - Pharaoh Network failure doesn't affect existing data
+   - Pharaoh Network failure doesn't affect user data storage
    - Pyramid failure doesn't affect ID generation
 
 4. Clear Contracts
-   - Obelisk: "I generate IDs fast and crash-safe"
-   - Pyramid: "I store data durably and serve queries"
+   - Obelisk: "I store counters and generate IDs fast and crash-safe"
+   - Pyramid: "I store user data durably and serve queries"
 
-5. Operational Simplicity
-   - Upgrade Pharaoh Network without touching data
+5. Storage Separation
+   - Obelisk: Sparse files (~MB) optimized for counters
+   - Pyramid: LSM trees (~TB) optimized for user data
+
+6. Operational Simplicity
+   - Upgrade Pharaoh Network without touching user data
    - Upgrade Pyramid nodes without touching coordination
 ```
 
@@ -507,7 +512,7 @@ pub struct ObeliskNode {
 | **Consensus** | Small Raft (metadata) | Large Raft (per partition) |
 | **Scaling** | Independent | Independent |
 
-**The key insight**: Separate coordination (Obelisk) from storage (Pyramid) for optimal scalability, resource efficiency, and operational simplicity.
+**The key insight**: Separate coordination storage (Obelisk sparse files) from user data storage (Pyramid LSM trees) for optimal scalability, resource efficiency, and operational simplicity.
 
 ---
 
