@@ -859,8 +859,9 @@ Pyralog builds upon groundbreaking work from many projects:
 - [Pony](https://www.ponylang.io/) - Deny capabilities, reference capabilities
 - [E Language](http://www.erights.org/) - Object-capability security model
 
-### Pyralog Libraries
-- [shared-nothing](https://github.com/pyralog/shared-nothing) - Shared-nothing architecture library for Rust with actor model, worker pools, and high-performance message passing
+### Pyralog Ecosystem
+- [shared-nothing](https://github.com/pyralog/shared-nothing) - Shared-nothing architecture library for Rust with actor model, worker pools, and high-performance message passing (~80ns SPSC latency, 12M msg/sec)
+- [GraphMD](https://github.com/graphmd-lpe/graphmd) - Literate Programming Environment for Markdown-Based Executable Knowledge Graphs. AI-assisted development workflow that emerged during Pyralog development to formalize systematic research → design → roadmap → plan → development process
 
 ### Programming Languages
 - [Clojure](https://clojure.org/) - Lisp on JVM, persistent data structures, REPL-driven development

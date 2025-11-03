@@ -1267,6 +1267,7 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for how to help improve documentation.
 
 **Pyralog Ecosystem**:
 - [shared-nothing](https://github.com/pyralog/shared-nothing) - Shared-nothing architecture library for Rust: actor model, worker pools, lock-free channels, high-performance message passing (~80ns SPSC latency, 12M msg/sec throughput)
+- [GraphMD](https://github.com/graphmd-lpe/graphmd) - Literate Programming Environment for Markdown-Based Executable Knowledge Graphs. AI-assisted development workflow (research → design → roadmap → plan → development → review) that formalized Pyralog's systematic development process
 
 **External Projects**:
 - [Redpanda](https://redpanda.com/)
