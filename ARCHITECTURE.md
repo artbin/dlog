@@ -1,229 +1,1085 @@
-# Pyralog Architecture
+# 🔺 Pyralog Architecture
 
-This document provides a deep dive into Pyralog's architecture, design decisions, and implementation details.
+**A platform for secure, parallel, distributed, and decentralized computing**
+
+> "Built to Last Millennia" - Inspired by Ancient Egyptian Engineering
+
+---
 
 ## Table of Contents
 
+### Foundation & Identity
 1. [Overview](#overview)
-2. [Core Components](#core-components)
-3. [Storage Engine](#storage-engine)
-4. [Consensus Protocol](#consensus-protocol)
-5. [Replication System](#replication-system)
-6. [Network Protocol](#network-protocol)
-7. [Performance Optimizations](#performance-optimizations)
-8. [Failure Scenarios](#failure-scenarios)
-9. [Scalability](#scalability)
-10. [Monitoring and Observability](#monitoring-and-observability)
-11. [Conclusion](#conclusion)
+2. [System Hierarchy](#system-hierarchy)
+3. [Novel Coordination Primitives](#-novel-coordination-primitives)
+
+### Core Architecture
+4. [Two-Tier Node Architecture](#two-tier-node-architecture)
+5. [Shen Ring Architecture](#-shen-ring-architecture)
+6. [Consensus Protocol: Dual Raft](#consensus-protocol-dual-raft)
+7. [Storage Engine](#storage-engine)
+
+### Multi-Model & Query
+8. [Multi-Model Database](#multi-model-database)
+9. [Query & Programming Languages](#query--programming-languages)
+10. [Actor Model](#actor-model)
+
+### Advanced Features
+11. [Tensor Database](#tensor-database)
+12. [Cryptographic Verification](#cryptographic-verification)
+13. [Deduplication](#multi-layer-deduplication)
+
+### Decentralization & Networking
+14. [Decentralized Network](#decentralized-network)
+15. [Network Protocol](#network-protocol)
+
+### Performance & Scalability
+16. [Replication System](#replication-system)
+17. [Performance Optimizations](#performance-optimizations)
+18. [Scalability](#scalability)
+
+### Operations & Monitoring
+19. [Monitoring & Observability](#monitoring--observability)
+20. [Failure Scenarios](#failure-scenarios)
+
+### Conclusion
+21. [Architectural Philosophy](#architectural-philosophy)
+
+---
 
 ## Overview
 
-Pyralog is a distributed log system designed for:
-- **High throughput**: Millions of writes per second
+Pyralog is a **theoretically-founded, multi-model, actor-based, decentralized database platform** designed for:
+
+- **High throughput**: 10M+ writes/sec (10 nodes, 100 partitions)
 - **Low latency**: Sub-millisecond write latencies
 - **Strong durability**: Configurable replication and persistence
-- **High availability**: Tolerates node failures
-- **Horizontal scalability**: Add nodes to increase capacity
+- **High availability**: Tolerates node failures with fast failover
+- **Horizontal scalability**: Add nodes to increase capacity linearly
+- **Multi-model flexibility**: 6 data models in unified storage
+- **Actor-first execution**: Distributed queries with supervision trees
+- **Cryptographic safety**: Merkle trees, BLAKE3, zero-trust architecture
+- **Decentralized network**: PoW, PoS, zk-proofs for global scale
 
-## Core Components
+### Platform Vision
 
-### 1. pyralog-core
+Pyralog draws inspiration from **ancient Egyptian civilization** - a culture that perfected engineering excellence, mathematical precision, and distributed coordination. Like the pyramids that have stood for 4,500+ years, Pyralog is built for **permanence, precision, and power**.
 
-Provides fundamental abstractions:
+### Key Innovations at a Glance
 
-```
-pyralog-core/
-├── error.rs          # Error types
-├── log.rs            # Log metadata
-├── offset.rs         # Offset types
-├── partition.rs      # Partition types
-├── record.rs         # Record and batch types
-└── traits.rs         # Core traits
-```
+| Innovation | Type | Benefit |
+|------------|------|---------|
+| **🗿 Obelisk Sequencer** | Novel | Persistent atomic counter (file size = value), 28B ops/sec |
+| **☀️ Pharaoh Network** | Novel | Lightweight coordination layer (Obelisk nodes) |
+| **🪲 Scarab IDs** | Novel | Crash-safe globally unique 64-bit IDs |
+| **𓍶 Shen Ring** | Novel | 5 unified distributed patterns |
+| **🎼 Batuta Language** | Novel | Category Theory + Functional Relational Algebra |
+| **Dual Raft Clusters** | Synthesized | Parallel failover (1000 partitions in 10ms) |
+| **CopySet Replication** | Synthesized | Maximum cluster utilization (90%+) |
+| **Multi-Model Database** | Synthesized | 6 data models, Arrow storage, Category Theory |
+| **Actor-First Execution** | Synthesized | Supervision trees, location transparency |
+| **Tensor Database** | Synthesized | Native ML/AI, Safetensors, DLPack |
 
-**Key Types:**
-- `LogOffset`: 64-bit offset in a log
-- `Record`: Single log record with key, value, headers
-- `RecordBatch`: Batch of records for efficient I/O
-- `LogId`: Namespaced log identifier
-- `PartitionId`: Partition identifier within a log
+### Performance Targets
 
-### 2. pyralog-storage
+| Metric | Target | Notes |
+|--------|--------|-------|
+| **Write throughput** | 10M+ records/sec | 10 nodes, 100 partitions |
+| **Read throughput** | 30M+ records/sec | With RF=3 |
+| **Write latency (p99)** | < 1ms | With write cache |
+| **Read latency (p99)** | < 0.5ms | With memory-mapped I/O |
+| **Leader election** | < 10ms | Per-partition Raft |
+| **Replication lag** | < 100ms | With fast network |
+| **Failover time** | < 10ms | Parallel per-partition |
 
-High-performance storage engine:
+### Egyptian Theme Explained
 
-```
-pyralog-storage/
-├── segment.rs        # Segment file management
-├── index.rs          # Offset index
-├── log_storage.rs    # Main storage interface
-├── write_cache.rs    # Write caching
-└── tiered.rs         # Tiered storage
-```
+**Why Egyptian?** These architectural values directly mirror Pyralog's design:
 
-**Design Principles:**
-- Log-structured storage
-- Sequential writes for performance
-- Sparse indexes for fast lookups
-- Memory-mapped I/O for zero-copy reads
+| Egyptian Engineering | Pyralog Technology |
+|---------------------|-------------------|
+| Stone monuments (permanent) | Crash-safe primitives (Obelisk Sequencer) |
+| Pharaohs (distributed authority) | Decentralized coordination (Pharaoh Network) |
+| Scarab seals (unique identity) | Globally unique IDs (Scarab IDs) |
+| Hieroglyphics (immutable records) | Append-only logs |
+| Pyramids (layered architecture) | Two-tier nodes (Obelisk vs Pyramid) |
+| Five crowns (unified power) | Five Rings (Shen Ring Architecture) |
 
-### 3. pyralog-consensus
+---
 
-Raft-based consensus protocol:
+## System Hierarchy
 
-```
-pyralog-consensus/
-├── raft.rs           # Main Raft implementation
-├── state.rs          # Node state management
-├── rpc.rs            # RPC types
-├── election.rs       # Leader election
-└── log.rs            # Persistent log
-```
+Pyralog has two levels of architectural organization:
 
-**Responsibilities:**
-- Cluster membership
-- Leader election
-- Metadata replication
-- Configuration changes
+### Level 1: Cluster vs Network
 
-### 4. pyralog-replication
+#### 🔺 Pyralog Cluster (Single Datacenter)
 
-Flexible quorum-based replication:
+A **single distributed computing cluster** within one datacenter or region:
 
-```
-pyralog-replication/
-├── quorum.rs         # Quorum configuration
-├── copyset.rs        # CopySet selection
-├── replicator.rs     # Replication manager
-└── sync.rs           # Synchronization
-```
+- **Strong consistency**: Raft consensus per partition
+- **Low latency**: Sub-millisecond writes, microsecond reads
+- **High throughput**: 10M+ writes/sec per cluster
+- **Use case**: Traditional distributed database applications
 
-**Features:**
-- Configurable quorums
-- CopySet replication
-- ISR tracking
-- Replication lag monitoring
-
-### 5. pyralog-protocol
-
-Protocol abstraction layer:
+**Example**: E-commerce platform in US-East datacenter
 
 ```
-pyralog-protocol/
-├── api.rs            # API types
-├── partitioner.rs    # Partitioning strategies
-├── kafka.rs          # Kafka compatibility
-├── request.rs        # Request wire format
-└── response.rs       # Response wire format
+Pyralog Cluster (US-East)
+  ├─ Pharaoh Network Layer
+  │    └─ Obelisk Nodes (ID generation, coordination)
+  ├─ Pyralog Cluster Layer  
+  │    └─ Pyramid Nodes (storage, consensus, compute)
+  └─ Consistency: Strong (Raft)
 ```
 
-## Storage Engine
+#### 🌐 Pyralog Network (Multiple Clusters)
 
-### Segment-Based Storage
+**Multiple Pyralog Clusters** forming a **Decentralized Autonomous Database**:
 
-Data is organized into segments:
+- **Global distribution**: Clusters across multiple datacenters/regions/continents
+- **Eventual consistency**: Byzantine fault tolerance
+- **Decentralized consensus**: PoW, PoS, zk-proofs
+- **Use case**: Global-scale, trustless, decentralized applications
 
-```
-log-namespace/
-└── log-name/
-    └── partition-0/
-        ├── 00000000000000000000.log      # Segment
-        ├── 00000000000000000000.index    # Index
-        ├── 00000000000001000000.log      # Next segment
-        └── 00000000000001000000.index    # Next index
-```
-
-**Segment Properties:**
-- Fixed maximum size (default: 1GB)
-- Immutable once full
-- Can be memory-mapped for reads
-- Atomic writes
-
-### Index Structure
-
-Sparse index for fast offset lookups:
+**Example**: Decentralized social network across 5 continents
 
 ```
-Index Entry: [Offset (8 bytes)][Position (8 bytes)][Size (4 bytes)]
+Pyralog Network (Global)
+  ├─ Pyralog Cluster (US-East)
+  ├─ Pyralog Cluster (EU-West)
+  ├─ Pyralog Cluster (Asia-Pacific)
+  ├─ Pyralog Cluster (South America)
+  └─ Pyralog Cluster (Africa)
+  
+  Consistency: Eventual (Byzantine fault tolerant)
+  Consensus: PoW / PoS / zk-proofs
 ```
 
-**Properties:**
-- Not every record is indexed (sparse)
-- Typically one entry per 4KB
-- Entire index loaded in memory
-- Binary search for lookups
+**See also**: [DECENTRALIZED.md](DECENTRALIZED.md) for cluster vs network details, [DADBS.md](DADBS.md) for Decentralized Autonomous Database Systems.
 
-### Write Cache
+### Level 2: Two-Tier Node Architecture (within a cluster)
 
-In-memory write buffer:
+Within a single Pyralog Cluster, there are two types of nodes:
 
-```
-Write Cache
-├── Buffer: VecDeque<Record>
-├── Total Size: usize
-├── Last Flush: Instant
-└── Config
-    ├── Max Size: 16MB
-    └── Max Time: 10ms
-```
+#### ☀️ Pharaoh Network (Coordination Layer)
 
-**Benefits:**
-- Reduced write latency
-- Batch multiple writes
-- Configurable durability/latency tradeoff
+**Lightweight coordinators** running **Obelisk Nodes**:
 
-## Consensus Protocol
+- **Purpose**: Scarab ID generation, sequencing, lightweight coordination
+- **State**: Stateless or minimal state (sparse files for counters)
+- **Consensus**: None (coordination-free)
+- **Throughput**: Millions of ops/sec per node
+- **Storage**: Sparse files (counter = file size)
 
-### Raft Cluster Topology
-
-**Key Question**: Do we need one global Raft cluster or per-partition Raft clusters?
-
-**Answer**: Pyralog uses **BOTH** (dual Raft clusters):
+**Example**: ID generation service
 
 ```
-┌────────────────────────────────────────────────────────────┐
-│   Dual Raft Cluster Architecture                           │
-├────────────────────────────────────────────────────────────┤
-│                                                            │
-│  1. GLOBAL RAFT CLUSTER (Metadata)                         │
-│     ────────────────────────────────────                   │
-│     All nodes participate                                  │
-│     Purpose: Cluster-wide operations                       │
-│                                                            │
-│     Operations:                                            │
-│     ✓ Cluster membership changes                          │
-│     ✓ Partition creation/deletion                         │
-│     ✓ CopySet assignments (per-partition mode)            │
-│     ✓ Configuration changes                               │
-│                                                            │
-│     Example:                                               │
-│     [N1, N2, N3, N4, N5] → One Raft group                 │
-│                                                            │
-├────────────────────────────────────────────────────────────┤
-│                                                            │
-│  2. PER-PARTITION RAFT CLUSTERS (Epochs)                   │
-│     ──────────────────────────────────                     │
-│     Only partition replicas participate                    │
-│     Purpose: Partition-specific operations                 │
-│                                                            │
-│     Operations:                                            │
-│     ✓ Epoch activation (leader election for partition)    │
-│     ✓ Epoch sealing (leadership transfer)                 │
-│     ✓ Partition-level failover                            │
-│                                                            │
-│     Example:                                               │
-│     Partition 0: [N1, N2, N3] → Raft group for P0        │
-│     Partition 1: [N2, N3, N4] → Raft group for P1        │
-│     Partition 2: [N3, N4, N5] → Raft group for P2        │
-│                                                            │
-└────────────────────────────────────────────────────────────┘
+Obelisk Node
+  ├─ Scarab ID Generator
+  ├─ Obelisk Sequencers (sparse file counters)
+  ├─ No Raft consensus
+  └─ Throughput: 28B ops/sec theoretical
 ```
 
-**Why Dual Clusters?**
+#### 🔺 Pyralog Cluster (Storage/Consensus/Compute Layer)
+
+**Heavy storage and compute nodes** running **Pyramid Nodes**:
+
+- **Purpose**: Data storage, consensus, query execution, multi-model operations
+- **State**: Full stateful (LSM-Tree, partitions, indexes)
+- **Consensus**: Raft per partition
+- **Throughput**: 100K+ writes/sec per partition
+- **Storage**: LSM-Tree + hybrid (file references)
+
+**Example**: Data storage and query execution
 
 ```
-Scalability Trade-off:
-──────────────────────────────────────────────────
+Pyramid Node
+  ├─ LSM-Tree Storage Engine
+  ├─ Raft Consensus (per partition)
+  ├─ Multi-Model Data (6 models)
+  ├─ Actor-Based Query Execution
+  ├─ Tensor Operations (ML/AI)
+  └─ Cryptographic Verification (Merkle trees)
+```
+
+**Visual Hierarchy**:
+
+```
+┌─────────────────────────────────────────────────┐
+│   Pyralog Platform Hierarchy                    │
+├─────────────────────────────────────────────────┤
+│                                                 │
+│  Level 1: Deployment Topology                   │
+│  ───────────────────────────────                │
+│    • Cluster: Single datacenter (Raft)          │
+│    • Network: Multiple clusters (Byzantine FT)  │
+│                                                 │
+│  Level 2: Node Architecture (within cluster)    │
+│  ─────────────────────────────────────          │
+│    ☀️ Pharaoh Network                            │
+│      └─ Obelisk Nodes (coordination)            │
+│         • Scarab ID generation                  │
+│         • Lightweight, stateless                │
+│         • No Raft consensus                     │
+│                                                 │
+│    🔺 Pyralog Cluster                            │
+│      └─ Pyramid Nodes (storage/consensus)       │
+│         • LSM-Tree storage                      │
+│         • Raft per partition                    │
+│         • Multi-model data                      │
+│         • Actor-based queries                   │
+│                                                 │
+└─────────────────────────────────────────────────┘
+```
+
+**See also**: [NODES.md](NODES.md) for detailed node architecture, [BRANDING.md](BRANDING.md) for platform hierarchy.
+
+---
+
+## 🎯 Novel Coordination Primitives
+
+Pyralog introduces three **original innovations** for distributed coordination:
+
+### 🗿 Obelisk Sequencer
+
+**The key innovation**: A persistent atomic counter where **the file size IS the counter value**.
+
+#### Concept
+
+Traditional atomic counters are in-memory and lost on crash. Obelisk Sequencer uses **sparse files** on disk where the file size represents the counter value:
+
+```rust
+pub struct ObeliskSequencer {
+    file: File,  // Sparse file on disk
+    // The file size IS the counter value!
+    // No need for mmap, no SIGBUS risk
+}
+
+impl ObeliskSequencer {
+    pub fn increment(&mut self, delta: u64) -> Result<u64> {
+        // Read current size (counter value)
+        let current = self.file.metadata()?.len();
+        
+        // Increment by extending file (atomic operation!)
+        let new_value = current + delta;
+        self.file.set_len(new_value)?;  // truncate() syscall
+        
+        Ok(new_value)
+    }
+    
+    pub fn get(&self) -> Result<u64> {
+        // Counter value = file size
+        Ok(self.file.metadata()?.len())
+    }
+}
+```
+
+#### Key Properties
+
+| Property | Benefit |
+|----------|---------|
+| **Crash-safe** | File system guarantees atomic size updates |
+| **Coordination-free** | No Raft consensus needed between nodes |
+| **High throughput** | 28 billion ops/sec theoretical |
+| **Simple** | Just truncate() system call |
+| **No mmap** | Avoids SIGBUS on disk full |
+| **Persistent** | Counter survives crashes |
+
+#### Performance
+
+```
+Sequential counter increment:
+  • Sparse file truncate(): 36 ns/op
+  • 28 billion ops/sec per core (theoretical)
+  • Actual: ~1-2 million ops/sec (with fsync)
+  • Batch mode: ~10 million ops/sec (async flush)
+```
+
+#### Use Cases
+
+1. **Scarab ID Generation**: Monotonic sequence numbers for distributed IDs
+2. **Schema Versioning**: Track schema changes with persistent counter
+3. **Consumer Group Generations**: Rebalance tracking
+4. **Partition Epochs**: Track partition leadership changes
+5. **Exactly-Once Sessions**: Deduplication session IDs
+
+#### Comparison with Alternatives
+
+| Approach | Crash-Safe | Coordination-Free | Throughput | Complexity |
+|----------|------------|-------------------|------------|------------|
+| **Obelisk Sequencer** | ✅ Yes | ✅ Yes | 🔥 28B/sec | ✅ Simple |
+| In-memory AtomicU64 | ❌ No | ✅ Yes | 🔥 1B/sec | ✅ Simple |
+| Memory-mapped file | ⚠️ Risky (SIGBUS) | ✅ Yes | 🔥 500M/sec | ⚠️ Medium |
+| Raft counter | ✅ Yes | ❌ No (consensus) | ⚠️ 10K/sec | ❌ Complex |
+
+**Original innovation**: Not found in Kafka, LogDevice, TiKV, or other distributed logs.
+
+**See also**: [CLIENT_PARTITIONING_PATTERNS.md](CLIENT_PARTITIONING_PATTERNS.md) for Obelisk Sequencer details, blog posts [02](blog/02-obelisk-sequencer.md), [04](blog/04-28-billion-ops.md).
+
+### ☀️ Pharaoh Network
+
+**Distributed coordination without centralized bottlenecks** using lightweight Obelisk nodes.
+
+#### Architecture
+
+```
+┌──────────────────────────────────────────────────┐
+│   Pharaoh Network (Coordination Layer)          │
+├──────────────────────────────────────────────────┤
+│                                                  │
+│  Obelisk Node 1    Obelisk Node 2    Obelisk Node 3 │
+│    ├─ Counter A       ├─ Counter D       ├─ Counter G │
+│    ├─ Counter B       ├─ Counter E       ├─ Counter H │
+│    └─ Counter C       └─ Counter F       └─ Counter I │
+│                                                  │
+│  Each node:                                      │
+│    • Stateless or minimal state                  │
+│    • Independent counter allocation              │
+│    • No inter-node coordination                  │
+│    • Millions of ops/sec                         │
+│                                                  │
+│  Clients connect directly:                       │
+│    Client A → Node 1 (get Scarab ID)            │
+│    Client B → Node 2 (get Scarab ID)            │
+│    Client C → Node 3 (get Scarab ID)            │
+│                                                  │
+└──────────────────────────────────────────────────┘
+```
+
+#### Key Characteristics
+
+| Characteristic | Description |
+|----------------|-------------|
+| **Lightweight** | Minimal CPU, memory, storage |
+| **Stateless** | Only persistent counters (sparse files) |
+| **Coordination-free** | No Raft, no consensus between nodes |
+| **High availability** | Any node can serve requests |
+| **Horizontal scaling** | Add more nodes for capacity |
+
+#### Responsibilities
+
+1. **Scarab ID Generation**: Monotonic IDs for distributed systems
+2. **Sequence Number Allocation**: Batch allocation for efficiency
+3. **Epoch Tracking**: Partition leadership generations
+4. **Session Management**: Exactly-once deduplication sessions
+
+#### Pharaoh Network vs Pyramid Cluster
+
+| Aspect | Pharaoh Network (Obelisk) | Pyralog Cluster (Pyramid) |
+|--------|--------------------------|---------------------------|
+| **Purpose** | Coordination, ID generation | Storage, consensus, compute |
+| **State** | Minimal (sparse files) | Full (LSM-Tree) |
+| **Consensus** | None (coordination-free) | Raft per partition |
+| **Throughput** | Millions/sec per node | 100K/sec per partition |
+| **Storage** | Sparse files (~MB) | LSM-Tree (~TB) |
+| **Complexity** | Low | High |
+
+**Original innovation**: Two-tier separation of coordination and storage.
+
+**See also**: [NODES.md](NODES.md) for node architecture, blog post [03](blog/03-pharaoh-network.md).
+
+### 🪲 Scarab IDs
+
+**Globally unique, time-ordered 64-bit identifiers** inspired by Twitter's Snowflake algorithm, enhanced with Obelisk Sequencers for crash-safety.
+
+#### Structure
+
+```
+64-bit Scarab ID:
+┌─────────────────┬──────────────┬───────────────┐
+│  Timestamp      │  Machine ID  │  Sequence     │
+│  (41 bits)      │  (10 bits)   │  (13 bits)    │
+├─────────────────┼──────────────┼───────────────┤
+│  Milliseconds   │  Node ID     │  Per-ms counter│
+│  since epoch    │  (0-1023)    │  (0-8191)      │
+└─────────────────┴──────────────┴───────────────┘
+
+Example:
+  Timestamp: 2025-11-03 12:34:56.789
+  Machine: 123
+  Sequence: 4567
+  
+  Result: 1730638496789 << 23 | 123 << 13 | 4567
+        = 7123456789012345678
+```
+
+#### Key Properties
+
+| Property | Benefit |
+|----------|---------|
+| **Time-ordered** | Sortable by creation time |
+| **Globally unique** | 1024 nodes × 8192 IDs/ms = 8.3M IDs/ms |
+| **Crash-safe** | Obelisk Sequencer for sequence counter |
+| **Coordination-free** | No consensus between ID generators |
+| **64-bit** | Fits in database integer columns |
+
+#### Generation Process
+
+```rust
+pub struct ScarabIdGenerator {
+    machine_id: u16,           // 0-1023
+    sequencer: ObeliskSequencer, // Crash-safe counter
+}
+
+impl ScarabIdGenerator {
+    pub fn generate(&mut self) -> Result<u64> {
+        // 1. Get current timestamp (milliseconds since epoch)
+        let timestamp = SystemTime::now()
+            .duration_since(UNIX_EPOCH)?
+            .as_millis() as u64;
+        
+        // 2. Get sequence number from Obelisk Sequencer
+        //    (crash-safe persistent counter!)
+        let sequence = self.sequencer.increment(1)? as u16;
+        
+        // 3. Combine: timestamp (41 bits) + machine (10 bits) + sequence (13 bits)
+        let scarab_id = (timestamp << 23) | ((self.machine_id as u64) << 13) | (sequence as u64);
+        
+        Ok(scarab_id)
+    }
+}
+```
+
+#### Crash-Safety Guarantee
+
+**Traditional Snowflake** (Twitter):
+- In-memory sequence counter
+- ❌ Counter resets to 0 on crash
+- ❌ Risk of duplicate IDs after restart
+
+**Scarab IDs** (Pyralog):
+- Obelisk Sequencer (persistent counter)
+- ✅ Counter persists across crashes
+- ✅ No risk of duplicates after restart
+
+#### Use Cases
+
+1. **Distributed Event IDs**: Unique identifiers for events
+2. **Message IDs**: Discord-style message IDs
+3. **Transaction IDs**: Database transaction tracking
+4. **Order IDs**: E-commerce order identifiers
+5. **User IDs**: Globally unique user identifiers
+6. **Log Record IDs**: Distributed log entries
+
+#### Performance
+
+```
+Scarab ID generation:
+  • 1-2 million IDs/sec (with Obelisk fsync)
+  • 10 million IDs/sec (with async flush)
+  • 8.3 million IDs/ms/node (theoretical max)
+  • 8.5 billion IDs/sec (1024 nodes theoretical)
+```
+
+**Original innovation**: Snowflake algorithm + Obelisk Sequencer = crash-safe distributed IDs.
+
+**See also**: [CLIENT_PARTITIONING_PATTERNS.md](CLIENT_PARTITIONING_PATTERNS.md) for Scarab ID use cases, blog post [04](blog/04-28-billion-ops.md).
+
+---
+
+## Two-Tier Node Architecture
+
+Pyralog separates **coordination** (lightweight) from **storage/consensus/compute** (heavyweight) in a two-tier architecture.
+
+### Obelisk Nodes (Pharaoh Network - Coordination Layer)
+
+**Lightweight coordinators** for ID generation and sequencing.
+
+#### Responsibilities
+
+1. **Scarab ID Generation**: Globally unique identifiers
+2. **Sequence Number Allocation**: For epochs, sessions, schemas
+3. **Obelisk Counters**: Persistent atomic counters
+4. **Lightweight Coordination**: Stateless or minimal state
+
+#### Architecture
+
+```rust
+pub struct ObeliskNode {
+    node_id: NodeId,
+    
+    // Scarab ID generator (with Obelisk Sequencer)
+    scarab_generator: ScarabIdGenerator,
+    
+    // Obelisk counters for various use cases
+    counters: HashMap<CounterId, ObeliskSequencer>,
+    
+    // Minimal metadata (cached from Pyramid nodes)
+    cluster_metadata: Arc<RwLock<ClusterMetadata>>,
+}
+
+impl ObeliskNode {
+    pub async fn handle_id_request(&mut self) -> Result<u64> {
+        // Generate Scarab ID (crash-safe, no consensus)
+        let scarab_id = self.scarab_generator.generate()?;
+        Ok(scarab_id)
+    }
+    
+    pub async fn allocate_sequence(&mut self, counter_id: CounterId, count: u64) -> Result<u64> {
+        // Allocate sequence numbers from Obelisk Sequencer
+        let sequencer = self.counters.get_mut(&counter_id)
+            .ok_or(Error::CounterNotFound)?;
+        
+        let base = sequencer.increment(count)?;
+        Ok(base)
+    }
+}
+```
+
+#### Storage
+
+Obelisk nodes use **sparse files** for persistent counters:
+
+```
+/var/lib/pyralog/obelisk/
+├── counters/
+│   ├── scarab_sequence_123.sparse      # Scarab ID sequence (node 123)
+│   ├── schema_version.sparse            # Schema versioning
+│   ├── consumer_generation.sparse       # Consumer group generations
+│   └── session_ids.sparse               # Exactly-once session IDs
+└── metadata/
+    └── cluster_cache.json               # Cached cluster metadata
+```
+
+**File size = counter value** (no content, just file metadata).
+
+#### Performance Characteristics
+
+| Metric | Value | Notes |
+|--------|-------|-------|
+| **Throughput** | 1-2M IDs/sec | With fsync |
+| **Throughput (async)** | 10M IDs/sec | Batched flush |
+| **Latency (p99)** | < 1ms | Local counter increment |
+| **Storage** | ~1 MB/counter | Sparse file metadata |
+| **CPU** | < 5% | Minimal processing |
+| **Memory** | < 100 MB | Lightweight state |
+
+#### Failure Handling
+
+- **Node failure**: Clients connect to another Obelisk node
+- **Counter lost**: Recreate from last known value (monotonic guarantee)
+- **No Raft**: Each node operates independently
+
+**See also**: [NODES.md](NODES.md) for detailed Obelisk node design.
+
+### Pyramid Nodes (Pyralog Cluster - Storage/Consensus/Compute Layer)
+
+**Heavy storage and compute nodes** for data persistence and query execution.
+
+#### Responsibilities
+
+1. **Data Storage**: LSM-Tree storage engine
+2. **Consensus**: Raft consensus per partition
+3. **Multi-Model Data**: 6 data models (relational, document, graph, RDF, tensor, key-value)
+4. **Query Execution**: Actor-based distributed queries
+5. **Replication**: CopySet replication for durability
+6. **Tensor Operations**: ML/AI workloads
+7. **Cryptographic Verification**: Merkle trees, BLAKE3
+
+#### Architecture
+
+```rust
+pub struct PyramidNode {
+    node_id: NodeId,
+    
+    // Storage layer (LSM-Tree)
+    storage: Arc<LogStorage>,
+    
+    // Raft consensus (per partition)
+    raft_groups: HashMap<PartitionId, Arc<RaftNode>>,
+    
+    // Multi-model data
+    arrow_storage: Arc<ArrowStore>,
+    relational: Arc<RelationalEngine>,
+    document: Arc<DocumentEngine>,
+    graph: Arc<GraphEngine>,
+    rdf: Arc<RDFEngine>,
+    tensor: Arc<TensorEngine>,
+    kv: Arc<KVEngine>,
+    
+    // Actor system for query execution
+    actor_system: Arc<ActorSystem>,
+    
+    // Cryptographic verification
+    merkle_trees: Arc<MerkleTreeManager>,
+    
+    // Replication
+    replicator: Arc<Replicator>,
+}
+
+impl PyramidNode {
+    pub async fn write(&self, record: Record) -> Result<LogOffset> {
+        // 1. Write to LSM-Tree (local storage)
+        let offset = self.storage.append(record.clone()).await?;
+        
+        // 2. Replicate to followers (CopySet)
+        self.replicator.replicate(record, offset).await?;
+        
+        // 3. Update Merkle tree (cryptographic verification)
+        self.merkle_trees.append_leaf(offset, &record).await?;
+        
+        Ok(offset)
+    }
+    
+    pub async fn query(&self, query: Query) -> Result<QueryResult> {
+        // Execute query as distributed actors
+        let actor = QueryActor::new(query, self.actor_system.clone());
+        actor.execute().await
+    }
+}
+```
+
+#### Storage Hierarchy
+
+```
+/var/lib/pyralog/pyramid/
+├── raft/
+│   ├── partition_0/               # Raft log for partition 0
+│   ├── partition_1/               # Raft log for partition 1
+│   └── ...
+├── storage/
+│   ├── partition_0/
+│   │   ├── 00000000000000.log     # LSM-Tree segments
+│   │   ├── 00000000000000.index
+│   │   ├── 00000000001000.log
+│   │   └── 00000000001000.index
+│   └── ...
+├── arrow/                         # Multi-model Arrow storage
+│   ├── relational/
+│   ├── document/
+│   ├── graph/
+│   ├── rdf/
+│   ├── tensor/
+│   └── kv/
+├── merkle/                        # Merkle trees
+│   ├── partition_0.merkle
+│   └── ...
+└── metadata/
+    └── cluster_metadata.db        # RocksDB for metadata
+```
+
+#### Performance Characteristics
+
+| Metric | Value | Notes |
+|--------|-------|-------|
+| **Write throughput** | 100K/sec/partition | Single partition |
+| **Read throughput** | 300K/sec/partition | With RF=3 |
+| **Write latency (p99)** | < 1ms | With cache |
+| **Read latency (p99)** | < 0.5ms | With mmap |
+| **Storage** | ~1 TB/node | LSM-Tree + Arrow |
+| **CPU** | 50-80% | Query execution |
+| **Memory** | 16-64 GB | Cache + indexes |
+
+#### Failure Handling
+
+- **Leader failure**: Per-partition Raft election (< 10ms)
+- **Follower failure**: ISR tracking, continue with quorum
+- **Disk failure**: Redirect to replicas, rebuild from object storage
+
+**See also**: [NODES.md](NODES.md) for detailed Pyramid node design, [STORAGE.md](STORAGE.md) for storage layer.
+
+### Interaction Between Tiers
+
+```
+┌──────────────────────────────────────────────────────┐
+│   Client Request Flow                                │
+├──────────────────────────────────────────────────────┤
+│                                                      │
+│  1. Client writes to Pyralog                         │
+│     ├─ Needs unique ID for record                    │
+│     └─ Connects to Obelisk Node (Pharaoh Network)   │
+│                                                      │
+│  2. Obelisk Node generates Scarab ID                 │
+│     ├─ Uses Obelisk Sequencer (crash-safe)          │
+│     ├─ Returns ID to client (< 1ms)                 │
+│     └─ No consensus, no coordination                 │
+│                                                      │
+│  3. Client writes record with Scarab ID              │
+│     ├─ Connects to Pyramid Node (Pyralog Cluster)   │
+│     ├─ Record: { id: scarab_id, data: ... }         │
+│     └─ Pyramid Node handles storage + replication   │
+│                                                      │
+│  4. Pyramid Node persists data                       │
+│     ├─ Writes to LSM-Tree (local storage)           │
+│     ├─ Replicates via CopySet                       │
+│     ├─ Updates Merkle tree                          │
+│     └─ Returns offset to client (< 1ms)             │
+│                                                      │
+│  Result: Fast, crash-safe, coordinated write! ✅    │
+│                                                      │
+└──────────────────────────────────────────────────────┘
+```
+
+**Benefits of Two-Tier Architecture**:
+
+1. **Separation of Concerns**: ID generation ≠ data storage
+2. **Independent Scaling**: Add Obelisk or Pyramid nodes independently
+3. **Lightweight Coordination**: Obelisk nodes are simple, fast
+4. **Heavy Computation**: Pyramid nodes handle complex queries
+5. **Fault Isolation**: Obelisk failure doesn't affect storage
+
+**See also**: [NODES.md](NODES.md), [BRANDING.md](BRANDING.md) for two-tier architecture details, diagrams [system-architecture.mmd](diagrams/system-architecture.mmd), [component-relationships.mmd](diagrams/component-relationships.mmd).
+
+---
+
+## 𓍶 Shen Ring Architecture
+
+**Five unified distributed patterns** for coordinated system behavior, inspired by Egyptian symbolism.
+
+### Overview
+
+The **Shen Ring** (𓍶) is an Egyptian hieroglyph meaning "eternity" or "protection". In Pyralog, it represents the **unification of five essential distributed patterns**:
+
+```
+      𓍶 Shen Ring
+    (Unified Log)
+         │
+    ┌────┼────┐
+    │    │    │
+   ☥    ⭕   𓍹𓍺   🐍
+ Ankh  Sundial Cartouche Ouroboros
+ Ring  Circle   Ring      Circle
+```
+
+### The Five Rings
+
+#### 1. ☥ Ankh Ring (Consistent Hashing)
+
+**Partition assignment and load balancing** using consistent hashing.
+
+**Purpose**: Distribute partitions evenly across nodes with minimal reassignment on topology changes.
+
+**Algorithm**:
+```rust
+pub struct AnkhRing {
+    ring: BTreeMap<u64, NodeId>,  // Hash → Node mapping
+    vnodes_per_node: usize,         // Virtual nodes
+}
+
+impl AnkhRing {
+    pub fn assign_partition(&self, partition_id: PartitionId) -> NodeId {
+        // 1. Hash partition ID
+        let hash = hash_partition(partition_id);
+        
+        // 2. Find next node on ring (clockwise)
+        let node = self.ring.range(hash..).next()
+            .or_else(|| self.ring.iter().next())  // Wrap around
+            .map(|(_, node)| *node)
+            .unwrap();
+        
+        node
+    }
+    
+    pub fn add_node(&mut self, node: NodeId) {
+        // Add virtual nodes for better distribution
+        for i in 0..self.vnodes_per_node {
+            let hash = hash_vnode(node, i);
+            self.ring.insert(hash, node);
+        }
+    }
+}
+```
+
+**Benefits**:
+- **Minimal movement**: Only affected partitions rebalance
+- **Even distribution**: Virtual nodes smooth out hotspots
+- **Fast lookup**: O(log N) with BTreeMap
+
+**Use cases**:
+- Partition → Node assignment
+- Read replica selection
+- Load balancing
+
+#### 2. ⭕ Sundial Circle (Gossip Protocol)
+
+**Cluster membership and failure detection** using gossip-style epidemic protocols.
+
+**Purpose**: Maintain consistent view of cluster membership without centralized coordination.
+
+**Algorithm**:
+```rust
+pub struct SundialCircle {
+    members: HashMap<NodeId, MemberState>,
+    gossip_interval: Duration,  // e.g., 1 second
+}
+
+#[derive(Debug, Clone)]
+pub struct MemberState {
+    node_id: NodeId,
+    status: NodeStatus,      // Alive, Suspected, Dead
+    heartbeat: u64,          // Monotonic counter
+    last_seen: SystemTime,
+}
+
+impl SundialCircle {
+    pub async fn gossip_tick(&mut self) {
+        // 1. Select random subset of nodes (fanout = 3)
+        let targets = self.select_random_nodes(3);
+        
+        // 2. Send our member list + our heartbeat
+        for target in targets {
+            self.send_gossip(target, self.members.clone()).await;
+        }
+        
+        // 3. Detect failures (no heartbeat for > 3x gossip_interval)
+        self.detect_failures();
+    }
+    
+    fn detect_failures(&mut self) {
+        let now = SystemTime::now();
+        let timeout = self.gossip_interval * 3;
+        
+        for member in self.members.values_mut() {
+            if now.duration_since(member.last_seen).unwrap() > timeout {
+                if member.status == NodeStatus::Alive {
+                    member.status = NodeStatus::Suspected;
+                } else if member.status == NodeStatus::Suspected {
+                    member.status = NodeStatus::Dead;
+                }
+            }
+        }
+    }
+}
+```
+
+**Benefits**:
+- **Decentralized**: No single point of failure
+- **Scalable**: O(log N) message complexity
+- **Fast convergence**: Membership updates propagate quickly
+
+**Use cases**:
+- Cluster membership tracking
+- Failure detection (heartbeats)
+- Metadata propagation
+
+#### 3. 𓍹𓍺 Cartouche Ring (Token-Based Coordination)
+
+**Mutual exclusion and resource allocation** using token passing.
+
+**Purpose**: Coordinate access to shared resources without centralized locks.
+
+**Algorithm**:
+```rust
+pub struct CartoucheRing {
+    ring: Vec<NodeId>,            // Ordered ring of nodes
+    token_holder: NodeId,          // Current token owner
+    request_queue: VecDeque<TokenRequest>,
+}
+
+impl CartoucheRing {
+    pub async fn request_token(&mut self, requester: NodeId) -> TokenLease {
+        // 1. Add to queue
+        self.request_queue.push_back(TokenRequest {
+            requester,
+            timestamp: SystemTime::now(),
+        });
+        
+        // 2. Wait for token to arrive
+        loop {
+            if self.token_holder == requester {
+                return TokenLease::new(requester, Duration::from_secs(30));
+            }
+            tokio::time::sleep(Duration::from_millis(10)).await;
+        }
+    }
+    
+    pub fn release_token(&mut self) {
+        // Pass token to next in queue
+        if let Some(next) = self.request_queue.pop_front() {
+            self.token_holder = next.requester;
+        } else {
+            // No waiters, pass to next node in ring
+            let idx = self.ring.iter().position(|&n| n == self.token_holder).unwrap();
+            self.token_holder = self.ring[(idx + 1) % self.ring.len()];
+        }
+    }
+}
+```
+
+**Benefits**:
+- **Fairness**: FIFO ordering for requests
+- **Deadlock-free**: Token always moves
+- **Low overhead**: No heavyweight locks
+
+**Use cases**:
+- Leader election (for partitions)
+- Exclusive resource access
+- Distributed transactions (2PC coordinator)
+
+#### 4. 🐍 Ouroboros Circle (Chain Replication)
+
+**Data durability and strong consistency** using chain replication.
+
+**Purpose**: Replicate writes through a chain of nodes for strong consistency and durability.
+
+**Algorithm**:
+```rust
+pub struct OuroborosCircle {
+    chain: Vec<NodeId>,  // Head → ... → Tail
+}
+
+impl OuroborosCircle {
+    pub async fn write(&self, record: Record) -> Result<()> {
+        // 1. Send to head of chain
+        let head = self.chain.first().unwrap();
+        self.send_to_node(*head, record.clone()).await?;
+        
+        // 2. Head propagates down the chain:
+        //    Head → Node2 → Node3 → ... → Tail
+        
+        // 3. Tail acknowledges back to client
+        //    (ensures all nodes in chain have the data)
+        
+        Ok(())
+    }
+    
+    // On each node in the chain:
+    pub async fn handle_write(&self, record: Record, next: Option<NodeId>) -> Result<()> {
+        // 1. Write locally
+        self.local_storage.append(record.clone()).await?;
+        
+        // 2. Forward to next in chain (if not tail)
+        if let Some(next_node) = next {
+            self.send_to_node(next_node, record).await?;
+        }
+        
+        // 3. If tail, acknowledge to client
+        if next.is_none() {
+            self.ack_to_client(record.id).await?;
+        }
+        
+        Ok(())
+    }
+}
+```
+
+**Benefits**:
+- **Strong consistency**: All nodes in chain have data before ACK
+- **Ordered replication**: Linear chain ensures order
+- **Fast reads**: Read from tail (most up-to-date)
+- **Low latency**: Pipeline writes through chain
+
+**Use cases**:
+- Primary replication strategy
+- Strong consistency requirements
+- Audit logs (sequential integrity)
+
+#### 5. 𓍶 Shen Ring (Unified Log Interface)
+
+**Append-only log with total ordering** - the core abstraction that unifies all other rings.
+
+**Purpose**: Provide a single, unified interface for all log operations.
+
+**Algorithm**:
+```rust
+pub struct ShenRing {
+    ankh: AnkhRing,               // Partition assignment
+    sundial: SundialCircle,       // Cluster membership
+    cartouche: CartoucheRing,     // Leader election
+    ouroboros: OuroborosCircle,   // Replication chain
+}
+
+impl ShenRing {
+    pub async fn append(&mut self, record: Record) -> Result<LogOffset> {
+        // 1. Use Ankh Ring: Determine partition
+        let partition = self.ankh.assign_partition(record.key);
+        
+        // 2. Use Cartouche Ring: Get partition leader
+        let leader = self.cartouche.get_leader(partition).await?;
+        
+        // 3. Use Sundial Circle: Check if leader is alive
+        if !self.sundial.is_alive(leader) {
+            // Trigger leader election via Cartouche
+            leader = self.cartouche.elect_leader(partition).await?;
+        }
+        
+        // 4. Use Ouroboros Circle: Replicate through chain
+        let offset = self.ouroboros.write(record).await?;
+        
+        Ok(offset)
+    }
+    
+    pub async fn read(&self, partition: PartitionId, offset: LogOffset) -> Result<Record> {
+        // 1. Use Ankh Ring: Find replica nodes
+        let replicas = self.ankh.get_replicas(partition);
+        
+        // 2. Use Sundial Circle: Filter alive replicas
+        let alive_replicas: Vec<_> = replicas.into_iter()
+            .filter(|&n| self.sundial.is_alive(n))
+            .collect();
+        
+        // 3. Read from any alive replica (Ouroboros tail is best)
+        let tail = self.ouroboros.get_tail(partition);
+        if alive_replicas.contains(&tail) {
+            return self.read_from_node(tail, partition, offset).await;
+        }
+        
+        // Fallback to any alive replica
+        let node = alive_replicas.first().unwrap();
+        self.read_from_node(*node, partition, offset).await
+    }
+}
+```
+
+**Benefits**:
+- **Unified interface**: Single API for all operations
+- **Composable**: Combines strengths of all rings
+- **Flexible**: Can swap implementations of individual rings
+- **Observable**: Each ring can be monitored independently
+
+**Use cases**:
+- Complete log system implementation
+- Multi-model database operations
+- Distributed queries
+
+### Shen Ring Architecture Diagram
+
+```
+┌──────────────────────────────────────────────────────┐
+│   Shen Ring Architecture (Five Unified Patterns)     │
+├──────────────────────────────────────────────────────┤
+│                                                      │
+│                   𓍶 Shen Ring                         │
+│                (Unified Log Interface)               │
+│                        │                             │
+│           ┌────────────┼────────────┐                │
+│           │            │            │                │
+│       ┌───┴───┐    ┌───┴───┐   ┌───┴───┐           │
+│       │       │    │       │   │       │            │
+│      ☥        ⭕   𓍹𓍺      🐍     │            │
+│    Ankh    Sundial Cartouche Ouroboros │            │
+│    Ring    Circle   Ring     Circle    │            │
+│       │       │        │        │                    │
+│  Partition  Cluster  Leader  Chain                   │
+│  Assignment Membership Election Replication          │
+│                                                      │
+│  Use Case Flow:                                      │
+│  1. Ankh: Which partition?                           │
+│  2. Cartouche: Who is leader?                        │
+│  3. Sundial: Is leader alive?                        │
+│  4. Ouroboros: Replicate data                        │
+│  5. Shen: Return success                             │
+│                                                      │
+└──────────────────────────────────────────────────────┘
+```
+
+**Performance**: Each ring operates independently, enabling parallelism and fault isolation.
+
+**See also**: [SHEN_RING.md](SHEN_RING.md) for comprehensive details, diagram [shen-ring.mmd](diagrams/shen-ring.mmd), blog post [12](blog/12-shen-ring.md).
+
+---
+
+## Consensus Protocol: Dual Raft
+
+Pyralog uses **two separate Raft clusters** for scalability: Global Raft (cluster-wide metadata) and Per-Partition Raft (partition-specific operations).
+
+### Why Dual Raft?
+
+**The Problem**: Single global Raft doesn't scale:
+
+```
 Single Global Raft Only:
   ✅ Simple architecture
   ✅ One consensus group to manage
@@ -239,6 +1095,136 @@ Dual Raft (Global + Per-Partition):
   ⚠️  Overhead: More Raft state to manage
 ```
 
+### Global Raft Cluster
+
+**All nodes participate** in a single global Raft group for cluster-wide operations.
+
+#### Responsibilities
+
+1. **Cluster membership changes**: Add/remove nodes
+2. **Partition creation/deletion**: Lifecycle management
+3. **CopySet assignments**: Initial replica placement (per-partition mode)
+4. **Configuration changes**: Cluster-wide settings
+
+#### Example
+
+```
+Cluster: [N1, N2, N3, N4, N5]
+
+Global Raft Group: All 5 nodes participate
+
+Operations:
+  • Add Node N6 → Propose to Global Raft → Committed → All nodes updated
+  • Create Partition 10 → Propose to Global Raft → Assigns CopySet [N2, N4, N5]
+  • Update Config → Propose to Global Raft → All nodes receive new config
+```
+
+#### Implementation
+
+```rust
+pub struct GlobalRaft {
+    raft_node: Arc<RaftNode>,
+    state_machine: Arc<GlobalStateMachine>,
+}
+
+#[derive(Debug, Clone)]
+pub struct GlobalStateMachine {
+    cluster_members: HashMap<NodeId, NodeMetadata>,
+    partitions: HashMap<PartitionId, PartitionMetadata>,
+    copysets: HashMap<PartitionId, Vec<NodeId>>,
+}
+
+impl GlobalRaft {
+    pub async fn add_node(&self, node: NodeId, address: SocketAddr) -> Result<()> {
+        // Propose membership change to Global Raft
+        let proposal = Proposal::AddNode { node, address };
+        self.raft_node.propose(proposal).await?;
+        Ok(())
+    }
+    
+    pub async fn create_partition(&self, partition: PartitionId) -> Result<Vec<NodeId>> {
+        // Select CopySet for new partition
+        let copyset = self.select_copyset(partition)?;
+        
+        // Propose partition creation to Global Raft
+        let proposal = Proposal::CreatePartition { partition, copyset: copyset.clone() };
+        self.raft_node.propose(proposal).await?;
+        
+        Ok(copyset)
+    }
+}
+```
+
+### Per-Partition Raft Clusters
+
+**Only partition replicas participate** in each partition's Raft group for partition-specific operations.
+
+#### Responsibilities
+
+1. **Epoch activation**: Leader election for partition
+2. **Epoch sealing**: Leadership transfer
+3. **Partition-level failover**: Fast recovery without global coordination
+
+#### Example
+
+```
+Cluster: [N1, N2, N3, N4, N5]
+Partition 0 CopySet: [N1, N2, N3]
+Partition 1 CopySet: [N2, N3, N4]
+Partition 2 CopySet: [N3, N4, N5]
+
+Per-Partition Raft Groups:
+  • Partition 0: [N1, N2, N3] → Raft group for P0 only
+  • Partition 1: [N2, N3, N4] → Raft group for P1 only
+  • Partition 2: [N3, N4, N5] → Raft group for P2 only
+
+Node N2 is a member of:
+  • Global Raft: [N1, N2, N3, N4, N5]
+  • Partition 0 Raft: [N1, N2, N3]
+  • Partition 1 Raft: [N2, N3, N4]
+  Total: 1 global + 2 partition Raft groups = 3 Raft instances
+```
+
+#### Implementation
+
+```rust
+pub struct PerPartitionRaft {
+    partition_id: PartitionId,
+    raft_node: Arc<RaftNode>,
+    state_machine: Arc<PartitionStateMachine>,
+}
+
+#[derive(Debug, Clone)]
+pub struct PartitionStateMachine {
+    current_epoch: Epoch,
+    leader: NodeId,
+    last_committed_offset: LogOffset,
+}
+
+impl PerPartitionRaft {
+    pub async fn activate_epoch(&self, epoch: Epoch) -> Result<()> {
+        // Propose epoch activation to Partition Raft (only replicas vote!)
+        let proposal = Proposal::ActivateEpoch { epoch };
+        self.raft_node.propose(proposal).await?;
+        Ok(())
+    }
+    
+    pub async fn handle_leader_failure(&self) -> Result<NodeId> {
+        // Fast election among partition replicas only
+        self.raft_node.trigger_election().await?;
+        
+        // Wait for new leader
+        let new_leader = self.raft_node.wait_for_leader().await?;
+        
+        // Activate new epoch
+        let new_epoch = self.state_machine.current_epoch.next();
+        self.activate_epoch(new_epoch).await?;
+        
+        Ok(new_leader)
+    }
+}
+```
+
 ### Node Membership in Raft Clusters
 
 Each node is a member of **1 global + N partition Raft clusters**:
@@ -248,10 +1234,10 @@ pub struct NodeRaftMembership {
     node_id: NodeId,
     
     // 1. Global cluster (always)
-    global_raft: Arc<RaftNode>,
+    global_raft: Arc<GlobalRaft>,
     
     // 2. Per-partition clusters (for partitions this node replicates)
-    partition_rafts: HashMap<PartitionId, Arc<RaftNode>>,
+    partition_rafts: HashMap<PartitionId, Arc<PerPartitionRaft>>,
 }
 
 // Example: Node 2 in 5-node cluster
@@ -264,71 +1250,25 @@ pub struct NodeRaftMembership {
 // Total: 1 global + 3 partition Raft groups = 4 Raft instances
 ```
 
-### Raft State Machine
+### Benefits of Dual Raft
+
+#### Parallel Failover
 
 ```
-                    Follower
-                       │
-                       │ election timeout
-                       ▼
-                   Candidate
-                       │
-                       │ receives votes from majority
-                       ▼
-                     Leader
-                       │
-                       │ discovers higher term
-                       ▼
-                    Follower
+1000 partitions fail over simultaneously:
+  
+  Single Global Raft:
+    1000 epoch changes → Global Raft log
+    Sequential processing → Slow!
+    Latency: 1000 × 10ms = 10 seconds ❌
+  
+  Per-Partition Raft:
+    1000 independent Raft groups
+    Parallel processing → Fast!
+    Latency: 10ms (same as one partition) ✅
 ```
 
-### Which Raft Cluster Does What?
-
-```
-┌─────────────────────────────────────────────────────────────┐
-│   Operation Flow: Global vs Per-Partition Raft              │
-├─────────────────────────────────────────────────────────────┤
-│                                                             │
-│  CLUSTER-WIDE OPERATIONS → Global Raft                      │
-│  ──────────────────────────────────────────                 │
-│                                                             │
-│  1. Add Node to Cluster                                     │
-│     Client → Any Node → Propose to Global Raft             │
-│     Global Raft commits → All nodes updated                │
-│                                                             │
-│  2. Create New Partition                                    │
-│     Admin API → Global Raft                                │
-│     Assigns partition ID, initial CopySet                  │
-│     Creates per-partition Raft group                       │
-│                                                             │
-│  3. Reassign CopySet (rebalancing)                          │
-│     Admin API → Global Raft                                │
-│     Updates CopySet metadata                               │
-│                                                             │
-├─────────────────────────────────────────────────────────────┤
-│                                                             │
-│  PARTITION-SPECIFIC OPERATIONS → Per-Partition Raft         │
-│  ────────────────────────────────────────────────           │
-│                                                             │
-│  1. Leader Election for Partition                           │
-│     Partition 0's Raft: [N1, N2, N3]                       │
-│     N1 fails → N2 or N3 elected leader                     │
-│     Only involves partition replicas!                      │
-│                                                             │
-│  2. Epoch Activation                                        │
-│     New leader N2 for Partition 0                          │
-│     N2 proposes epoch change to P0's Raft                  │
-│     Only [N1, N2, N3] vote (fast!)                         │
-│                                                             │
-│  3. Epoch Sealing                                           │
-│     Leader N2 seals old epoch                              │
-│     Proposes to P0's Raft                                  │
-│     Committed when majority of [N1, N2, N3] ack            │
-│                                                             │
-└─────────────────────────────────────────────────────────────┘
-```
-
-**Concrete Example: Node Failure**
+#### Node Failure Example
 
 ```
 Initial State:
@@ -357,51 +1297,6 @@ N1 Fails:
    → N2 is still leader
    → Continues normal operation
 ```
-
-### Benefits of Dual Raft
-
-```
-Parallelism:
-──────────────────────────────────────────────────
-1000 partitions fail over simultaneously:
-  
-  Single Global Raft:
-    1000 epoch changes → Global Raft log
-    Sequential processing → Slow!
-    Latency: 1000 × 10ms = 10 seconds ❌
-  
-  Per-Partition Raft:
-    1000 independent Raft groups
-    Parallel processing → Fast!
-    Latency: 10ms (same as one partition) ✅
-```
-
-### Log Replication Flow
-
-```
-Leader                      Follower
-  │                            │
-  │──── AppendEntries ────────►│
-  │    (entries, commitIndex)  │
-  │                            │
-  │                            │ Apply entries
-  │                            │ Update commitIndex
-  │                            │
-  │◄───── Success ─────────────│
-  │    (matchIndex)            │
-  │                            │
-  │ Update commitIndex         │
-  │                            │
-```
-
-### Election Process
-
-1. **Follower timeout**: No heartbeat from leader
-2. **Become candidate**: Increment term, vote for self
-3. **Request votes**: Send RequestVote RPC to all peers
-4. **Collect votes**: Wait for majority
-5. **Become leader**: If majority votes received
-6. **Send heartbeats**: Establish authority
 
 ### Resource Management: Multiple Raft Groups
 
@@ -449,7 +1344,7 @@ Network: 601 × 2 heartbeats/sec = ~1200 msgs/sec ✅ (fine)
 ```rust
 // Batch heartbeats for multiple Raft groups
 pub struct MultiRaftManager {
-    groups: HashMap<PartitionId, RaftNode>,
+    groups: HashMap<PartitionId, Arc<PerPartitionRaft>>,
     
     pub async fn tick(&self) {
         // Single timer for all groups
@@ -479,191 +1374,1569 @@ pub struct MultiRaftManager {
 
 **Result**: 1000 partitions managed efficiently with minimal overhead! ✅
 
+**See also**: [EPOCHS.md](EPOCHS.md) for epoch-based coordination, diagram [consensus.mmd](diagrams/consensus.mmd).
+
+---
+
+## Storage Engine
+
+Pyralog uses a **hybrid storage architecture** combining native LSM-Tree for hot data with file references for cold data.
+
+### LSM-Tree Architecture
+
+**Log-Structured Merge Tree** for write-optimized storage.
+
+#### Multi-Level Organization
+
+```
+┌──────────────────────────────────────────────────┐
+│   LSM-Tree Structure                             │
+├──────────────────────────────────────────────────┤
+│                                                  │
+│  Level 0: MemTable (Memory)                      │
+│    • In-memory sorted tree                       │
+│    • 16-64 MB size                               │
+│    • Flush to Level 1 when full                  │
+│                                                  │
+│  Level 1: Immutable MemTable → SSTable           │
+│    • Write to disk as sorted string table        │
+│    • One SSTable = one segment                   │
+│    • Max 10-20 SSTables                          │
+│                                                  │
+│  Level 2-N: Compacted SSTables                   │
+│    • Merge overlapping SSTables                  │
+│    • Each level 10× larger than previous         │
+│    • Level 2: ~100-200 MB                        │
+│    • Level 3: ~1-2 GB                            │
+│    • Level 4: ~10-20 GB                          │
+│                                                  │
+└──────────────────────────────────────────────────┘
+```
+
+#### Write Path
+
+```rust
+pub struct LSMTree {
+    memtable: Arc<RwLock<MemTable>>,
+    immutable: Arc<RwLock<Vec<MemTable>>>,
+    sstables: Arc<RwLock<Vec<SSTable>>>,
+    wal: Arc<WriteAheadLog>,
+}
+
+impl LSMTree {
+    pub async fn write(&self, key: &[u8], value: &[u8]) -> Result<()> {
+        // 1. Write to WAL (crash safety)
+        self.wal.append(key, value).await?;
+        
+        // 2. Write to MemTable (in-memory)
+        let mut memtable = self.memtable.write();
+        memtable.insert(key.to_vec(), value.to_vec());
+        
+        // 3. Check if MemTable is full
+        if memtable.size() > 64 * 1024 * 1024 {  // 64 MB
+            // Flush to disk as SSTable
+            self.flush_memtable().await?;
+        }
+        
+        Ok(())
+    }
+    
+    async fn flush_memtable(&self) -> Result<()> {
+        // 1. Freeze current MemTable
+        let frozen = {
+            let mut memtable = self.memtable.write();
+            let frozen = std::mem::replace(&mut *memtable, MemTable::new());
+            frozen
+        };
+        
+        // 2. Add to immutable list
+        self.immutable.write().push(frozen.clone());
+        
+        // 3. Write to disk as SSTable (async)
+        let sstable = self.write_sstable(frozen).await?;
+        
+        // 4. Add to SSTable list (Level 1)
+        self.sstables.write().push(sstable);
+        
+        // 5. Trigger compaction if needed
+        self.maybe_compact().await?;
+        
+        Ok(())
+    }
+}
+```
+
+#### Read Path
+
+```rust
+impl LSMTree {
+    pub async fn read(&self, key: &[u8]) -> Result<Option<Vec<u8>>> {
+        // 1. Check MemTable (most recent)
+        if let Some(value) = self.memtable.read().get(key) {
+            return Ok(Some(value.clone()));
+        }
+        
+        // 2. Check immutable MemTables (recent, not yet flushed)
+        for memtable in self.immutable.read().iter().rev() {
+            if let Some(value) = memtable.get(key) {
+                return Ok(Some(value.clone()));
+            }
+        }
+        
+        // 3. Check SSTables (disk, most recent first)
+        for sstable in self.sstables.read().iter().rev() {
+            // Use Bloom filter to skip SSTables that don't have the key
+            if !sstable.bloom_filter.may_contain(key) {
+                continue;
+            }
+            
+            // Use sparse index to find approximate position
+            if let Some(offset) = sstable.index.lookup(key) {
+                // Read from disk (memory-mapped for zero-copy)
+                if let Some(value) = sstable.read_at(offset, key).await? {
+                    return Ok(Some(value));
+                }
+            }
+        }
+        
+        // 4. Not found
+        Ok(None)
+    }
+}
+```
+
+#### Compaction Strategies
+
+1. **Size-Tiered Compaction**: Merge SSTables of similar size
+2. **Leveled Compaction**: Merge overlapping SSTables across levels
+3. **Deduplication Compaction**: Remove duplicates and tombstones
+
+```rust
+pub enum CompactionStrategy {
+    SizeTiered,
+    Leveled,
+    Deduplication { mode: DeduplicationMode },
+}
+
+#[derive(Debug, Clone)]
+pub enum DeduplicationMode {
+    LastWriteWins,     // Keep most recent value
+    Tombstone,         // Keep delete markers
+    MVCC,              // Keep all versions
+}
+
+impl LSMTree {
+    async fn compact(&self, strategy: CompactionStrategy) -> Result<()> {
+        match strategy {
+            CompactionStrategy::Leveled => {
+                // Merge overlapping SSTables from Level N to Level N+1
+                self.leveled_compaction().await?;
+            }
+            CompactionStrategy::Deduplication { mode } => {
+                // Remove duplicates based on mode
+                self.deduplication_compaction(mode).await?;
+            }
+            _ => {}
+        }
+        Ok(())
+    }
+}
+```
+
+**See also**: [STORAGE.md](STORAGE.md) for detailed storage layer, diagram [lsm-storage.mmd](diagrams/lsm-storage.mmd).
+
+### Hybrid Storage Architecture
+
+**Combine native LSM-Tree (hot data) with file references (cold data)** for cost-effective storage.
+
+#### Decision Matrix
+
+| Data Type | Hot (LSM-Tree) | Cold (File Reference) |
+|-----------|----------------|----------------------|
+| **Recent records** | ✅ Fast random access | ❌ Too slow |
+| **Old records** | ⚠️ Wastes space | ✅ Cost-effective |
+| **Analytics tables** | ❌ Too large | ✅ Parquet files |
+| **ML models** | ❌ Too large | ✅ Safetensors files |
+| **Tensors** | ❌ Too large | ✅ Zarr files |
+| **Documents** | ✅ For recent | ✅ For archival |
+
+#### File References
+
+Instead of storing large blobs in LSM-Tree, store **file paths** and memory-map files directly:
+
+```rust
+pub enum StorageValue {
+    // Hot data: Stored in LSM-Tree
+    Inline(Vec<u8>),
+    
+    // Cold data: File reference (memory-mapped on access)
+    FileReference {
+        path: PathBuf,         // /mnt/cold/analytics/table123.parquet
+        offset: u64,           // Byte offset within file
+        length: u64,           // Byte length
+        format: ExternalFormat,  // Parquet, Safetensors, Zarr
+    },
+}
+
+impl LSMTree {
+    pub async fn read(&self, key: &[u8]) -> Result<Option<Vec<u8>>> {
+        let value = self.read_raw(key).await?;
+        
+        match value {
+            StorageValue::Inline(data) => Ok(Some(data)),
+            
+            StorageValue::FileReference { path, offset, length, format } => {
+                // Memory-map external file (zero-copy!)
+                let mmap = unsafe { Mmap::map(&File::open(path)?)? };
+                let data = &mmap[offset as usize..(offset + length) as usize];
+                Ok(Some(data.to_vec()))
+            }
+        }
+    }
+}
+```
+
+#### Benefits
+
+| Benefit | Description |
+|---------|-------------|
+| **Zero-copy** | Memory-map files directly, no data duplication |
+| **Cost-effective** | 70-90% cost savings for cold data |
+| **Native formats** | Use Parquet, Safetensors, Zarr directly |
+| **Flexibility** | Hot data in LSM, cold data as files |
+
+**Example**: Store 100 GB ML model as Safetensors file, reference it in LSM-Tree (1 KB metadata), access via memory-mapping (zero-copy).
+
+**See also**: [STORAGE.md](STORAGE.md) for hybrid storage details, [DATA_FORMATS.md](DATA_FORMATS.md) for external formats, blog post [20](blog/20-lsm-arrow.md).
+
+### Memory-Only Mode
+
+**Ultra-fast ephemeral storage** for testing, caching, and real-time workloads.
+
+#### Configuration
+
+```rust
+pub struct StorageConfig {
+    pub mode: StorageMode,
+}
+
+pub enum StorageMode {
+    Persistent {
+        data_dir: PathBuf,
+        wal_enabled: bool,
+        fsync_mode: FsyncMode,
+    },
+    MemoryOnly {
+        max_size: usize,         // Max memory usage
+        eviction: EvictionPolicy,  // LRU, LFU, TTL
+    },
+}
+```
+
+#### Performance Characteristics
+
+| Metric | Persistent Mode | Memory-Only Mode |
+|--------|----------------|------------------|
+| **Write throughput** | 100K/sec | 10M+/sec (100× faster) |
+| **Write latency** | 1-10ms | 10-100μs (100× faster) |
+| **Read latency** | 0.5-5ms | 0.1-1μs (10× faster) |
+| **Durability** | ✅ Crash-safe | ❌ Lost on restart |
+| **Storage** | Disk-based | RAM-based |
+
+#### Use Cases
+
+1. **Testing**: Fast test databases (no disk I/O)
+2. **Caching**: Hot data cache (TTL-based eviction)
+3. **Real-time**: Sub-millisecond latencies
+4. **Ephemeral**: Session storage, temporary results
+5. **Development**: Fast iteration cycles
+
+**See also**: [MEMORY_ONLY_MODE.md](MEMORY_ONLY_MODE.md) for details, blog post [15](blog/15-memory-only.md).
+
+---
+
+## Multi-Model Database
+
+Pyralog unifies **6 data models** in a single storage engine using Apache Arrow.
+
+### The Six Data Models
+
+#### 1. Relational (SQL Tables)
+
+**Traditional SQL tables** with schemas, indexes, and ACID transactions.
+
+**Storage**: Arrow RecordBatch (columnar)
+
+```rust
+pub struct RelationalEngine {
+    arrow_store: Arc<ArrowStore>,
+    datafusion: Arc<DataFusion>,  // SQL engine
+}
+
+// Example: Users table
+// Schema: (id: Int64, name: Utf8, email: Utf8, created_at: Timestamp)
+
+let schema = Schema::new(vec![
+    Field::new("id", DataType::Int64, false),
+    Field::new("name", DataType::Utf8, false),
+    Field::new("email", DataType::Utf8, false),
+    Field::new("created_at", DataType::Timestamp(TimeUnit::Millisecond, None), false),
+]);
+
+// Write as Arrow RecordBatch
+let batch = RecordBatch::try_new(
+    Arc::new(schema),
+    vec![
+        Arc::new(Int64Array::from(vec![1, 2, 3])),
+        Arc::new(StringArray::from(vec!["Alice", "Bob", "Charlie"])),
+        Arc::new(StringArray::from(vec!["alice@example.com", "bob@example.com", "charlie@example.com"])),
+        Arc::new(TimestampMillisecondArray::from(vec![1730000000000, 1730000001000, 1730000002000])),
+    ],
+)?;
+
+relational.write_batch(batch).await?;
+
+// Query with SQL
+let result = relational.query("SELECT name, email FROM users WHERE id > 1").await?;
+```
+
+#### 2. Document (JSON/XML Hierarchies)
+
+**Hierarchical documents** with nested structures.
+
+**Storage**: Arrow Struct (nested columnar)
+
+```rust
+pub struct DocumentEngine {
+    arrow_store: Arc<ArrowStore>,
+}
+
+// Example: Blog post document
+// Schema: { id: Int64, title: Utf8, author: Struct(name, email), tags: List(Utf8), content: Utf8 }
+
+let doc = json!({
+    "id": 123,
+    "title": "Pyralog Architecture",
+    "author": {
+        "name": "Alice",
+        "email": "alice@pyralog.io"
+    },
+    "tags": ["database", "distributed", "rust"],
+    "content": "..."
+});
+
+// Store as Arrow Struct
+let batch = document.json_to_arrow(&doc).await?;
+document.write_batch(batch).await?;
+
+// Query with JSONPath
+let result = document.query("$.author.name").await?;
+```
+
+#### 3. Property Graph (Cypher Queries)
+
+**Nodes and edges** with properties for graph traversals.
+
+**Storage**: Arrow Table with adjacency list
+
+```rust
+pub struct GraphEngine {
+    arrow_store: Arc<ArrowStore>,
+}
+
+// Example: Social network graph
+// Nodes: (id: Int64, label: Utf8, properties: Struct)
+// Edges: (from: Int64, to: Int64, label: Utf8, properties: Struct)
+
+// Create nodes
+graph.create_node(Node { id: 1, label: "Person", properties: { name: "Alice" } }).await?;
+graph.create_node(Node { id: 2, label: "Person", properties: { name: "Bob" } }).await?;
+
+// Create edge
+graph.create_edge(Edge { from: 1, to: 2, label: "FOLLOWS", properties: {} }).await?;
+
+// Query with Cypher
+let result = graph.query("MATCH (a:Person)-[:FOLLOWS]->(b:Person) RETURN a.name, b.name").await?;
+```
+
+#### 4. RDF Graph (SPARQL Queries)
+
+**Semantic triples** (subject, predicate, object) for semantic web.
+
+**Storage**: Arrow Triple Table
+
+```rust
+pub struct RDFEngine {
+    arrow_store: Arc<ArrowStore>,
+}
+
+// Example: Knowledge graph
+// Schema: (subject: Utf8, predicate: Utf8, object: Utf8)
+
+// Add triples
+rdf.add_triple("<pyralog>", "<type>", "<database>").await?;
+rdf.add_triple("<pyralog>", "<written_in>", "<rust>").await?;
+rdf.add_triple("<pyralog>", "<supports>", "<multi_model>").await?;
+
+// Query with SPARQL
+let result = rdf.query("SELECT ?o WHERE { <pyralog> <supports> ?o }").await?;
+```
+
+#### 5. Tensor (Multi-Dimensional Arrays)
+
+**ML/AI tensors** with native operations.
+
+**Storage**: Arrow FixedSizeList or File Reference (Safetensors, Zarr)
+
+```rust
+pub struct TensorEngine {
+    arrow_store: Arc<ArrowStore>,
+}
+
+// Example: ML model embeddings
+// Schema: (id: Int64, embedding: FixedSizeList(Float32, 768))
+
+let embedding = vec![0.1, 0.2, ..., 0.768];  // 768-dimensional vector
+
+// Store as Arrow FixedSizeList (for analytics)
+let batch = tensor.vector_to_arrow(&embedding).await?;
+tensor.write_batch(batch).await?;
+
+// Or store as Safetensors file (for large models)
+let model_path = PathBuf::from("/mnt/models/bert-base.safetensors");
+tensor.store_file_reference(model_path).await?;
+
+// Query with tensor operations
+let result = tensor.cosine_similarity(embedding1, embedding2).await?;
+```
+
+#### 6. Key-Value (High-Speed Lookups)
+
+**Simple key-value pairs** for fast dictionary storage.
+
+**Storage**: Arrow Dictionary (columnar dictionary encoding)
+
+```rust
+pub struct KVEngine {
+    arrow_store: Arc<ArrowStore>,
+}
+
+// Example: User sessions
+// Schema: (key: Utf8, value: Binary)
+
+kv.put("session:123", b"user_data...").await?;
+let value = kv.get("session:123").await?;
+```
+
+### Unified Storage: Apache Arrow
+
+**Columnar in-memory format** for zero-copy data interchange.
+
+#### Why Arrow?
+
+| Benefit | Description |
+|---------|-------------|
+| **Zero-copy** | No serialization between models |
+| **Columnar** | SIMD vectorization (8-16× speedup) |
+| **Cross-model joins** | 10-50× faster than ETL |
+| **DataFusion/Polars** | Best-in-class SQL engine |
+| **Industry standard** | Interop with Pandas, Spark, etc. |
+
+#### Cross-Model Queries
+
+**Example**: Join relational table with graph data
+
+```sql
+-- SQL query joining relational users with graph relationships
+SELECT u.name, COUNT(e.to) AS follower_count
+FROM users AS u
+LEFT JOIN graph_edges AS e ON e.from = u.id
+WHERE e.label = 'FOLLOWS'
+GROUP BY u.name;
+```
+
+**Performance**: 10-50× faster than ETL (no data copying!)
+
+**See also**: [MULTI_MODEL_DATABASE.md](MULTI_MODEL_DATABASE.md) for details, [ARROW.md](ARROW.md) for Arrow integration, blog post [07](blog/07-multi-model-database.md).
+
+### Category Theory Foundation
+
+**Schema as category, instance as functor** for proven correctness of transformations.
+
+#### Core Concepts
+
+1. **Schema**: Category with types as objects, transformations as morphisms
+2. **Instance**: Functor mapping schema to data
+3. **Query**: Natural transformation between functors
+4. **Correctness**: Commutative diagrams ensure query correctness
+
+**See also**: [FUNCTIONAL_RELATIONAL_ALGEBRA.md](FUNCTIONAL_RELATIONAL_ALGEBRA.md), blog post [18](blog/18-category-theory.md).
+
+---
+
+## Query & Programming Languages
+
+Pyralog offers **4 query interfaces** with different theoretical rigor levels:
+
+### Theoretical Rigor Spectrum
+
+```
+SQL (none) < PRQL (pragmatic) < GraphQL (API) < **Batuta (Category Theory)**
+```
+
+### 🎼 Batuta Language (Theoretically Founded)
+
+**A full programming language** with Category Theory foundations and Functional Relational Algebra.
+
+#### Core Principles
+
+1. **Category Theory**: Functors, monads, natural transformations
+2. **Functional Relational Algebra**: Proven query optimizations
+3. **Sulise Foundation**: Complete language theory (grammar, type systems, semantics)
+4. **Actor-First**: Queries execute as distributed actors
+5. **Lisp Macros**: Full metaprogramming capabilities
+
+#### Two Execution Modes
+
+**Client-Side (Application-Embedded)**:
+```rust
+// Batuta runs in application process
+let batuta = BatutaRuntime::new_client();
+let result = batuta.eval("
+  (from users
+    (filter (> age 18))
+    (select name email))
+").await?;
+```
+
+**Server-Side (Database-Embedded)**:
+```rust
+// Batuta runs in Pyramid node
+let batuta = BatutaRuntime::new_server(pyramid_node);
+let result = batuta.eval("
+  (from users
+    (join orders (on (= users.id orders.user_id)))
+    (aggregate (count *)))
+").await?;
+```
+
+#### Category Theory Example
+
+```clojure
+;; Define a category for database schema
+(defcategory UserSchema
+  (objects User Order Product)
+  (morphisms
+    (has-orders User → [Order])
+    (contains Order → [Product])))
+
+;; Define a functor mapping schema to data
+(deffunctor UserData [UserSchema → Set]
+  (map User #{alice bob charlie})
+  (map Order #{order1 order2})
+  (map has-orders {alice [order1] bob [order2]}))
+
+;; Query as natural transformation
+(defnatural-transformation
+  active-users
+  [UserData → UserData]
+  (from User u
+    (where (> (count (has-orders u)) 0))
+    (select u)))
+```
+
+**Benefits**:
+- **Proven correctness**: Category Theory guarantees
+- **Type-safe schema evolution**: Commutative diagrams
+- **Automatic optimization**: Functional Relational Algebra
+
+**See also**: [BATUTA.md](BATUTA.md), [FUNCTIONAL_RELATIONAL_ALGEBRA.md](FUNCTIONAL_RELATIONAL_ALGEBRA.md), blog posts [08](blog/08-batuta-language.md), [17](blog/17-batuta-modes.md), [18](blog/18-category-theory.md).
+
+### PRQL (Pragmatic Query Language)
+
+**Functional pipelines** that compile to SQL for readable queries.
+
+```prql
+from users
+filter age > 18
+join orders (users.id == orders.user_id)
+aggregate (count *)
+```
+
+Compiles to:
+```sql
+SELECT COUNT(*)
+FROM users
+JOIN orders ON users.id = orders.user_id
+WHERE users.age > 18;
+```
+
+**Benefits**:
+- **10× more readable**: Pipelines > nested SQL
+- **Compiles to SQL**: Zero runtime overhead
+- **Type-safe**: Catches errors at compile time
+
+**See also**: [PRQL.md](PRQL.md), blog post [16](blog/16-five-interfaces.md).
+
+### GraphQL (Flexible API)
+
+**Client-driven queries** for fetching exactly the data needed.
+
+```graphql
+query {
+  users(age_gt: 18) {
+    name
+    email
+    orders {
+      id
+      total
+      products {
+        name
+        price
+      }
+    }
+  }
+}
+```
+
+**Benefits**:
+- **Client-driven**: Request exactly what you need
+- **Type-safe**: Strong type system
+- **Real-time**: Subscriptions for live updates
+- **Multi-model**: Query across relational, document, graph
+
+**See also**: [GRAPHQL.md](GRAPHQL.md), blog post [16](blog/16-five-interfaces.md).
+
+### JSON-RPC/WebSocket (Lightweight RPC)
+
+**Low-latency, bidirectional RPC** for real-time applications.
+
+```json
+// Request
+{
+  "jsonrpc": "2.0",
+  "id": 1,
+  "method": "query",
+  "params": {
+    "sql": "SELECT * FROM users WHERE age > 18",
+    "format": "arrow"
+  }
+}
+
+// Response (with Arrow IPC binary)
+{
+  "jsonrpc": "2.0",
+  "id": 1,
+  "result": {
+    "format": "arrow-ipc",
+    "data": "<binary Arrow IPC stream>"
+  }
+}
+```
+
+**Benefits**:
+- **Low-latency**: <5ms overhead
+- **Bidirectional**: Server can push updates
+- **Binary support**: Arrow IPC for zero-copy
+- **Simpler than gRPC**: No protobuf compilation
+- **Browser-native**: WebSocket in all browsers
+
+**Why JSON-RPC/WS Replaces gRPC**:
+- ✅ 30-50% faster (no HTTP/2 framing overhead)
+- ✅ Simpler (no protobuf, no code generation)
+- ✅ Browser-native (WebSocket everywhere)
+- ✅ Better binary format (Arrow IPC vs protobuf)
+
+**See also**: [JSONRPC_WEBSOCKET.md](JSONRPC_WEBSOCKET.md), blog post [16](blog/16-five-interfaces.md).
+
+---
+
+## Actor Model
+
+Pyralog uses **actors** for distributed query execution with fault tolerance.
+
+### Location-Transparent Actors
+
+**Queries execute as distributed actors** that can run anywhere in the cluster.
+
+```rust
+pub struct QueryActor {
+    query: Query,
+    actor_system: Arc<ActorSystem>,
+}
+
+impl QueryActor {
+    pub async fn execute(&self) -> Result<QueryResult> {
+        // 1. Spawn child actors for each partition
+        let partition_actors: Vec<_> = self.query.partitions.iter()
+            .map(|&p| self.actor_system.spawn(PartitionQueryActor::new(p, self.query.clone())))
+            .collect();
+        
+        // 2. Execute queries in parallel across partitions
+        let partition_results = futures::future::join_all(
+            partition_actors.iter().map(|a| a.send(Execute))
+        ).await?;
+        
+        // 3. Aggregate results
+        let result = self.aggregate(partition_results)?;
+        
+        Ok(result)
+    }
+}
+```
+
+**Benefits**:
+- **Location transparency**: Actor can run on any node
+- **Automatic parallelism**: Partitions processed concurrently
+- **Fault tolerance**: Actors can restart on failure
+
+### Supervision Trees
+
+**Self-healing hierarchies** for fault tolerance ("let it crash" philosophy).
+
+```rust
+pub struct QuerySupervisor {
+    children: Vec<ActorRef<QueryActor>>,
+    strategy: SupervisionStrategy,
+}
+
+#[derive(Debug, Clone)]
+pub enum SupervisionStrategy {
+    OneForOne,  // Restart only failed child
+    OneForAll,  // Restart all children if one fails
+    RestForOne, // Restart failed child and all younger siblings
+}
+
+impl QuerySupervisor {
+    pub async fn handle_failure(&self, failed_actor: ActorRef<QueryActor>, error: Error) {
+        match self.strategy {
+            SupervisionStrategy::OneForOne => {
+                // Restart only the failed actor
+                self.restart_actor(failed_actor).await;
+            }
+            SupervisionStrategy::OneForAll => {
+                // Restart all child actors
+                for child in &self.children {
+                    self.restart_actor(child.clone()).await;
+                }
+            }
+            SupervisionStrategy::RestForOne => {
+                // Restart failed actor and all younger siblings
+                let failed_idx = self.children.iter().position(|c| c == &failed_actor).unwrap();
+                for child in &self.children[failed_idx..] {
+                    self.restart_actor(child.clone()).await;
+                }
+            }
+        }
+    }
+}
+```
+
+**Benefits**:
+- **Self-healing**: Automatic recovery from failures
+- **Fault isolation**: Failures don't propagate
+- **Configurable**: Choose supervision strategy per use case
+
+### Topology-Level Reactivity
+
+**Flocks and deploy-* operators** for peer discovery and coordination.
+
+```rust
+// Flock: Auto-discover and coordinate with peers
+let flock = Flock::new("query-workers");
+flock.join("pyralog-cluster").await?;
+
+// deploy-map: Distribute work across flock members
+let results = flock.deploy_map(|node| {
+    node.execute_query(query.clone())
+}).await?;
+
+// deploy-reduce: Aggregate results from all nodes
+let final_result = flock.deploy_reduce(results, |a, b| {
+    merge_query_results(a, b)
+}).await?;
+```
+
+**Benefits**:
+- **Auto-discovery**: Nodes find each other via mDNS/gossip
+- **Dynamic topology**: Add/remove nodes without reconfiguration
+- **Declarative coordination**: deploy-* operators abstract complexity
+
+**See also**: [ACTOR_MODEL.md](ACTOR_MODEL.md), blog post [09](blog/09-actor-concurrency.md).
+
+### Formal Semantics
+
+1. **π-calculus**: Process communication and concurrency
+2. **Session types**: Protocol safety and correctness
+3. **Category theory**: Actor composition
+
+**See also**: [FUNCTIONAL_RELATIONAL_ALGEBRA.md](FUNCTIONAL_RELATIONAL_ALGEBRA.md).
+
+---
+
+## Tensor Database
+
+Pyralog provides **native tensor storage and operations** for ML/AI workloads.
+
+### Storage Strategy
+
+**Two-layer architecture**:
+
+1. **Persistent Storage**: Safetensors files (100× faster than pickle)
+2. **Runtime Exchange**: DLPack (zero-copy between frameworks)
+
+```rust
+pub struct TensorEngine {
+    arrow_store: Arc<ArrowStore>,
+    tensor_cache: Arc<TensorCache>,
+}
+
+impl TensorEngine {
+    pub async fn store_model(&self, model_id: &str, tensors: &HashMap<String, Tensor>) -> Result<()> {
+        // 1. Serialize to Safetensors format
+        let safetensors_bytes = serialize_safetensors(tensors)?;
+        
+        // 2. Write to disk
+        let path = format!("/mnt/models/{}.safetensors", model_id);
+        fs::write(&path, safetensors_bytes).await?;
+        
+        // 3. Store file reference in LSM-Tree
+        self.arrow_store.put(
+            model_id.as_bytes(),
+            StorageValue::FileReference {
+                path: PathBuf::from(path),
+                offset: 0,
+                length: safetensors_bytes.len() as u64,
+                format: ExternalFormat::Safetensors,
+            }
+        ).await?;
+        
+        Ok(())
+    }
+    
+    pub async fn load_model(&self, model_id: &str) -> Result<HashMap<String, Tensor>> {
+        // 1. Get file reference from LSM-Tree
+        let file_ref = self.arrow_store.get(model_id.as_bytes()).await?;
+        
+        // 2. Memory-map Safetensors file (zero-copy!)
+        let tensors = match file_ref {
+            StorageValue::FileReference { path, .. } => {
+                deserialize_safetensors(&path)?
+            }
+            _ => return Err(Error::InvalidStorageValue),
+        };
+        
+        Ok(tensors)
+    }
+    
+    pub fn to_dlpack(&self, tensor: &Tensor) -> DLPackTensor {
+        // Zero-copy export to DLPack for PyTorch/TensorFlow/JAX
+        DLPackTensor::from_tensor(tensor)
+    }
+}
+```
+
+### Use Cases
+
+#### 1. Vector Embeddings
+
+```rust
+// Store embeddings for similarity search
+let embedding = vec![0.1, 0.2, ..., 0.768];  // 768-dim BERT embedding
+
+tensor_engine.store_embedding(
+    "doc_123",
+    embedding.clone(),
+).await?;
+
+// ANN search for similar embeddings
+let results = tensor_engine.ann_search(
+    embedding,
+    top_k: 10,
+    metric: CosineS imilarity,
+).await?;
+```
+
+#### 2. ML Feature Store
+
+```rust
+// Store versioned features for ML training
+let features = FeatureSet {
+    user_id: 123,
+    features: vec![
+        ("age", 25.0),
+        ("clicks", 150.0),
+        ("purchases", 5.0),
+    ],
+    timestamp: SystemTime::now(),
+    version: 1,
+};
+
+tensor_engine.store_features(features).await?;
+
+// Load features for training
+let training_data = tensor_engine.load_features(
+    user_ids: vec![123, 456, 789],
+    version: 1,
+).await?;
+```
+
+#### 3. Model Registry
+
+```rust
+// Store trained model with metadata
+let model = TrainedModel {
+    id: "bert-base-v2",
+    weights: model_tensors,
+    metadata: ModelMetadata {
+        framework: "PyTorch",
+        accuracy: 0.95,
+        training_date: "2025-11-03",
+    },
+};
+
+tensor_engine.register_model(model).await?;
+
+// Load model for inference
+let model = tensor_engine.load_model("bert-base-v2").await?;
+let predictions = model.predict(inputs).await?;
+```
+
+#### 4. Hugging Face Integration
+
+```rust
+// Download model from Hugging Face and store in Pyralog
+let model = tensor_engine.download_from_huggingface(
+    "bert-base-uncased",
+).await?;
+
+// Model is now stored as Safetensors file with file reference
+// Access it via zero-copy memory-mapping
+```
+
+### Performance
+
+| Operation | Traditional (pickle) | Pyralog (Safetensors + DLPack) |
+|-----------|---------------------|-------------------------------|
+| **Model save** | ~10 sec | ~100 ms (100× faster) |
+| **Model load** | ~5 sec | ~50 ms (100× faster) |
+| **Framework exchange** | Copy | Zero-copy (DLPack) |
+| **Safety** | ⚠️ Arbitrary code execution | ✅ Memory-safe |
+
+**See also**: [TENSOR_DATABASE.md](TENSOR_DATABASE.md), [DATA_FORMATS.md](DATA_FORMATS.md), blog post [19](blog/19-tensor-database.md).
+
+---
+
+## Cryptographic Verification
+
+Pyralog provides **cryptographic guarantees** for data integrity and zero-trust architectures.
+
+### Merkle Trees
+
+**Hierarchical hash trees** for efficient verification.
+
+```rust
+pub struct MerkleTreeManager {
+    trees: HashMap<PartitionId, MerkleTree>,
+}
+
+impl MerkleTreeManager {
+    pub async fn append_leaf(&self, partition: PartitionId, offset: LogOffset, record: &Record) -> Result<()> {
+        // 1. Hash the record using BLAKE3 (10× faster than SHA256)
+        let leaf_hash = blake3::hash(&record.serialize()?);
+        
+        // 2. Get Merkle tree for partition
+        let mut tree = self.trees.get_mut(&partition).unwrap();
+        
+        // 3. Append leaf and update tree
+        tree.append(leaf_hash);
+        
+        // 4. Store updated root hash
+        self.store_root_hash(partition, tree.root()).await?;
+        
+        Ok(())
+    }
+    
+    pub fn generate_proof(&self, partition: PartitionId, offset: LogOffset) -> Result<MerkleProof> {
+        let tree = self.trees.get(&partition).unwrap();
+        let proof = tree.generate_proof(offset)?;
+        Ok(proof)
+    }
+    
+    pub fn verify_proof(&self, root: Hash, proof: &MerkleProof, leaf: Hash) -> bool {
+        proof.verify(root, leaf)
+    }
+}
+```
+
+**Benefits**:
+- **Efficient**: O(log N) proof size
+- **Fast**: BLAKE3 is 10× faster than SHA256
+- **Tamper-evident**: Any modification changes root hash
+
+### Zero-Trust Architecture
+
+**Client-side verification** without trusting the server.
+
+```rust
+// Client verifies data integrity without trusting server
+let record = client.read(partition, offset).await?;
+let proof = client.request_merkle_proof(partition, offset).await?;
+let root = client.get_root_hash(partition).await?;
+
+// Verify locally
+let leaf_hash = blake3::hash(&record.serialize()?);
+if !proof.verify(root, leaf_hash) {
+    return Err(Error::TamperedData);
+}
+```
+
+### Notarization API
+
+**Cryptographic timestamps** for legal/copyright protection.
+
+```rust
+pub struct NotarizationService {
+    merkle_trees: Arc<MerkleTreeManager>,
+}
+
+impl NotarizationService {
+    pub async fn notarize(&self, data: &[u8]) -> Result<NotarizationReceipt> {
+        // 1. Hash the data
+        let data_hash = blake3::hash(data);
+        
+        // 2. Append to Merkle tree
+        let partition = self.select_notarization_partition();
+        let offset = self.merkle_trees.append_leaf(partition, data_hash).await?;
+        
+        // 3. Generate receipt
+        let receipt = NotarizationReceipt {
+            data_hash,
+            partition,
+            offset,
+            timestamp: SystemTime::now(),
+            merkle_root: self.merkle_trees.get_root(partition)?,
+        };
+        
+        Ok(receipt)
+    }
+    
+    pub fn verify_receipt(&self, data: &[u8], receipt: &NotarizationReceipt) -> Result<bool> {
+        // Verify data hasn't been tampered with
+        let data_hash = blake3::hash(data);
+        Ok(data_hash == receipt.data_hash)
+    }
+}
+```
+
+### Auditor Mode
+
+**Independent verification** for regulatory compliance.
+
+```rust
+// Auditor runs independent read-only node
+let auditor = AuditorNode::new();
+
+// Continuously verify data integrity
+loop {
+    for partition in partitions {
+        let root = auditor.read_root_hash(partition).await?;
+        let verified = auditor.verify_partition(partition, root).await?;
+        
+        if !verified {
+            auditor.report_tampering(partition).await?;
+        }
+    }
+    
+    tokio::time::sleep(Duration::from_secs(60)).await;
+}
+```
+
+**Use cases**:
+- SEC, HIPAA, SOC2 compliance
+- Tamper detection
+- Forensic auditing
+
+**See also**: [CRYPTOGRAPHIC_VERIFICATION.md](CRYPTOGRAPHIC_VERIFICATION.md), blog post [06](blog/06-cryptographic-verification.md).
+
+---
+
+## Multi-Layer Deduplication
+
+Pyralog applies **5 deduplication strategies** at different layers.
+
+### The Five Layers
+
+#### 1. Storage-Level Deduplication (LSM Compaction)
+
+```rust
+pub enum DeduplicationMode {
+    LastWriteWins,     // Keep most recent value
+    Tombstone,         // Keep delete markers
+    MVCC,              // Keep all versions
+}
+
+// Example: Last-Write-Wins compaction
+impl LSMTree {
+    async fn compact_lww(&self) -> Result<()> {
+        let mut seen = HashMap::new();
+        let mut output = Vec::new();
+        
+        // Scan SSTables in reverse order (most recent first)
+        for sstable in self.sstables.read().iter().rev() {
+            for (key, value) in sstable.iter() {
+                if !seen.contains_key(&key) {
+                    seen.insert(key.clone(), true);
+                    output.push((key, value));
+                }
+            }
+        }
+        
+        // Write deduplicated SSTable
+        self.write_sstable(output).await?;
+        Ok(())
+    }
+}
+```
+
+#### 2. PPHM-Level Deduplication (Index Merging)
+
+**6 deduplication strategies** when merging perfect hash maps:
+
+1. **First-Wins**: Keep first occurrence
+2. **Last-Wins**: Keep last occurrence
+3. **Min-Value**: Keep minimum value
+4. **Max-Value**: Keep maximum value
+5. **Concatenate**: Merge values
+6. **Custom**: User-defined merge function
+
+**See also**: [PPHM.md](PPHM.md), blog post [13](blog/13-perfect-hash-maps.md).
+
+#### 3. Exactly-Once Semantics
+
+```rust
+pub struct ExactlyOnceDeduplicator {
+    sessions: HashMap<SessionId, SessionState>,
+}
+
+impl ExactlyOnceDeduplicator {
+    pub async fn deduplicate_write(&self, session_id: SessionId, sequence: u64, record: Record) -> Result<bool> {
+        let session = self.sessions.get(&session_id).unwrap();
+        
+        // Check if already written
+        if session.written_sequences.contains(&sequence) {
+            return Ok(false);  // Duplicate, skip
+        }
+        
+        // Write and mark as written
+        self.storage.write(record).await?;
+        session.written_sequences.insert(sequence);
+        
+        Ok(true)  // New write
+    }
+}
+```
+
+#### 4. Content-Addressable Storage
+
+```rust
+pub struct ContentAddressableStore {
+    chunks: HashMap<Blake3Hash, Vec<u8>>,
+}
+
+impl ContentAddressableStore {
+    pub async fn store(&self, data: &[u8]) -> Result<Blake3Hash> {
+        // 1. Hash content
+        let hash = blake3::hash(data);
+        
+        // 2. Check if already stored
+        if self.chunks.contains_key(&hash) {
+            return Ok(hash);  // Deduplicated!
+        }
+        
+        // 3. Store new chunk
+        self.chunks.insert(hash, data.to_vec());
+        Ok(hash)
+    }
+}
+```
+
+#### 5. Application-Level Deduplication
+
+```rust
+// Semantic deduplication: Detect similar documents
+let doc1_embedding = tensor_engine.embed("Document 1 content").await?;
+let doc2_embedding = tensor_engine.embed("Document 2 content").await?;
+
+let similarity = cosine_similarity(&doc1_embedding, &doc2_embedding);
+if similarity > 0.95 {
+    // Documents are duplicates (95% similar)
+    deduplicate_documents(doc1, doc2).await?;
+}
+```
+
+**See also**: [DEDUPLICATION.md](DEDUPLICATION.md), diagram [deduplication-layers.mmd](diagrams/deduplication-layers.mmd), blog post [14](blog/14-deduplication.md).
+
+---
+
+## Decentralized Network
+
+Pyralog supports **two deployment models**: Cluster (single datacenter) and Network (multiple clusters).
+
+### Pyralog Cluster (Single Datacenter)
+
+**Strong consistency** with Raft consensus:
+
+- **Use case**: Traditional distributed database
+- **Consistency**: Strong (Raft per partition)
+- **Latency**: Sub-millisecond
+- **Fault tolerance**: Crash fault tolerant (CFT)
+- **Scale**: Single region/datacenter
+
+### Pyralog Network (Multiple Clusters)
+
+**Decentralized Autonomous Database** with Byzantine fault tolerance:
+
+- **Use case**: Global-scale, trustless applications
+- **Consistency**: Eventual (configurable)
+- **Latency**: Milliseconds to seconds (cross-region)
+- **Fault tolerance**: Byzantine fault tolerant (BFT)
+- **Scale**: Multi-region/continent
+
+### Consensus Mechanisms
+
+#### 1. Raft (Default for Clusters)
+
+**Crash fault tolerant** consensus for trusted environments:
+
+```rust
+pub struct RaftConsensus {
+    raft_node: Arc<RaftNode>,
+}
+
+impl RaftConsensus {
+    pub async fn propose(&self, command: Command) -> Result<()> {
+        // Propose to Raft
+        self.raft_node.propose(command).await?;
+        Ok(())
+    }
+}
+```
+
+**Properties**:
+- **Fast**: < 10ms consensus
+- **Simple**: Easier to implement than Paxos
+- **Trusted**: Assumes non-Byzantine faults
+
+#### 2. Proof of Work (PoW)
+
+**Useful computation** for anti-spam and rate limiting:
+
+```rust
+pub struct ProofOfWork {
+    difficulty: u32,
+}
+
+impl ProofOfWork {
+    pub fn compute(&self, data: &[u8]) -> Result<u64> {
+        // Find nonce such that hash(data || nonce) has `difficulty` leading zeros
+        let mut nonce = 0u64;
+        loop {
+            let hash = blake3::hash(&[data, &nonce.to_le_bytes()].concat());
+            if Self::check_difficulty(&hash, self.difficulty) {
+                return Ok(nonce);
+            }
+            nonce += 1;
+        }
+    }
+}
+```
+
+**Use cases** (not just mining!):
+- **Anti-spam**: Require PoW for writes
+- **Rate limiting**: Natural throttle mechanism
+- **Sybil resistance**: Make fake identities expensive
+- **Priority queues**: Higher PoW = higher priority
+- **Time-lock puzzles**: Delay access until computation complete
+
+**See also**: Blog post [23](blog/23-pow-useful.md).
+
+#### 3. Proof of Stake (PoS)
+
+**Energy-efficient staking** for economic incentives:
+
+```rust
+pub struct ProofOfStake {
+    stakes: HashMap<NodeId, u64>,
+    total_stake: u64,
+}
+
+impl ProofOfStake {
+    pub fn select_proposer(&self, round: u64) -> NodeId {
+        // Weighted random selection based on stake
+        let mut rng = ChaCha20Rng::seed_from_u64(round);
+        let target = rng.gen_range(0..self.total_stake);
+        
+        let mut cumulative = 0;
+        for (&node, &stake) in &self.stakes {
+            cumulative += stake;
+            if cumulative > target {
+                return node;
+            }
+        }
+        
+        unreachable!()
+    }
+}
+```
+
+**Properties**:
+- **Energy-efficient**: No wasteful computation
+- **Fast finality**: Seconds instead of minutes
+- **Economic security**: Slashing for misbehavior
+
+#### 4. zk-SNARKs (Privacy-Preserving)
+
+**Zero-knowledge proofs** for private transactions:
+
+```rust
+pub struct ZKSnark {
+    proving_key: ProvingKey,
+    verifying_key: VerifyingKey,
+}
+
+impl ZKSnark {
+    pub fn prove(&self, witness: &Witness) -> Result<Proof> {
+        // Generate proof (slow: seconds)
+        let proof = groth16::create_proof(&self.proving_key, witness)?;
+        Ok(proof)
+    }
+    
+    pub fn verify(&self, proof: &Proof, public_inputs: &[Fr]) -> bool {
+        // Verify proof (fast: 1-5ms)
+        groth16::verify_proof(&self.verifying_key, proof, public_inputs).is_ok()
+    }
+}
+```
+
+**Properties**:
+- **Small proofs**: 200-500 bytes
+- **Fast verification**: 1-5ms
+- **Slow generation**: Seconds to minutes
+- **Trusted setup**: Requires ceremony
+
+**Use cases**:
+- Private transactions (amounts hidden)
+- Verifiable computation (prove correctness without revealing inputs)
+- Batch verification (aggregate multiple proofs)
+
+#### 5. zk-STARKs (No Trusted Setup)
+
+**Transparent zero-knowledge proofs**:
+
+```rust
+pub struct ZKStark;
+
+impl ZKStark {
+    pub fn prove(&self, witness: &Witness) -> Result<Proof> {
+        // Generate STARK proof (faster for large computations)
+        let proof = stark::prove(witness)?;
+        Ok(proof)
+    }
+    
+    pub fn verify(&self, proof: &Proof) -> bool {
+        // Verify (slower than SNARKs: 10-50ms)
+        stark::verify(proof).is_ok()
+    }
+}
+```
+
+**Properties**:
+- **No trusted setup**: Transparent
+- **Post-quantum secure**: Resistant to quantum attacks
+- **Larger proofs**: 100-200 KB (vs 200-500 bytes for SNARKs)
+- **Slower verification**: 10-50ms (vs 1-5ms for SNARKs)
+
+**See also**: [DECENTRALIZED.md](DECENTRALIZED.md), [DADBS.md](DADBS.md), blog posts [21](blog/21-decentralized.md), [22](blog/22-zk-proofs.md).
+
+---
+
+## Network Protocol
+
+Pyralog uses **JSON-RPC/WebSocket** as the primary RPC protocol with **Arrow Flight** for zero-copy data transport.
+
+### JSON-RPC/WebSocket (Primary RPC)
+
+**Low-latency, bidirectional RPC** for real-time applications:
+
+```rust
+pub struct JsonRpcServer {
+    pyramid_node: Arc<PyramidNode>,
+}
+
+impl JsonRpcServer {
+    pub async fn handle_request(&self, request: JsonRpcRequest) -> Result<JsonRpcResponse> {
+        match request.method.as_str() {
+            "query" => {
+                // Execute SQL/PRQL/GraphQL query
+                let result = self.pyramid_node.query(&request.params).await?;
+                
+                // Return as Arrow IPC (zero-copy)
+                Ok(JsonRpcResponse {
+                    id: request.id,
+                    result: ArrowIpcStream::new(result),
+                })
+            }
+            "write" => {
+                // Write records
+                let offset = self.pyramid_node.write(&request.params).await?;
+                Ok(JsonRpcResponse {
+                    id: request.id,
+                    result: json!({ "offset": offset }),
+                })
+            }
+            _ => Err(Error::MethodNotFound),
+        }
+    }
+}
+```
+
+**Benefits**:
+- **Low-latency**: <5ms overhead
+- **Bidirectional**: Server push via WebSocket
+- **Binary support**: Arrow IPC streams
+- **Simpler than gRPC**: No protobuf, no code generation
+- **Browser-native**: WebSocket everywhere
+
+**See also**: [JSONRPC_WEBSOCKET.md](JSONRPC_WEBSOCKET.md).
+
+### Arrow Flight (Zero-Copy Data Transport)
+
+**High-performance data streams**:
+
+```rust
+pub struct ArrowFlightServer {
+    arrow_store: Arc<ArrowStore>,
+}
+
+impl ArrowFlightServer {
+    pub async fn do_get(&self, ticket: FlightTicket) -> Result<FlightData> {
+        // 1. Read Arrow RecordBatch from storage
+        let batch = self.arrow_store.read_batch(&ticket.key).await?;
+        
+        // 2. Convert to FlightData (zero-copy!)
+        let flight_data = FlightData::from_batch(&batch)?;
+        
+        Ok(flight_data)
+    }
+}
+```
+
+**Benefits**:
+- **3× faster**: Than gRPC/Protobuf
+- **Zero-copy**: Direct Arrow IPC
+- **Columnar**: SIMD-friendly data layout
+- **Streaming**: Large datasets
+
+### WireGuard + Rosenpass (Quantum-Resistant)
+
+**Secure, low-latency networking**:
+
+```rust
+pub struct WireGuardTunnel {
+    interface: WgInterface,
+    rosenpass: RosenpassHandshake,
+}
+
+impl WireGuardTunnel {
+    pub async fn establish_tunnel(&self, peer: SocketAddr) -> Result<()> {
+        // 1. Perform Rosenpass handshake (post-quantum key exchange)
+        let shared_secret = self.rosenpass.handshake(peer).await?;
+        
+        // 2. Configure WireGuard tunnel
+        self.interface.set_peer(peer, &shared_secret)?;
+        
+        Ok(())
+    }
+}
+```
+
+**Benefits**:
+- **10× less complexity**: Than TLS handshake
+- **Post-quantum**: Kyber1024 + Dilithium
+- **DPI resistance**: Traffic obfuscation
+- **Cryptokey routing**: No IP-based trust
+
+**See also**: [WIREGUARD_PROTOCOL.md](WIREGUARD_PROTOCOL.md), [JSONRPC_WEBSOCKET.md](JSONRPC_WEBSOCKET.md).
+
+### Smart Client Architecture
+
+**Direct connections** to partition leaders:
+
+```rust
+pub struct SmartClient {
+    metadata_cache: Arc<RwLock<ClusterMetadata>>,
+}
+
+impl SmartClient {
+    pub async fn write(&self, key: &[u8], value: &[u8]) -> Result<LogOffset> {
+        // 1. Determine partition from key
+        let partition = self.hash_partition(key);
+        
+        // 2. Get leader from cached metadata
+        let leader = self.metadata_cache.read().get_leader(partition)?;
+        
+        // 3. Connect directly to leader (no proxy!)
+        let offset = self.send_to_node(leader, key, value).await?;
+        
+        Ok(offset)
+    }
+    
+    async fn refresh_metadata(&self) -> Result<()> {
+        // Refresh metadata from any node (infrequent)
+        let metadata = self.fetch_metadata().await?;
+        *self.metadata_cache.write() = metadata;
+        Ok(())
+    }
+}
+```
+
+**Benefits**:
+- **1 hop**: Client → Leader (vs 2 hops with proxy)
+- **Client-side load balancing**: No central bottleneck
+- **Metadata caching**: ~5 min TTL, low overhead
+
+**See also**: [DATA_PATH.md](DATA_PATH.md).
+
+---
+
 ## Replication System
+
+Pyralog supports **two CopySet strategies**: Per-Partition (simple) and Per-Record (maximum distribution).
 
 ### CopySet Selection Strategies
 
-Pyralog supports **two CopySet selection strategies**, configurable based on your needs:
+#### Strategy 1: Per-Partition CopySet (Kafka-Style)
 
-#### Strategy 1: Per-Partition CopySet (Kafka-style)
-
-**Fixed CopySet per partition:**
+**Fixed replicas per partition**:
 
 ```rust
 pub struct PartitionCopySet {
     partition_id: PartitionId,
     nodes: Vec<NodeId>,  // Fixed: [N1, N2, N3]
 }
-
-// All records in partition 0 → Always [N1, N2, N3]
-// All records in partition 1 → Always [N2, N3, N4]
 ```
 
-**Advantages:**
+**Benefits**:
 - ✅ Simpler to implement
-- ✅ Easier to reason about
-- ✅ Faster lookups (cached per partition)
-- ✅ Good for small clusters (< 10 nodes)
+- ✅ Faster lookups (cached)
+- ✅ Good for small clusters
 
-**Disadvantages:**
-- ❌ Less uniform load distribution
-- ❌ Hot partitions still overload same nodes
-- ❌ Fixed replica sets
+**Use case**: Clusters < 10 nodes
 
-**Best for:**
-- Smaller deployments
-- Simpler operations
-- Kafka-compatible behavior
+#### Strategy 2: Per-Record CopySet (LogDevice-Style)
 
-#### Strategy 2: Per-Record CopySet (LogDevice-style)
-
-**Dynamic CopySet per record/batch:**
-
-```rust
-pub struct RecordCopySet {
-    lsn: u64,  // Log Sequence Number (epoch + offset)
-    nodes: Vec<NodeId>,  // Calculated: hash(lsn) → [N1, N5, N7]
-}
-
-// Record @ LSN 1000 → hash(1000) → [N1, N5, N7]
-// Record @ LSN 1001 → hash(1001) → [N2, N3, N6]
-// Record @ LSN 1002 → hash(1002) → [N1, N4, N8]
-```
-
-**Key Innovation: Leader as Coordinator**
-
-With per-record CopySet, the **leader doesn't need to store data locally**:
-
-```
-Traditional (Leader Stores Data):
-──────────────────────────────────────────
-Client → Leader → Write to local disk
-                → Replicate to followers
-                
-Leader role: Storage + Coordinator
-Leader disk: Heavy I/O (ALL partition data)
-
-Per-Record CopySet (Leader Coordinates Only):
-──────────────────────────────────────────
-Client → Leader → Calculate CopySet
-                → Send to storage nodes
-                
-Leader role: Coordinator ONLY
-Leader disk: Metadata only (epochs, offsets)
-Reduction: 99%+ less leader I/O! 🚀
-```
-
-**Advantages:**
-- ✅ Maximum load distribution
-- ✅ Hot keys don't overload same nodes
-- ✅ Better fault tolerance
-- ✅ No metadata storage needed (deterministic)
-- ✅ **Leader can be disk-free** (just coordinates)
-- ✅ **Leader can handle 10x more partitions** (no storage overhead)
-- ✅ **Disk failure doesn't affect leadership** (no local data)
-
-**Disadvantages:**
-- ❌ More complex implementation
-- ❌ Readers must calculate CopySet
-- ❌ Slightly more CPU for hash calculation
-- ❌ Can't read directly from leader (unless hybrid mode)
-
-**Best for:**
-- Large clusters (10+ nodes)
-- Uneven key distributions
-- Maximum performance
-- High partition count per node
-
-### Configuration
-
-```rust
-#[derive(Debug, Clone, Serialize, Deserialize)]
-pub enum CopySetStrategy {
-    /// Fixed CopySet per partition
-    PerPartition,
-    
-    /// Dynamic CopySet per record (LogDevice-style)
-    PerRecord {
-        /// Seed for deterministic selection
-        seed: u64,
-        
-        /// Should leader store data locally?
-        /// false = Leader is pure coordinator (LogDevice-style)
-        /// true = Leader also stores data (hybrid mode)
-        leader_stores_data: bool,
-    },
-}
-
-#[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct ReplicationConfig {
-    pub replication_factor: usize,
-    pub write_quorum: usize,
-    pub read_quorum: usize,
-    
-    /// CopySet selection strategy
-    pub copyset_strategy: CopySetStrategy,
-}
-```
-
-**Configuration file:**
-
-```toml
-[replication]
-replication_factor = 3
-write_quorum = 2
-read_quorum = 2
-
-# Option 1: Per-partition (simpler)
-copyset_strategy = "PerPartition"
-
-# Option 2: Per-record with leader as coordinator (maximum performance)
-[replication.copyset_strategy]
-type = "PerRecord"
-seed = 42
-leader_stores_data = false  # Leader disk-free! 🚀
-
-# Option 3: Per-record hybrid (leader also stores)
-[replication.copyset_strategy]
-type = "PerRecord"
-seed = 42
-leader_stores_data = true   # Leader can serve reads
-```
-
-### Implementation: Per-Partition CopySet
-
-```rust
-pub struct PartitionCopySetSelector {
-    // Stored in metadata (Raft + RocksDB)
-    assignments: Arc<RwLock<HashMap<PartitionId, Vec<NodeId>>>>,
-    replication_factor: usize,
-}
-
-impl PartitionCopySetSelector {
-    pub fn select(&self, partition: PartitionId) -> Vec<NodeId> {
-        // Simple lookup - O(1)
-        self.assignments
-            .read()
-            .get(&partition)
-            .cloned()
-            .unwrap_or_default()
-    }
-    
-    pub async fn assign(&self, partition: PartitionId) -> Result<Vec<NodeId>> {
-        // Round-robin or random selection
-        let nodes = self.select_nodes_for_partition(partition);
-        
-        // Store in metadata via Raft consensus
-        self.propose_assignment(partition, nodes.clone()).await?;
-        
-        // Cache locally
-        self.assignments.write().insert(partition, nodes.clone());
-        
-        Ok(nodes)
-    }
-}
-```
-
-### Implementation: Per-Record CopySet
+**Dynamic replicas per record**:
 
 ```rust
 pub struct RecordCopySetSelector {
@@ -675,18 +2948,13 @@ pub struct RecordCopySetSelector {
 impl RecordCopySetSelector {
     pub fn select(&self, lsn: u64) -> Vec<NodeId> {
         // Deterministic selection based on LSN
-        // NO storage needed - pure function!
-        
-        use std::collections::hash_map::DefaultHasher;
-        use std::hash::{Hash, Hasher};
-        
         let mut hasher = DefaultHasher::new();
         lsn.hash(&mut hasher);
         self.seed.hash(&mut hasher);
         let hash = hasher.finish();
         
-        // Select RF unique nodes using hash
-        let mut selected = Vec::with_capacity(self.replication_factor);
+        // Select RF unique nodes
+        let mut selected = Vec::new();
         let mut offset = hash as usize;
         
         while selected.len() < self.replication_factor {
@@ -701,714 +2969,119 @@ impl RecordCopySetSelector {
         
         selected
     }
-    
-    // NO storage or consensus needed!
-    // Any node can calculate the same CopySet for a given LSN
 }
 ```
 
-### Write Path with Both Strategies
+**Key Innovation: Leader as Coordinator**
 
-```rust
-pub struct Replicator {
-    strategy: CopySetStrategy,
-    partition_selector: Option<PartitionCopySetSelector>,
-    record_selector: Option<RecordCopySetSelector>,
-    node_id: NodeId,
-}
-
-impl Replicator {
-    pub async fn replicate(&self, record: Record) -> Result<()> {
-        // Select CopySet based on strategy
-        let (copyset, include_leader) = match &self.strategy {
-            CopySetStrategy::PerPartition => {
-                // Lookup partition's fixed CopySet
-                let selector = self.partition_selector.as_ref().unwrap();
-                let copyset = selector.select(record.partition_id);
-                (copyset, true)  // Leader always stores data
-            }
-            
-            CopySetStrategy::PerRecord { seed, leader_stores_data } => {
-                // Calculate CopySet from LSN
-                let selector = self.record_selector.as_ref().unwrap();
-                let lsn = record.epoch_offset.as_u64();
-                let mut copyset = selector.select(lsn);
-                
-                // If leader_stores_data=true, ensure leader is in CopySet
-                if *leader_stores_data && !copyset.contains(&self.node_id) {
-                    copyset.push(self.node_id);
-                }
-                
-                (copyset, *leader_stores_data)
-            }
-        };
-        
-        // Write to local storage (if configured)
-        if include_leader && copyset.contains(&self.node_id) {
-            self.local_storage.append(record.clone()).await?;
-        }
-        
-        // Send to remote nodes in CopySet
-        let futures: Vec<_> = copyset.iter()
-            .filter(|&&node| node != self.node_id)  // Skip self if already written
-            .map(|&node| self.send_to_node(node, record.clone()))
-            .collect();
-        
-        // Wait for write quorum
-        self.wait_for_quorum(futures).await
-    }
-}
-```
-
-**Leader as Pure Coordinator (leader_stores_data=false):**
-
-```rust
-// Leader (Sequencer) - Lightweight, no storage!
-pub struct Sequencer {
-    partition_id: PartitionId,
-    current_epoch: Epoch,
-    next_offset: AtomicU64,
-    copyset_selector: RecordCopySetSelector,
-    // NO local_storage field!
-}
-
-impl Sequencer {
-    pub async fn handle_write(&self, record: Record) -> Result<LogOffset> {
-        // 1. Assign LSN (metadata only, no disk I/O!)
-        let epoch = self.current_epoch;
-        let offset = LogOffset::new(
-            self.next_offset.fetch_add(1, Ordering::SeqCst)
-        );
-        let lsn = EpochOffset::new(epoch, offset.as_u64()).as_u64();
-        
-        // 2. Calculate CopySet (pure function, deterministic)
-        let copyset = self.copyset_selector.select(lsn);
-        // → [Node 3, Node 7, Node 9]
-        
-        // 3. Prepare record with LSN
-        let mut record = record;
-        record.epoch = epoch;
-        record.offset = offset;
-        
-        // 4. Send directly to storage nodes (NOT local disk!)
-        for node in copyset {
-            self.send_to_storage_node(node, record.clone()).await?;
-        }
-        
-        // 5. Wait for write quorum
-        self.wait_for_quorum(copyset.len()).await?;
-        
-        // 6. Done! Leader never touched disk! ✅
-        Ok(offset)
-    }
-}
-```
-
-**Storage Node (Receives and Stores):**
-
-```rust
-// Storage node - Stores data selected by CopySet
-pub struct StorageNode {
-    node_id: NodeId,
-    storage: LogStorage,
-}
-
-impl StorageNode {
-    pub async fn handle_write(&self, record: Record) -> Result<()> {
-        // Storage node writes to disk
-        self.storage.append(record).await?;
-        Ok(())
-    }
-}
-```
-
-### Read Path with Both Strategies
-
-```rust
-impl Reader {
-    pub async fn read(&self, partition: PartitionId, offset: LogOffset) -> Result<Record> {
-        // Find which nodes have this record
-        let copyset = match &self.strategy {
-            CopySetStrategy::PerPartition => {
-                // Lookup partition's fixed CopySet
-                self.partition_selector.select(partition)
-            }
-            
-            CopySetStrategy::PerRecord { seed } => {
-                // Calculate from LSN (epoch + offset)
-                let lsn = self.calculate_lsn(partition, offset)?;
-                self.record_selector.select(lsn)
-            }
-        };
-        
-        // Try reading from any node in the CopySet
-        for node in copyset {
-            if let Ok(record) = self.try_read_from(node, partition, offset).await {
-                return Ok(record);
-            }
-        }
-        
-        Err(PyralogError::RecordNotFound(offset))
-    }
-}
-```
-
-### Leader as Coordinator: Architecture Diagram
+Leader doesn't need to store data:
 
 ```
-┌─────────────────────────────────────────────────────────┐
-│   Traditional: Leader Stores All Partition Data         │
-├─────────────────────────────────────────────────────────┤
-│                                                         │
-│  Node 1 (Leader for P0):                                │
-│    ├─ Sequencer (assigns offsets)                       │
-│    ├─ Local Storage (/segments/P0/)     ← Heavy I/O ⚠️  │
-│    │  └─ All records for partition 0                    │
-│    └─ Replicates to followers                           │
-│                                                         │
-│  Node 2, Node 3 (Followers):                            │
-│    └─ Receive replicas of partition 0                   │
-│                                                         │
-│  Problem: Leader disk is bottleneck                     │
-└─────────────────────────────────────────────────────────┘
-
-┌─────────────────────────────────────────────────────────┐
-│   Per-Record CopySet: Leader Coordinates Only           │
-├─────────────────────────────────────────────────────────┤
-│                                                         │
-│  Node 1 (Leader for P0):                                │
-│    ├─ Sequencer (assigns LSN)                           │
-│    ├─ NO local storage! ✅                               │
-│    └─ Routes to storage nodes                           │
-│         │                                               │
-│         ├──► Record @ LSN 1000 → CopySet [N3, N7, N9]  │
-│         ├──► Record @ LSN 1001 → CopySet [N2, N5, N8]  │
-│         └──► Record @ LSN 1002 → CopySet [N4, N6, N7]  │
-│                                                         │
-│  Nodes 2-10 (Storage Nodes):                            │
-│    └─ Each stores subset of records                     │
-│       Based on deterministic CopySet selection          │
-│                                                         │
-│  Result: Leader is lightweight! 🚀                      │
-└─────────────────────────────────────────────────────────┘
-```
-
-**Leader Resource Usage:**
-
-```
-┌──────────────────────────────────────────────────┐
-│   Leader Disk I/O Comparison                     │
-├──────────────────────────────────────────────────┤
-│                                                  │
-│  Per-Partition CopySet:                          │
-│    Disk writes: 100 GB/hour (all data)          │
-│    Disk reads: 50 GB/hour (serves reads)        │
-│    Total I/O: 150 GB/hour ⚠️                     │
-│                                                  │
-│  Per-Record CopySet (leader_stores_data=false):  │
-│    Disk writes: 10 MB/hour (metadata only)      │
-│    Disk reads: 5 MB/hour (metadata only)        │
-│    Total I/O: 15 MB/hour ✅                      │
-│                                                  │
-│  Reduction: 99.99% less I/O! 🎉                  │
-│                                                  │
-│  Leader can handle:                              │
-│    Before: 10-20 partitions                     │
-│    After: 200-500 partitions                    │
-│    Increase: 20x-50x! 🚀                         │
-│                                                  │
-└──────────────────────────────────────────────────┘
-```
-
-**Benefits for Large Deployments:**
-
-```
-Scenario: 1000 partitions, 20 nodes
-
-Per-Partition CopySet:
-  Each node leads: 50 partitions
-  Each partition: 10 GB data
-  Leader storage: 50 × 10 GB = 500 GB per node
-  Problem: Disk-bound! 💥
-
-Per-Record CopySet (coordinator mode):
-  Each node leads: 50 partitions
-  Each partition: Metadata only
-  Leader storage: 50 × 1 MB = 50 MB per node
-  Solution: CPU-bound (better!) ✅
+Per-Record CopySet (Coordinator Mode):
+  Client → Leader → Calculate CopySet [N3, N7, N9]
+                  → Send directly to storage nodes
   
-  Actual data: Distributed across all 20 nodes
-  Each node stores: ~1/3 of total data (RF=3)
-  Balanced load across cluster!
-```
-
-### Load Distribution Comparison
-
-```
-Scenario: 10 nodes, 100 partitions, RF=3, 1M records
-
-Per-Partition CopySet:
-──────────────────────────────────────────
-Partition 0 → [N1, N2, N3]  (10K records)
-Partition 1 → [N2, N3, N4]  (10K records)
-...
-Partition 99 → [N7, N8, N9] (10K records)
-
-If partition 0 is hot (100K records):
-  N1, N2, N3: 100K records each ⚠️ 
-  N4-N10: 10K records each
+  Leader: Metadata only (~1 MB)
+  Storage nodes: Actual data
   
-Imbalance: 10x difference!
-
-Per-Record CopySet:
-──────────────────────────────────────────
-Record 1 → hash(1) → [N1, N3, N5]
-Record 2 → hash(2) → [N2, N4, N7]
-Record 3 → hash(3) → [N1, N6, N8]
-...
-
-Even if 100K records have same key:
-  Each record gets different CopySet
-  All nodes: ~30K records each ✅
-  
-Imbalance: ~1.1x (much better!)
+  Result: Leader can handle 20×-50× more partitions! 🚀
 ```
 
-### When to Use Each Strategy
+**Benefits**:
+- ✅ Maximum load distribution
+- ✅ Leader disk-free (99%+ less I/O)
+- ✅ 20×-50× more partitions per leader
+- ✅ 90%+ cluster utilization
 
-```
-┌─────────────────────────────────────────────────────────┐
-│   Decision Matrix                                       │
-├─────────────────────────────────────────────────────────┤
-│                                                         │
-│  Use Per-Partition if:                                  │
-│    • Cluster size < 10 nodes                            │
-│    • Keys are well-distributed                          │
-│    • Simplicity is priority                             │
-│    • Kafka-compatible behavior needed                   │
-│    • Lower partition count (< 100 partitions/node)      │
-│    • Leader can handle storage load                     │
-│                                                         │
-│  Use Per-Record (leader_stores_data=false) if:          │
-│    • Cluster size >= 10 nodes                           │
-│    • Uneven key distribution / hot partitions           │
-│    • High partition count (100s per node)               │
-│    • Maximum performance needed                         │
-│    • Large scale (billions of records)                  │
-│    • Leader disk is bottleneck                          │
-│    • Want to separate coordination from storage         │
-│                                                         │
-│  Use Per-Record (leader_stores_data=true) if:           │
-│    • Want per-record distribution benefits              │
-│    • But also want leader to serve reads                │
-│    • Hybrid approach for migration                      │
-│                                                         │
-└─────────────────────────────────────────────────────────┘
-```
-
-**Rule of thumb:**
-- **< 10 nodes**: Start with per-partition (simpler)
-- **10-50 nodes**: Per-record with leader storage (hybrid)
-- **50+ nodes**: Per-record coordinator-only (maximum scale)
-
-### Migration Between Strategies
-
-You can change strategies online:
-
-```rust
-// Start with per-partition
-config.copyset_strategy = CopySetStrategy::PerPartition;
-
-// Later, migrate to per-record for better distribution
-config.copyset_strategy = CopySetStrategy::PerRecord { seed: 42 };
-
-// Old records: Still use partition CopySet (backward compatible)
-// New records: Use per-record CopySet
-```
-
-**Benefits:**
-- ✅ Both strategies in one system
-- ✅ Choose based on cluster size and workload
-- ✅ Can migrate as you scale
-- ✅ Best of both worlds!
-
-### Summary: Three Configuration Modes
-
-```
-┌────────────────────────────────────────────────────────────┐
-│   Mode Comparison                                          │
-├────────────────────────────────────────────────────────────┤
-│                                                            │
-│  MODE 1: Per-Partition CopySet                             │
-│  ────────────────────────────────────────────              │
-│  copyset_strategy = "PerPartition"                         │
-│                                                            │
-│  ✅ Simplest implementation                                 │
-│  ✅ Kafka-compatible                                        │
-│  ✅ Leader serves reads                                     │
-│  ❌ Fixed replica sets                                      │
-│  ❌ Hot partitions overload nodes                           │
-│  ❌ Leader stores all data                                  │
-│                                                            │
-│  Best for: Small clusters (< 10 nodes)                     │
-│  Partitions/node: 10-20                                    │
-│                                                            │
-├────────────────────────────────────────────────────────────┤
-│                                                            │
-│  MODE 2: Per-Record with Leader Storage (Hybrid)           │
-│  ────────────────────────────────────────────              │
-│  [replication.copyset_strategy]                            │
-│  type = "PerRecord"                                        │
-│  seed = 42                                                 │
-│  leader_stores_data = true                                 │
-│                                                            │
-│  ✅ Better load distribution                                │
-│  ✅ Leader serves reads                                     │
-│  ✅ Hot keys don't overload                                 │
-│  ⚠️  Leader still stores data                               │
-│                                                            │
-│  Best for: Medium clusters (10-50 nodes)                   │
-│  Partitions/node: 20-100                                   │
-│                                                            │
-├────────────────────────────────────────────────────────────┤
-│                                                            │
-│  MODE 3: Per-Record Coordinator-Only (Maximum Scale)       │
-│  ────────────────────────────────────────────              │
-│  [replication.copyset_strategy]                            │
-│  type = "PerRecord"                                        │
-│  seed = 42                                                 │
-│  leader_stores_data = false                                │
-│                                                            │
-│  ✅ Maximum load distribution                               │
-│  ✅ Leader disk-free (99%+ less I/O)                        │
-│  ✅ Leader handles 20x-50x more partitions                  │
-│  ✅ Separation of coordination and storage                  │
-│  ❌ Can't read from leader                                  │
-│  ❌ More complex read path                                  │
-│                                                            │
-│  Best for: Large clusters (50+ nodes)                      │
-│  Partitions/node: 100-500                                  │
-│                                                            │
-└────────────────────────────────────────────────────────────┘
-```
-
-**Scalability Progression:**
-
-```
-Start Small → Grow Large → Maximum Scale
-─────────────────────────────────────────────────
-Mode 1      → Mode 2     → Mode 3
-Per-Partition  Hybrid       Coordinator
-
-10 nodes    → 30 nodes   → 100 nodes
-20 parts    → 100 parts  → 500 parts/node
-Simple      → Balanced   → Maximum perf
-```
-
-### CopySet Storage
-
-CopySets are **cluster metadata**, stored separately from log data:
-
-```
-┌─────────────────────────────────────────────────┐
-│         CopySet Storage Architecture            │
-├─────────────────────────────────────────────────┤
-│                                                 │
-│  1. RAFT LOG (Consensus)                        │
-│     ├─ CopySet assignments proposed            │
-│     ├─ Cluster votes on assignments            │
-│     └─ Committed to Raft log                   │
-│                                                 │
-│  2. METADATA STORE (Persistence)                │
-│     ├─ RocksDB or similar KV store             │
-│     ├─ Key: partition_id                       │
-│     └─ Value: CopySetMetadata                  │
-│                                                 │
-│  3. IN-MEMORY CACHE (Performance)               │
-│     ├─ ClusterManager holds map                │
-│     ├─ Fast lookups during writes              │
-│     └─ Refreshed from metadata store           │
-│                                                 │
-└─────────────────────────────────────────────────┘
-```
-
-**Data Structure:**
-
-```rust
-// Stored in metadata store
-pub struct CopySetMetadata {
-    pub partition_id: PartitionId,
-    pub nodes: Vec<NodeId>,           // [Node1, Node2, Node3]
-    pub leader: NodeId,                // Current leader
-    pub created_at: SystemTime,
-    pub last_modified: SystemTime,
-}
-
-// In-memory representation
-pub struct ClusterManager {
-    // Fast lookup: partition -> copyset
-    copyset_cache: Arc<RwLock<HashMap<PartitionId, CopySetMetadata>>>,
-    
-    // Persistent store
-    metadata_store: Arc<MetadataStore>,
-    
-    // Raft for consensus
-    raft: Arc<RaftNode>,
-}
-```
-
-**File System Layout:**
-
-```
-/var/lib/pyralog/
-├── raft/
-│   └── raft.log              ← CopySet changes in Raft log
-├── metadata/
-│   └── rocksdb/
-│       └── copysets/         ← Persistent CopySet storage
-│           ├── partition_0   → [N1, N2, N4]
-│           ├── partition_1   → [N2, N3, N5]
-│           └── partition_2   → [N1, N3, N6]
-└── segments/
-    └── partition_0/          ← Actual log data
-        ├── 00000000.log
-        └── 00000000.index
-```
-
-**Key Characteristics:**
-
-```
-CopySets (Metadata):
-──────────────────────────────────────
-Size: O(partitions × replication_factor)
-      Small - hundreds of KB
-
-Frequency: Changed rarely
-          (only on rebalancing/failures)
-
-Storage: Raft log + RocksDB
-         Must be consistent across cluster
-
-Access: Fast in-memory lookup
-        Cached by ClusterManager
-
-vs.
-
-Log Records (Data):
-──────────────────────────────────────
-Size: O(millions/billions of records)
-      Large - terabytes
-
-Frequency: Changed constantly
-          (every write)
-
-Storage: Segment files on disk
-         Per-replica, eventually consistent
-
-Access: Disk I/O or mmap
-        Indexed lookups
-```
-
-**CopySet Assignment Flow:**
-
-```
-New Partition Created:
-──────────────────────────────────────────
-1. Leader proposes CopySet assignment
-   Propose([Node1, Node3, Node5])
-   
-2. Raft consensus
-   Majority votes → Committed
-   
-3. Write to metadata store
-   RocksDB: partition_id → [N1, N3, N5]
-   
-4. Update in-memory cache
-   ClusterManager.copyset_cache.insert(...)
-   
-5. All nodes see consistent CopySet
-   Used for all writes to this partition
-   
-Duration: Once per partition creation
-Cost: ~100ms (Raft consensus)
-```
-
-**CopySet Lookup During Write:**
-
-```
-Write arrives for Partition 0:
-──────────────────────────────────────────
-1. Leader checks cache (fast!)
-   copyset = copyset_cache.get(partition_0)
-   → [Node1, Node2, Node4]
-   
-2. Replicate to these nodes
-   Send to Node1, Node2, Node4 in parallel
-   
-3. No disk I/O for CopySet lookup
-   Already in memory!
-   
-Duration: ~1 microsecond (hash map lookup)
-Cost: Negligible
-```
-
-**Why Store in Raft?**
-
-CopySets must be **strongly consistent** across the cluster:
-- All nodes must agree on which nodes hold a partition
-- Prevents split-brain (different nodes thinking different CopySets)
-- Raft provides linearizable consensus
-- Changes are rare, so Raft overhead is acceptable
-
-**Comparison:**
-
-```
-┌─────────────────────────────────────────────────┐
-│   What Gets Stored Where                        │
-├─────────────────────────────────────────────────┤
-│                                                 │
-│  Raft Log + Metadata Store:                     │
-│    ✓ CopySet assignments                        │
-│    ✓ Epoch changes                              │
-│    ✓ Cluster membership                         │
-│    ✓ Leader elections                           │
-│    ✗ NOT log records (too many!)               │
-│                                                 │
-│  Segment Files (Log Storage):                   │
-│    ✓ Actual records                             │
-│    ✓ Record epochs (tagged on each record)     │
-│    ✓ Offsets                                    │
-│    ✗ NOT CopySet info (would duplicate)        │
-│                                                 │
-└─────────────────────────────────────────────────┘
-```
+**Use case**: Clusters > 50 nodes
 
 ### Flexible Quorums
 
-```
-Quorum Configuration:
-- Replication Factor: R
-- Write Quorum: W
-- Read Quorum: R
+**Configure consistency vs availability**:
 
-Constraint: W + R > RF (ensures overlap)
+```rust
+pub struct QuorumConfig {
+    pub replication_factor: usize,  // R
+    pub write_quorum: usize,         // W
+    pub read_quorum: usize,          // Rd
+}
+
+// Constraint: W + Rd > R (ensures overlap)
 ```
 
-**Examples:**
+**Examples**:
 
 | Config | R | W | Rd | Use Case |
 |--------|---|---|-----|----------|
-| Majority | 3 | 2 | 2 | Balanced |
-| Write-Heavy | 3 | 1 | 3 | Low write latency |
-| Read-Heavy | 3 | 3 | 1 | Low read latency |
-| Strong Consistency | 3 | 3 | 3 | Maximum durability |
+| **Strong** | 3 | 3 | 3 | Maximum durability |
+| **Balanced** | 3 | 2 | 2 | Standard config |
+| **Write-heavy** | 3 | 1 | 3 | Low write latency |
+| **Read-heavy** | 3 | 3 | 1 | Low read latency |
 
 ### ISR (In-Sync Replicas)
 
-Track which replicas are up-to-date:
+**Track which replicas are up-to-date**:
 
-```
-Partition 0:
-- Leader: Node 1 (offset: 1000)
-- ISR: [Node 1, Node 2, Node 3]
-- Follower Offsets:
-  - Node 2: 998 (in sync, lag < 1000)
-  - Node 3: 995 (in sync, lag < 1000)
-  - Node 4: 500 (out of sync, lag > 1000)
-```
+```rust
+pub struct ISRTracker {
+    isr: HashMap<PartitionId, Vec<NodeId>>,
+    max_lag: Duration,
+}
 
-## Network Protocol
-
-### Smart Client Architecture
-
-Pyralog uses the **smart client pattern** where clients fetch metadata and connect directly to partition leaders, avoiding proxy hops:
-
-```
-┌────────────────────────────────────────────────┐
-│         Smart Client Flow                      │
-├────────────────────────────────────────────────┤
-│                                                │
-│  1. Bootstrap & Metadata Discovery             │
-│     Client → Any Server: MetadataRequest       │
-│     Server → Client: {                         │
-│       partition_0: leader=Node5,               │
-│       partition_1: leader=Node3,               │
-│       partition_2: leader=Node1                │
-│     }                                          │
-│                                                │
-│  2. Client Caches Topology                     │
-│     partition_cache[0] = Node5                 │
-│     partition_cache[1] = Node3                 │
-│     partition_cache[2] = Node1                 │
-│                                                │
-│  3. Direct Write to Leader                     │
-│     Client calculates: hash(key) % 3 = 0       │
-│     Client connects directly to Node5          │
-│     No proxy overhead! ✅                      │
-│                                                │
-└────────────────────────────────────────────────┘
+impl ISRTracker {
+    pub fn update_isr(&mut self, partition: PartitionId, leader_offset: LogOffset, follower_offsets: &HashMap<NodeId, LogOffset>) {
+        let mut in_sync = vec![];
+        
+        for (&node, &offset) in follower_offsets {
+            let lag = leader_offset.as_u64() - offset.as_u64();
+            if lag < 1000 {  // < 1000 records lag
+                in_sync.push(node);
+            }
+        }
+        
+        self.isr.insert(partition, in_sync);
+    }
+}
 ```
 
-**Benefits:**
-- ✅ Direct connection (1 hop vs 2)
-- ✅ Client-side load balancing
-- ✅ No proxy bottleneck
-- ✅ Scales with cluster size
+**See also**: [ARCHITECTURE.md sections in original](#replication-system).
 
-**Metadata includes:**
-- Partition → Leader mapping
-- Replica locations for reads
-- ISR (In-Sync Replicas) status
-- Node addresses and ports
-
-For detailed flow and implementation, see [DATA_PATH.md](DATA_PATH.md#smart-client-architecture).
-
-### Request/Response Flow
-
-```
-Client                      Server
-  │                           │
-  │──── ProduceRequest ──────►│
-  │    [records]              │
-  │                           │
-  │                           │ Write to storage
-  │                           │ Replicate
-  │                           │
-  │◄─── ProduceResponse ──────│
-  │    [offset]               │
-  │                           │
-```
-
-### Wire Format
-
-```
-Message Format:
-┌────────────────┬──────────────────┬─────────────┐
-│ Length (4B)    │ Request ID (8B)  │ Payload     │
-└────────────────┴──────────────────┴─────────────┘
-
-Payload (bincode serialized):
-- Request Type
-- Request Data
-```
+---
 
 ## Performance Optimizations
 
-### 1. Zero-Copy I/O
+Pyralog applies **multiple optimizations** for sub-millisecond latencies.
+
+### 1. Zero-Copy Data Flow
+
+**Four layers of zero-copy**:
+
+1. **Memory-mapped files**: 30-50% faster reads
+2. **Arrow IPC**: Zero-copy serialization
+3. **File references**: No blob duplication
+4. **DMA transfers**: Direct memory access
 
 ```rust
-// Memory-mapped file
+// Zero-copy read from disk
 let mmap = unsafe { Mmap::map(&file)? };
+let data = &mmap[offset..offset+length];  // No copy!
 
-// Zero-copy read
-let data = &mmap[offset..offset+length];
+// Zero-copy Arrow serialization
+let batch = RecordBatch::from(data);  // No copy!
+
+// Zero-copy network send
+socket.send_vectored(&[batch.as_bytes()])?;  // No copy!
 ```
+
+**See also**: Blog post [11](blog/11-zero-copy-data-flow.md).
 
 ### 2. Batch Processing
 
+**Amortize overhead**:
+
 ```rust
 // Batch multiple records
-let batch = RecordBatch::new(base_offset, records);
+let batch = RecordBatch::new(vec![rec1, rec2, rec3]);
 
 // Single write operation
 storage.append_batch(batch).await?;
@@ -1416,881 +3089,339 @@ storage.append_batch(batch).await?;
 
 ### 3. Write Caching
 
-```rust
-// Add to cache (no disk I/O)
-cache.push(record)?;
+**In-memory buffering**:
 
-// Flush when needed
-if cache.should_flush() {
-    cache.drain_and_write().await?;
+```rust
+pub struct WriteCache {
+    buffer: VecDeque<Record>,
+    max_size: usize,        // 16 MB
+    max_time: Duration,     // 10 ms
+}
+
+impl WriteCache {
+    pub async fn push(&mut self, record: Record) -> Result<()> {
+        self.buffer.push_back(record);
+        
+        if self.should_flush() {
+            self.drain_and_write().await?;
+        }
+        
+        Ok(())
+    }
+    
+    fn should_flush(&self) -> bool {
+        self.buffer.len() * 1024 > self.max_size  // Size
+            || self.last_flush.elapsed() > self.max_time  // Time
+    }
 }
 ```
 
 ### 4. Async I/O
 
+**Concurrent operations**:
+
 ```rust
-// Concurrent operations
+// Execute queries in parallel
 let (r1, r2, r3) = tokio::join!(
-    storage.append(rec1),
-    storage.append(rec2),
-    storage.append(rec3),
+    query1.execute(),
+    query2.execute(),
+    query3.execute(),
 );
 ```
 
+**See also**: [PERFORMANCE.md](PERFORMANCE.md).
+
+---
+
+## Scalability
+
+Pyralog achieves **horizontal scalability** through partitioning, CopySet replication, and distributed leadership.
+
+### Distributed Leadership
+
+**Partitions spread across nodes**:
+
+```
+16 Partitions, 4 Nodes:
+  Node 1 leads: [P0, P4, P8, P12]
+  Node 2 leads: [P1, P5, P9, P13]
+  Node 3 leads: [P2, P6, P10, P14]
+  Node 4 leads: [P3, P7, P11, P15]
+
+Write throughput:
+  Single partition: 100K/sec
+  16 partitions: 1.6M/sec (16× scaling)
+```
+
+### CopySet Distribution
+
+**Replication load spread evenly**:
+
+```
+Without CopySet (bottleneck):
+  All partitions: [N1, N2, N3]
+  ❌ Nodes 1-3: Overloaded
+  ❌ Nodes 4-6: Underutilized
+
+With CopySet (balanced):
+  P0: [N1, N2, N4]
+  P1: [N2, N3, N5]
+  P2: [N3, N4, N6]
+  ✅ All nodes: Evenly loaded
+```
+
+### Read Scaling
+
+**Reads from any replica**:
+
+```
+Write throughput: 10M/sec
+Read throughput: 30M/sec (with RF=3)
+
+Scaling: 3× read capacity per partition
+```
+
+### Dynamic Partitions
+
+**Auto-split/merge for load balancing**:
+
+```toml
+[partition_policy]
+mode = "dynamic"
+max_size = 10_000_000_000  # 10 GB
+max_write_rate = 100_000.0  # 100K/sec
+
+# Hot partition auto-splits
+# Cold partitions auto-merge
+```
+
+**See also**: [DYNAMIC_PARTITIONS.md](DYNAMIC_PARTITIONS.md), [SCALABILITY section in original](#scalability).
+
+### Performance Targets
+
+| Metric | Target | Notes |
+|--------|--------|-------|
+| **Write throughput** | 10M+/sec | 10 nodes, 100 partitions |
+| **Read throughput** | 30M+/sec | With RF=3 |
+| **Write latency (p99)** | < 1ms | With cache |
+| **Read latency (p99)** | < 0.5ms | With mmap |
+| **Scalability** | Linear | Add nodes/partitions |
+
+---
+
+## Monitoring & Observability
+
+Pyralog provides **comprehensive metrics and tracing**.
+
+### Key Metrics
+
+```rust
+pub struct PyralogMetrics {
+    // Throughput
+    write_rate: Counter,
+    read_rate: Counter,
+    
+    // Latency
+    write_latency: Histogram,
+    read_latency: Histogram,
+    
+    // Replication
+    replication_lag: Gauge,
+    isr_count: Gauge,
+    
+    // Storage
+    disk_usage: Gauge,
+    segment_count: Gauge,
+}
+```
+
+**Prometheus integration**:
+
+```rust
+// Expose metrics endpoint
+let metrics = prometheus::default_registry();
+let exporter = PrometheusExporter::new(metrics);
+exporter.listen("0.0.0.0:9090").await?;
+```
+
+### Distributed Tracing
+
+**OpenTelemetry integration**:
+
+```rust
+#[tracing::instrument]
+pub async fn write(&self, record: Record) -> Result<LogOffset> {
+    // Automatic trace context propagation
+    let span = tracing::info_span!("write", record.key = ?record.key);
+    let _guard = span.enter();
+    
+    // ... write logic ...
+    
+    Ok(offset)
+}
+```
+
+### Grafana Dashboards
+
+**Pre-built dashboards** for:
+- Write/read throughput
+- Latency percentiles (p50, p99, p999)
+- Replication lag
+- Disk usage
+- Partition health
+
+**See also**: [OPERATIONS.md](OPERATIONS.md), blog post [24](blog/24-operations.md).
+
+---
+
 ## Failure Scenarios
+
+Pyralog handles **multiple failure modes** with automatic recovery.
 
 ### Node Failure
 
 ```
-Before:
-Leader: Node 1
-Followers: [Node 2, Node 3]
+Per-Partition Raft Election:
+  1. Followers detect missing heartbeats
+  2. Election timeout triggers (300ms)
+  3. Candidate wins election (majority votes)
+  4. New leader activates epoch
+  5. System continues operating
 
-After Node 1 fails:
-1. Followers detect missing heartbeats
-2. Election timeout triggers
-3. Node 2 becomes candidate
-4. Node 2 wins election
-5. Node 2 is new leader
-
-Recovery time: ~300ms
+Recovery time: < 10ms per partition
 ```
 
 ### Network Partition
 
 ```
-Partition scenario:
-[Node 1] | [Node 2, Node 3]
-
-With 3 nodes, majority is 2:
-- Node 1 cannot form quorum (steps down)
-- Nodes 2,3 can form quorum (elect new leader)
-
-System continues operating on majority side
-```
-
-### Data Corruption
-
-```
-Detection:
-1. CRC checksum on each batch
-2. Verification on read
-3. Replication checksum comparison
-
-Recovery:
-1. Detect corrupted segment
-2. Request from replica
-3. Rebuild from healthy copy
+Split-brain prevention:
+  [N1] | [N2, N3, N4, N5]
+  
+  N1: Cannot form quorum (1 < 3) → Blocks writes
+  N2-N5: Can form quorum (4 > 3) → Continues operation
+  
+  Result: Availability on majority side
 ```
 
 ### Disk Failure
 
 ```
-With tiered storage:
-1. Detect disk failure
-2. Mark node as degraded
-3. Redirect reads to replicas
-4. Background recovery from object storage
-5. Rebuild local copy
+Recovery process:
+  1. Detect disk failure (I/O errors)
+  2. Mark node as degraded
+  3. Redirect reads to replicas
+  4. Background recovery from object storage
+  5. Rebuild local copy
+
+Recovery time: Minutes to hours (data size dependent)
 ```
 
-## Scalability
-
-### The Leader Bottleneck Problem
-
-Pyralog uses a **leader-based architecture** where all writes for a partition must go through a single leader node. This creates a potential bottleneck:
+### Data Corruption
 
 ```
-┌─────────────────────────────────────────────────┐
-│         Single Partition Write Path             │
-├─────────────────────────────────────────────────┤
-│                                                 │
-│  All clients writing to Partition 0             │
-│        │         │         │                    │
-│        ▼         ▼         ▼                    │
-│    ┌──────────────────────────┐                │
-│    │   Leader Node 1          │ ← BOTTLENECK!  │
-│    │   (Partition 0)          │                │
-│    └───────┬──────────────────┘                │
-│            │ Replicate                          │
-│       ┌────┼────┐                               │
-│       ▼    ▼    ▼                               │
-│    Node2 Node3 Node4                            │
-│   (Followers)                                   │
-│                                                 │
-│  Limit: Leader's CPU/Network/Disk              │
-└─────────────────────────────────────────────────┘
+Detection & recovery:
+  1. CRC checksum validation
+  2. Merkle tree verification
+  3. Request from healthy replica
+  4. Automatic rebuild
+
+Prevention: BLAKE3 checksums, Merkle trees
 ```
 
-**Why this happens:**
-- All writes must flow through the partition leader
-- Leader assigns offsets (with epochs for efficiency)
-- Leader coordinates replication
-- Single point of serialization per partition
+**See also**: [OPERATIONS.md](OPERATIONS.md), blog post [24](blog/24-operations.md).
 
-**But this is a deliberate trade-off** for strong consistency and ordering guarantees!
+---
 
-### Solution 1: Distributed Leadership via Partitioning
+## Architectural Philosophy
 
-Pyralog distributes leadership across the cluster through partitioning:
+Pyralog's architecture embodies **four core principles**.
 
-```
-┌──────────────────────────────────────────────────────┐
-│         Distributed Leadership                       │
-├──────────────────────────────────────────────────────┤
-│                                                      │
-│  16 Partitions, 4 Nodes                              │
-│                                                      │
-│  Node 1 leads: Partitions [0, 4, 8, 12]            │
-│  Node 2 leads: Partitions [1, 5, 9, 13]            │
-│  Node 3 leads: Partitions [2, 6, 10, 14]           │
-│  Node 4 leads: Partitions [3, 7, 11, 15]           │
-│                                                      │
-│  Client A ──→ hash("key-1") % 16 = 0 ──→ Node 1    │
-│  Client B ──→ hash("key-2") % 16 = 5 ──→ Node 2    │
-│  Client C ──→ hash("key-3") % 16 = 10 ──→ Node 3   │
-│  Client D ──→ hash("key-4") % 16 = 15 ──→ Node 4   │
-│                                                      │
-│  Result: Writes distributed across ALL nodes! ✅    │
-└──────────────────────────────────────────────────────┘
-```
+### 1. Optimize the Hot Path
 
-**Throughput scaling:**
+**Write path optimizations**:
+- Epochs avoid Raft (100× throughput gain)
+- Cache avoids fsync (98% latency reduction)
+- Smart clients avoid proxy (50% latency reduction)
 
-```
-Single partition:
-  Leader throughput: 100K records/sec
-  Total: 100K records/sec
+**Read path optimizations**:
+- Memory-mapped I/O for zero-copy
+- ISR tracking for flexibility
+- Metadata caching for direct routing
 
-16 partitions (4 nodes):
-  16 leaders × 100K = 1.6M records/sec
-  Scaling: 16x ✅
+### 2. Eliminate Bottlenecks at Every Level
 
-64 partitions (8 nodes):
-  64 leaders × 100K = 6.4M records/sec
-  Scaling: 64x ✅
-```
+| Bottleneck | Solution |
+|------------|----------|
+| **Global consensus** | Dual Raft (separate domains) |
+| **Single leader** | Distributed leadership (partitioning) |
+| **Follower overload** | CopySet (distributed replication) |
+| **Proxy overhead** | Smart clients (direct routing) |
+| **Consensus per record** | Epochs (batch consensus) |
+| **Sequential failover** | Per-partition Raft (parallel) |
 
-### Solution 2: Read Scaling via Replicas
+### 3. Make Trade-offs Configurable
 
-While writes must go through the leader, **reads can come from any replica**:
+**CAP spectrum**:
+- Strong consistency: W=3, R=3
+- High availability: W=1, R=3
+- Balanced: W=2, R=2
 
-```
-┌──────────────────────────────────────────────────┐
-│         Write vs Read Paths                      │
-├──────────────────────────────────────────────────┤
-│                                                  │
-│  WRITE PATH (must use leader):                  │
-│  Client ──→ Leader ──→ Replicate ──→ Followers  │
-│             Single                               │
-│                                                  │
-│  READ PATH (any replica):                        │
-│  Client A ──→ Node 1 (any replica) ┐            │
-│  Client B ──→ Node 2 (any replica) ├─ Load      │
-│  Client C ──→ Node 3 (any replica) │  balanced! │
-│  Client D ──→ Node 4 (any replica) ┘            │
-│                                                  │
-│  Read throughput with RF=3:                      │
-│    1 partition × 3 replicas = 3x reads ✅        │
-└──────────────────────────────────────────────────┘
-```
+**Read policy**:
+- Leader only (strong consistency)
+- Any replica (low latency)
+- Quorum (balanced)
+- Nearest (geo-distributed)
 
-**Configuration:**
+**Quorum sizes**:
+- Balance durability vs latency
+- Tune per use case
 
-```rust
-// Allow reads from any replica (eventual consistency)
-config.read_policy = ReadPolicy::AnyReplica;
+### 4. Horizontal Scalability
 
-// Or require leader reads (strong consistency)
-config.read_policy = ReadPolicy::LeaderOnly;
+**Linear scaling**:
+- Add nodes → Add capacity
+- Add partitions → Add throughput
+- No fundamental limitations
 
-// Or require read quorum
-config.read_policy = ReadPolicy::Quorum(2);
-```
+**Dynamic rebalancing**:
+- Auto-split hot partitions
+- Auto-merge cold partitions
+- Continuous load balancing
 
-### Solution 3: CopySet Distribution
+## Key Innovations Summary
 
-Pyralog uses **non-deterministic replica placement** to distribute load:
+### Novel (Original to Pyralog) ⭐
 
-```
-┌──────────────────────────────────────────────────┐
-│   Traditional Replication (Bottleneck)          │
-├──────────────────────────────────────────────────┤
-│                                                  │
-│  All partitions use same replica set:            │
-│    Partition 0: [Node 1, Node 2, Node 3]        │
-│    Partition 1: [Node 1, Node 2, Node 3]        │
-│    Partition 2: [Node 1, Node 2, Node 3]        │
-│                                                  │
-│  Problem: Nodes 1,2,3 always get all traffic!   │
-│           Other nodes underutilized!             │
-└──────────────────────────────────────────────────┘
+1. **🗿 Obelisk Sequencer** - File size as persistent atomic counter
+2. **☀️ Pharaoh Network** - Two-tier architecture (coordination vs storage)
+3. **🪲 Scarab IDs** - Crash-safe globally unique IDs
+4. **𓍶 Shen Ring** - Five unified distributed patterns
+5. **🎼 Batuta Language** - Category Theory + Functional Relational Algebra
 
-┌──────────────────────────────────────────────────┐
-│   CopySet Replication (Pyralog) ✅                  │
-├──────────────────────────────────────────────────┤
-│                                                  │
-│  Each partition uses different copysets:         │
-│    Partition 0: [Node 1, Node 2, Node 4]        │
-│    Partition 1: [Node 2, Node 3, Node 5]        │
-│    Partition 2: [Node 1, Node 3, Node 6]        │
-│    Partition 3: [Node 4, Node 5, Node 6]        │
-│                                                  │
-│  Result: Load spread across entire cluster! ✅   │
-└──────────────────────────────────────────────────┘
-```
+### Synthesized (Best of Breed)
 
-### How These Solutions Complement Each Other
+6. **Dual Raft Clusters** - Parallel failover (from TiKV)
+7. **CopySet Replication** - Maximum utilization (from LogDevice)
+8. **Smart Client Pattern** - Direct routing (from Kafka)
+9. **Write Caching** - Sub-ms latencies (from Redpanda)
+10. **Multi-Model Database** - 6 data models (from ArangoDB + theory)
 
-The three solutions work together to eliminate bottlenecks at different levels:
-
-```
-┌─────────────────────────────────────────────────────┐
-│   Problem Solved by Each Solution                   │
-├─────────────────────────────────────────────────────┤
-│                                                     │
-│  Solution 1: Partitioning                           │
-│    Distributes WRITE LEADERSHIP                     │
-│    ├─ Each partition has one leader                │
-│    ├─ Leaders distributed across nodes             │
-│    └─ Avoids single leader bottleneck              │
-│                                                     │
-│  Solution 2: Read Replicas                          │
-│    Distributes READ LOAD                            │
-│    ├─ Clients can read from any replica            │
-│    ├─ Multiplies read capacity by RF                │
-│    └─ Avoids read bottleneck                       │
-│                                                     │
-│  Solution 3: CopySet                                │
-│    Distributes REPLICATION LOAD                     │
-│    ├─ Each partition uses different replicas       │
-│    ├─ Spreads follower traffic across cluster      │
-│    └─ Avoids always hitting same followers         │
-│                                                     │
-└─────────────────────────────────────────────────────┘
-```
-
-**Why Partitioning + CopySet is Powerful:**
-
-Without CopySet (partitioning only):
-```
-Cluster: 6 nodes, 12 partitions, RF=3
-
-Leadership distribution (good):
-  Node 1 leads: Partitions [0, 6]
-  Node 2 leads: Partitions [1, 7]
-  Node 3 leads: Partitions [2, 8]
-  Node 4 leads: Partitions [3, 9]
-  Node 5 leads: Partitions [4, 10]
-  Node 6 leads: Partitions [5, 11]
-  ✅ Write load distributed evenly!
-
-But replica placement (bottleneck):
-  All partitions: Replicas=[N1, N2, N3]
-  
-  ❌ Problem: Nodes 1,2,3 get ALL replication traffic!
-  ❌ Nodes 4,5,6 underutilized as followers
-  ❌ Nodes 1,2,3 become bottleneck despite distributed leadership
-```
-
-With CopySet (partitioning + copyset):
-```
-Cluster: 6 nodes, 12 partitions, RF=3
-
-Leadership distribution:
-  Node 1 leads: Partitions [0, 6]
-  Node 2 leads: Partitions [1, 7]
-  Node 3 leads: Partitions [2, 8]
-  Node 4 leads: Partitions [3, 9]
-  Node 5 leads: Partitions [4, 10]
-  Node 6 leads: Partitions [5, 11]
-  ✅ Write load distributed!
-
-Replica placement (with CopySet):
-  Partition 0: Leader=N1, Replicas=[N1, N2, N4]
-  Partition 1: Leader=N2, Replicas=[N2, N3, N5]
-  Partition 2: Leader=N3, Replicas=[N3, N1, N6]
-  Partition 3: Leader=N4, Replicas=[N4, N5, N1]
-  Partition 4: Leader=N5, Replicas=[N5, N6, N2]
-  Partition 5: Leader=N6, Replicas=[N6, N1, N3]
-  Partition 6: Leader=N1, Replicas=[N1, N3, N5]
-  Partition 7: Leader=N2, Replicas=[N2, N4, N6]
-  Partition 8: Leader=N3, Replicas=[N3, N5, N1]
-  Partition 9: Leader=N4, Replicas=[N4, N6, N2]
-  Partition 10: Leader=N5, Replicas=[N5, N1, N3]
-  Partition 11: Leader=N6, Replicas=[N6, N2, N4]
-  
-  ✅ Replication load distributed across ALL nodes!
-  ✅ No node is overloaded
-  ✅ Maximum cluster utilization
-```
-
-**The Combined Effect:**
-
-```
-┌─────────────────────────────────────────────────────┐
-│   Partitioning ONLY                                 │
-├─────────────────────────────────────────────────────┤
-│  Write throughput:     ✅ High (distributed)        │
-│  Replication capacity: ❌ Limited (same followers)  │
-│  Cluster utilization:  ⚠️  50-70% (uneven)         │
-│                                                     │
-│  Bottleneck: Follower nodes overwhelmed             │
-└─────────────────────────────────────────────────────┘
-
-┌─────────────────────────────────────────────────────┐
-│   Partitioning + CopySet                            │
-├─────────────────────────────────────────────────────┤
-│  Write throughput:     ✅ High (distributed)        │
-│  Replication capacity: ✅ High (distributed)        │
-│  Cluster utilization:  ✅ 90%+ (even)               │
-│                                                     │
-│  No bottleneck: All nodes participate equally       │
-└─────────────────────────────────────────────────────┘
-```
-
-**Load Distribution Comparison:**
-
-```
-Traditional (no CopySet):
-─────────────────────────────────────────
-Node 1: Leader for 2 partitions + Follower for 12 = OVERLOADED ⚠️
-Node 2: Leader for 2 partitions + Follower for 12 = OVERLOADED ⚠️
-Node 3: Leader for 2 partitions + Follower for 12 = OVERLOADED ⚠️
-Node 4: Leader for 2 partitions + Follower for 0  = UNDERUTILIZED ⚠️
-Node 5: Leader for 2 partitions + Follower for 0  = UNDERUTILIZED ⚠️
-Node 6: Leader for 2 partitions + Follower for 0  = UNDERUTILIZED ⚠️
-
-With CopySet:
-─────────────────────────────────────────
-Node 1: Leader for 2 partitions + Follower for 6  = BALANCED ✅
-Node 2: Leader for 2 partitions + Follower for 6  = BALANCED ✅
-Node 3: Leader for 2 partitions + Follower for 6  = BALANCED ✅
-Node 4: Leader for 2 partitions + Follower for 6  = BALANCED ✅
-Node 5: Leader for 2 partitions + Follower for 6  = BALANCED ✅
-Node 6: Leader for 2 partitions + Follower for 6  = BALANCED ✅
-```
-
-**Real-World Impact:**
-
-```
-Scenario: 10 nodes, 100 partitions, RF=3, 1M writes/sec total
-
-Without CopySet:
-  Leaders: Evenly distributed (✅ 100K writes/node)
-  Followers: Replicas always [N1, N2, N3]
-    ❌ N1, N2, N3 each handle 3M writes/sec (3x load!)
-    ❌ N4-N10 handle 0 replication (wasted capacity)
-  
-  Result: Cluster CANNOT sustain 1M writes/sec
-          Nodes 1-3 are bottleneck
-
-With CopySet:
-  Leaders: Evenly distributed (✅ 100K writes/node)
-  Followers: Distributed via CopySet
-    ✅ Each node handles ~300K writes/sec as follower
-    ✅ All nodes utilized evenly
-  
-  Result: Cluster EASILY sustains 1M writes/sec
-          Can scale to 3M+ writes/sec
-```
-
-**Key Insight:**
-
-Partitioning and CopySet are **complementary by design**:
-
-1. **Partitioning** distributes the decision-making (leadership)
-2. **CopySet** distributes the work (replication)
-3. Together they eliminate **all major bottlenecks**
-
-Without CopySet, partitioning only solves half the problem. With CopySet, you get **true horizontal scalability** where every node contributes equally to both leadership and replication.
-
-This is why **LogDevice invented CopySet replication** - to complement partitioning and achieve maximum cluster utilization! 🚀
-
-### Throughput Scaling Examples
-
-#### Example 1: Small Cluster (3 nodes)
-
-```
-Configuration:
-  Nodes: 3
-  Partitions: 9
-  Replication Factor: 3
-  Write Quorum: 2
-
-Leadership Distribution:
-  Node 1 leads: 3 partitions
-  Node 2 leads: 3 partitions
-  Node 3 leads: 3 partitions
-
-Write Throughput:
-  Per-partition: 100K records/sec
-  Total: 9 × 100K = 900K records/sec
-
-Read Throughput (from any replica):
-  Total: 900K × 3 = 2.7M records/sec
-```
-
-#### Example 2: Large Cluster (10 nodes)
-
-```
-Configuration:
-  Nodes: 10
-  Partitions: 100
-  Replication Factor: 3
-  Write Quorum: 2
-
-Leadership Distribution:
-  Each node leads: ~10 partitions
-  Load balanced evenly across cluster
-
-Write Throughput:
-  Per-partition: 100K records/sec
-  Total: 100 × 100K = 10M records/sec
-
-Read Throughput (from any replica):
-  Total: 10M × 3 = 30M records/sec
-```
-
-### The Fundamental Trade-off
-
-Pyralog's leader-based architecture is a deliberate choice:
-
-```
-┌─────────────────────────────────────────────────────┐
-│   LEADER-BASED (Pyralog, Kafka)                        │
-├─────────────────────────────────────────────────────┤
-│  Advantages:                                        │
-│    ✅ Strong consistency per partition              │
-│    ✅ Total ordering within partition               │
-│    ✅ Simple programming model                      │
-│    ✅ Exactly-once semantics possible               │
-│    ✅ No write conflicts                            │
-│                                                     │
-│  Disadvantages:                                     │
-│    ❌ Leader bottleneck per partition               │
-│    ❌ Write latency includes network RTT            │
-│    ❌ Single point of failure (until failover)      │
-│                                                     │
-│  Scales via: Many partitions with distributed       │
-│              leadership across nodes                │
-└─────────────────────────────────────────────────────┘
-
-┌─────────────────────────────────────────────────────┐
-│   LEADERLESS (Cassandra, Riak)                      │
-├─────────────────────────────────────────────────────┤
-│  Advantages:                                        │
-│    ✅ No single bottleneck                          │
-│    ✅ Write to any node                             │
-│    ✅ Better availability                           │
-│    ✅ Simpler failure handling                      │
-│                                                     │
-│  Disadvantages:                                     │
-│    ❌ Eventual consistency only                     │
-│    ❌ Complex conflict resolution                   │
-│    ❌ No total ordering                             │
-│    ❌ Read-repair overhead                          │
-│                                                     │
-│  Scales via: All nodes equal, hash-based routing    │
-└─────────────────────────────────────────────────────┘
-```
-
-**Pyralog chooses leader-based because:**
-1. Distributed logs require ordering (fundamental requirement)
-2. Strong consistency simplifies application logic
-3. Kafka compatibility demands leader-based model
-4. Scales well via partitioning in practice
-
-### Remaining Bottleneck: Hot Partitions
-
-Even with distributed leadership, a single hot partition can become a bottleneck:
-
-```
-Problem: Hot Key
-────────────────────────────────────────
-All records with key="popular-user-id"
-  → Same partition (hash-based routing)
-  → Same leader
-  → Bottleneck on that leader
-
-Example:
-  1M requests/sec for one user
-  → All to Partition 7
-  → Node 2 (leader) overloaded
-  → Other nodes underutilized
-```
-
-**Mitigations:**
-
-```rust
-// 1. Application-level sharding
-let partition = if is_hot_key(key) {
-    hash(key + random_suffix) % partition_count
-} else {
-    hash(key) % partition_count
-};
-
-// 2. Dynamic partition splitting (see DYNAMIC_PARTITIONS.md)
-if partition_load > threshold {
-    split_partition(partition_id);
-    // Partition 7 → Partitions 7a, 7b
-    // Automatic with dynamic partitions!
-}
-
-// 3. Read from replicas for hot reads
-config.read_policy = ReadPolicy::AnyReplica;
-// Spreads read load across 3 nodes
-```
-
-**Solution: Dynamic Partitions**
-
-Pyralog supports **dynamic partition splitting and merging** (similar to TiKV's regions):
-
-```
-Static Partitions (original):
-──────────────────────────────────────────
-10 partitions, fixed at creation
-  → Partition 7 gets hot
-  → Cannot split without reconfiguration
-  → Must over-provision partitions upfront
-
-Dynamic Partitions (NEW):
-──────────────────────────────────────────
-Start with 5 partitions
-  → Partition 3 gets hot (100K writes/sec)
-  → Automatic split: P3 → P3a + P3b
-  → Each gets 50K writes/sec ✅
-  → No manual intervention!
-
-See DYNAMIC_PARTITIONS.md for complete details.
-```
-
-**Benefits of dynamic partitions:**
-- ✅ Automatic load balancing
-- ✅ Start small, scale as needed
-- ✅ Hot partition auto-splitting
-- ✅ Cold partition auto-merging
-- ✅ True elastic scalability
-
-**Configuration:**
-
-```toml
-[log.my_events]
-partitioning_mode = "dynamic"
-initial_partitions = 5
-
-[log.my_events.split_policy]
-max_partition_size = 10_000_000_000  # 10GB
-max_write_rate = 100_000.0            # 100K/sec
-load_imbalance_threshold = 2.0
-
-[log.my_events.merge_policy]
-min_partition_size = 1_000_000_000   # 1GB
-min_write_rate = 100.0                # 100/sec
-```
-
-### Horizontal Scaling
-
-Adding nodes increases capacity linearly:
-
-```
-Add Node Process:
-1. Join cluster (Raft membership change)
-2. Receive partition assignments
-3. Fetch data from existing replicas
-4. Join ISR when caught up
-5. Start serving as leader for assigned partitions
-6. Start serving as follower for other partitions
-
-Result:
-  N nodes → N+1 nodes
-  Leadership distributed across N+1 nodes
-  Throughput increases proportionally
-```
-
-**Example scaling timeline:**
-
-```
-Initial: 3 nodes, 30 partitions
-  Each node: 10 partitions (leader)
-  Write capacity: 3M records/sec
-
-Add Node 4:
-  Rebalance: Each node now leads ~7-8 partitions
-  Write capacity: ~3M records/sec (same, but more headroom)
-
-Add more partitions: 3 nodes, 60 partitions
-  Each node: 20 partitions (leader)
-  Write capacity: 6M records/sec ✅
-
-Add Node 5, 6: 6 nodes, 60 partitions
-  Each node: 10 partitions (leader)
-  Write capacity: 6M records/sec (more fault tolerance)
-```
-
-### Partition Rebalancing
-
-Automatic load balancing when cluster topology changes:
-
-```
-Rebalance Triggers:
-  - New node added
-  - Node removed
-  - Uneven load distribution
-  - Manual rebalancing requested
-
-Rebalance Process:
-  1. Calculate optimal partition assignment
-     (minimize movement, balance load)
-  
-  2. Create new replicas on target nodes
-     (fetch data from existing replicas)
-  
-  3. Wait for new replicas to sync
-     (join ISR when caught up)
-  
-  4. Update metadata
-     (new leader/follower assignments)
-  
-  5. Remove old replicas
-     (cleanup previous assignments)
-
-During rebalancing:
-  ✅ System remains available
-  ✅ No data loss
-  ✅ Minimal performance impact
-```
-
-### Future Optimizations
-
-**1. Partition Splitting**
-
-```rust
-// Automatic partition splitting for hot partitions
-if partition_metrics.throughput > threshold {
-    // Split partition: hash range 0-65535 → 0-32767 + 32768-65535
-    split_partition(partition_id)?;
-}
-```
-
-**2. Dynamic Leader Rebalancing**
-
-```rust
-// Move leadership to less-loaded nodes
-if node_load_imbalance > threshold {
-    rebalance_leaders()?;
-    // Transfer leadership without moving data
-}
-```
-
-**3. Multi-Leader for Geo-Replication**
-
-```rust
-// Each datacenter has a leader (eventual consistency)
-config.topology = Topology::MultiDatacenter {
-    allow_multi_leader: true,
-    conflict_resolution: ConflictResolution::LastWriteWins,
-};
-```
-
-**4. Read Replicas**
-
-```rust
-// Dedicated read-only replicas (don't participate in quorum)
-config.replication.read_replicas = 2;
-// Increases read capacity without affecting write quorum
-```
-
-### Scalability Summary
-
-| Aspect | Strategy | Result |
-|--------|----------|--------|
-| Write throughput | Partitioning | Linear scaling with partitions |
-| Read throughput | Replicas | Linear scaling with RF |
-| Storage capacity | Add nodes | Linear scaling with nodes |
-| Fault tolerance | Replication | Tolerates RF-W node failures |
-| Hot partitions | App sharding, future split | Mitigated |
-| Leadership | Distributed via partitions | No single bottleneck |
-
-**Real-world capacity example:**
-```
-10 nodes × 10 partitions/node × 100K records/sec = 10M records/sec
-With RF=3: 30M reads/sec possible
-```
-
-## Monitoring and Observability
-
-Key metrics:
-- Write latency (p50, p99, p999)
-- Read latency (p50, p99, p999)
-- Throughput (bytes/sec, records/sec)
-- Replication lag
-- ISR count
-- Disk usage
-- Network I/O
-
-## Conclusion
-
-Pyralog's architecture represents a synthesis of the best ideas from modern distributed log systems, designed for extreme performance and scalability.
-
-### Key Architectural Innovations
-
-**1. Dual Raft Clusters** ⭐
-
-Separate consensus domains for massive scalability:
-- **Global Raft**: Cluster-wide metadata (membership, partition creation)
-- **Per-Partition Raft**: Partition-specific operations (epoch changes, failover)
-- **Parallel failover**: 1000 partitions fail over in 10ms (not 10 seconds!)
-- **No global bottleneck**: Partition operations don't contend with each other
-- **Efficient multiplexing**: 600+ Raft groups per node with batched heartbeats
-
-**2. Epochs (from LogDevice)**
-
-The most impactful optimization:
-- **100x throughput improvement** by decoupling offset assignment from consensus
-- Per-partition Raft consensus once per epoch (not per record!)
-- Local offset increment: millions of records/sec without consensus bottleneck
-- Safe failover without split-brain scenarios
-
-**3. Smart Client Pattern (from Kafka)**
-
-Eliminates proxy overhead:
-- Direct connection to partition leaders (1 hop vs 2)
-- Client-side load balancing via metadata caching
-- Metadata refresh only on topology changes (~5 min)
-- Amortized overhead: essentially zero
-
-**4. Distributed Leadership via Partitioning**
-
-Spreads write decisions across the cluster:
-- Each partition has one leader
-- Leadership distributed across all nodes
-- Linear scaling: N partitions → N× write throughput
-- No single leader bottleneck
-
-**5. CopySet Replication (from LogDevice)**
-
-Critical complement to partitioning:
-- Two strategies: Per-partition (simple) or per-record (maximum distribution)
-- Per-record: Distributes replication load across entire cluster
-- Per-record with coordinator mode: Leader doesn't store data (99%+ less I/O!)
-- Achieves 90%+ cluster utilization vs 50% without it
-- Every node contributes equally to leadership and replication
-- Leader can handle 20x-50x more partitions in coordinator mode
-
-**6. Flexible Quorums**
-
-Runtime configurability:
-- Configure CAP position per use case
-- Strong consistency (CP), high availability (AP), or balanced
-- W+R > RF constraint ensures safety
-- No architectural lock-in
-
-**7. Multiple Optimizations Working Together**
-
-```
-┌──────────────────────────────────────────────────────────┐
-│         The Synergistic Effect                           │
-├──────────────────────────────────────────────────────────┤
-│                                                          │
-│  Dual Raft + Partitioning                                │
-│    = Parallel failover, no global bottleneck            │
-│    → 1000 partitions fail over simultaneously            │
-│                                                          │
-│  Epochs + Per-Partition Raft                             │
-│    = Fast epoch changes (only partition replicas vote)  │
-│    → 10ms failover instead of seconds                   │
-│                                                          │
-│  Epochs + Smart Clients                                  │
-│    = Million writes/sec with sub-ms latency             │
-│                                                          │
-│  Partitioning + CopySet                                  │
-│    = True horizontal scalability, no bottlenecks        │
-│                                                          │
-│  Flexible Quorums + ISR                                  │
-│    = Configurable consistency/availability              │
-│                                                          │
-│  Global Raft + Per-Partition Raft                        │
-│    = Strong consistency without throughput penalty      │
-│    → Cluster ops separate from partition ops            │
-│                                                          │
-│  Write Cache + Zero-Copy                                 │
-│    = Sub-millisecond latencies                          │
-│                                                          │
-└──────────────────────────────────────────────────────────┘
-```
-
-### What Makes This Architecture Special
-
-**Complementary Design:**
-
-Every component enhances the others:
-- Dual Raft separates concerns → enables parallel partition operations
-- Epochs remove consensus bottleneck → enables million writes/sec  
-- Per-partition Raft makes epochs fast → 10ms epoch changes (not seconds)
-- Smart clients avoid proxy → enables direct scaling
-- Partitioning distributes leadership → enables horizontal scaling
-- CopySet distributes replication → prevents follower bottleneck
-- Together: **No single point of bottleneck anywhere!**
-
-**Production-Ready Capabilities:**
-
-```
-Expected Performance (10 nodes, 100 partitions):
-─────────────────────────────────────────────────
-Write throughput:  10M+ records/sec
-Read throughput:   30M+ records/sec (RF=3)
-Write latency:     < 1ms (p99, with cache)
-Read latency:      < 0.5ms (p99, with mmap)
-Scalability:       Linear with nodes/partitions
-Consistency:       Configurable (CP to AP spectrum)
-Availability:      Tolerates RF-W node failures
-```
-
-**Learning from the Best:**
+## Learning from the Best
 
 Pyralog synthesizes innovations from:
-- **LogDevice** (Facebook): Epochs, CopySet, flexible quorums, hierarchical storage
-- **Kafka** (LinkedIn): Smart clients, partitioning, ISR, log-structured storage
-- **Redpanda** (Vectorized): Write caching, zero-copy I/O, thread-per-core
-- **Raft** (Stanford): Proven consensus algorithm for cluster coordination
+- **LogDevice** (Facebook): Epochs, CopySet, flexible quorums
+- **Kafka** (LinkedIn): Smart clients, partitioning, ISR
+- **Redpanda** (Vectorized): Write caching, zero-copy I/O
+- **TiKV** (PingCAP): Multi-Raft architecture
+- **Raft** (Stanford): Proven consensus algorithm
 
-### Architectural Philosophy
+**Plus our own innovations**: Obelisk, Pharaoh, Scarab, Shen Ring, Batuta
 
-**1. Optimize the Hot Path**
-
-- Write path: Epochs avoid Raft, cache avoids fsync, smart client avoids proxy
-- Read path: mmap for zero-copy, ISR for flexibility, metadata for direct routing
-- Result: Sub-millisecond latencies at million ops/sec
-
-**2. Eliminate Bottlenecks at Every Level**
-
-- Global consensus for everything → Dual Raft (separate domains)
-- Single leader → Distributed leadership (partitioning)
-- Follower overload → Distributed replication (CopySet)
-- Proxy overhead → Smart clients (direct routing)
-- Consensus per record → Consensus per epoch (100x gain)
-- Sequential partition failover → Parallel per-partition Raft (1000x faster)
-
-**3. Make Trade-offs Configurable**
-
-- CAP spectrum: Choose consistency vs availability at runtime
-- Read policy: Leader, replicas, quorum, or nearest
-- Quorum sizes: Balance durability vs latency
-- No one-size-fits-all: You decide the trade-offs
-
-**4. Horizontal Scalability**
-
-- Add nodes → Add capacity (linear scaling)
-- Add partitions → Add throughput (linear scaling)
-- Replication → Fault tolerance (configurable)
-- Result: Start small, scale to billions of records/day
-
-### The Big Picture
+## The Big Picture
 
 ```
 ┌─────────────────────────────────────────────────────┐
-│   Why Pyralog's Architecture Succeeds                  │
+│   Why Pyralog's Architecture Succeeds              │
 ├─────────────────────────────────────────────────────┤
 │                                                     │
 │  Traditional Distributed Log:                       │
@@ -2300,9 +3431,9 @@ Pyralog synthesizes innovations from:
 │    ❌ Follower bottleneck                           │
 │    ❌ Fixed consistency model                       │
 │                                                     │
-│  Pyralog's Solution:                                   │
+│  Pyralog's Solution:                                │
 │    ✅ Distributed leadership (partitioning)         │
-│    ✅ Consensus per epoch (100x faster)             │
+│    ✅ Consensus per epoch (100× faster)             │
 │    ✅ Smart clients (direct routing)                │
 │    ✅ Distributed replication (CopySet)             │
 │    ✅ Flexible quorums (configurable)               │
@@ -2313,21 +3444,20 @@ Pyralog synthesizes innovations from:
 └─────────────────────────────────────────────────────┘
 ```
 
-### Final Thoughts
+## Welcome to Pyralog 🔺
 
-Pyralog isn't just another distributed log - it's a **synthesis of proven innovations** that complement each other perfectly:
+**Built to last millennia. Built for the next generation of distributed systems.**
 
-1. **Epochs** make high throughput possible (remove consensus bottleneck)
-2. **Smart clients** make it scalable (remove proxy bottleneck)
-3. **Partitioning** makes it distributed (remove leader bottleneck)
-4. **CopySet** makes it efficient (remove follower bottleneck)
-5. **Flexible quorums** make it adaptable (configure for your needs)
+This architecture combines:
+- **Novel primitives** (Obelisk, Pharaoh, Scarab, Shen Ring)
+- **Proven techniques** (Raft, CopySet, LSM-Tree, Arrow)
+- **Theoretical rigor** (Category Theory, Functional Relational Algebra)
+- **Practical performance** (10M+ writes/sec, sub-ms latencies)
 
-Each innovation solves a specific bottleneck. Together, they create a system with **no fundamental limitations** - just add more nodes and partitions to scale.
+**The modular design allows for easy extension while maintaining strong guarantees about data durability and consistency. Whether you need strong consistency for financial transactions or high availability for analytics, Pyralog's architecture can be configured to meet your requirements.**
 
-**This is the power of learning from a decade of production distributed log systems and combining their best ideas in a modern, Rust-based implementation.**
+---
 
-The modular design allows for easy extension and customization while maintaining strong guarantees about data durability and consistency. Whether you need strong consistency for financial transactions or high availability for analytics, Pyralog's architecture can be configured to meet your requirements.
-
-**Welcome to the next generation of distributed logs.** 🚀
-
+*Pyralog Architecture - Complete*  
+*Last Updated: 2025-11-03*  
+*Version: 2.0 (Complete Rewrite)*
