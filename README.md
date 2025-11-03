@@ -234,9 +234,6 @@ Five ring patterns that work together as **The One Ring**:
 - **Privacy & Scalability**: zk-SNARKs (small proofs, fast verify) and zk-STARKs (no trusted setup, post-quantum)
 - **Cross-Cluster Coordination**: Global transaction coordination, multi-cluster queries, autonomous governance
 
-📖 See [DECENTRALIZED.md](DECENTRALIZED.md) and [DADBS.md](DADBS.md) for complete architecture
-
-
 ### 🔍 Perfect Hash Functions
 
 - **Partitioned Perfect Hash Maps**: O(1) guaranteed lookup, zero collisions, zero wasted space
