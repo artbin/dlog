@@ -390,12 +390,15 @@ Pyralog unifies cryptographic verification, actor-based concurrency, functional 
     - O(1) guaranteed lookup, zero collisions
     - Complete build pipeline (sample → partition → reduce → build)
     - 6 deduplication strategies (LWW, First-Wins, Max-Value, Priority, Timestamp, Custom)
-    - PHF builders comparison (BBHash, RecSplit, PTHash, CHD, BDZ)
-    - Complete file format specification with memory-mapped loading
-    - Real benchmarks: 18s build for 100M keys, 45ns p50 lookup, 15.8× parallelism speedup
-    - ~200 lines of Rust implementation with fluent API
-    - 5 real-world use cases (LSM compaction, DHT, routing, genomics, config management)
-    - Advanced optimizations (SIMD, zero-copy, batch prefetch, Bloom filters)
+
+- [DEDUPLICATION.md](DEDUPLICATION.md) ⭐ **NEW: Multi-Layer Deduplication**
+  - **Comprehensive Deduplication Guide**
+    - Storage-level (LSM compaction): LWW, tombstones, MVCC, delta encoding
+    - PPHM-level (index merging): 6 strategies for conflict resolution
+    - Exactly-once semantics: Session-based write deduplication
+    - Content-addressable storage: Chunk-level hash deduplication
+    - Application patterns: Semantic, sliding window, Bloom filters
+    - Performance analysis: Cost vs. savings, when to deduplicate
 
 #### Networking & Security
 - [WIREGUARD_PROTOCOL.md](WIREGUARD_PROTOCOL.md) ⭐ **NEW: WireGuard as Universal Protocol**
