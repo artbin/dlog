@@ -276,14 +276,283 @@ impl CrossClusterReplicator {
 ### Consensus Across Clusters
 ```rust
 pub enum NetworkConsensus {
-    /// Raft across cluster leaders
+    /// Raft across cluster leaders (trusted environment)
     Raft(RaftNetwork),
     /// PBFT for Byzantine environments
     PBFT(PBFTNetwork),
     /// Tendermint for blockchain-style consensus
     Tendermint(TendermintNetwork),
+    /// Proof of Work for permissionless networks
+    PoW(PoWNetwork),
     /// Proof of Stake for economic incentives
     PoS(PoSNetwork),
+}
+```
+
+#### Proof of Work (PoW)
+
+**What it is**: Miners compete to solve computational puzzles to propose blocks.
+
+**When to use**:
+- Fully permissionless network (anyone can join)
+- Maximum decentralization desired
+- Sybil attack resistance needed
+- No trusted parties
+
+**Trade-offs**:
+- ❌ High energy consumption
+- ❌ Slow finality (10+ minutes)
+- ❌ Vulnerable to 51% attacks
+- ✅ Truly permissionless
+- ✅ Proven security model (Bitcoin)
+
+**Implementation**:
+```rust
+pub struct PoWNetwork {
+    /// Mining difficulty (adjusts based on hashrate)
+    difficulty: u64,
+    /// Block time target (e.g., 10 minutes)
+    target_block_time: Duration,
+    /// Current blockchain
+    chain: Blockchain,
+}
+
+impl PoWNetwork {
+    pub async fn mine_block(&self, transactions: Vec<Transaction>) -> Block {
+        let mut nonce = 0u64;
+        let prev_hash = self.chain.last_block_hash();
+        
+        loop {
+            let block = Block {
+                transactions: transactions.clone(),
+                prev_hash,
+                timestamp: SystemTime::now(),
+                nonce,
+            };
+            
+            let hash = blake3::hash(&block.serialize());
+            
+            // Check if hash meets difficulty target
+            if hash_meets_difficulty(&hash, self.difficulty) {
+                return block;
+            }
+            
+            nonce += 1;
+        }
+    }
+    
+    pub async fn adjust_difficulty(&mut self) {
+        // Adjust every 2016 blocks (like Bitcoin)
+        if self.chain.len() % 2016 == 0 {
+            let actual_time = self.chain.last_2016_blocks_time();
+            let target_time = self.target_block_time * 2016;
+            
+            if actual_time < target_time {
+                self.difficulty += 1; // Increase difficulty
+            } else {
+                self.difficulty -= 1; // Decrease difficulty
+            }
+        }
+    }
+}
+```
+
+**Example Use Case**:
+```
+Public Pyralog Network:
+- Anyone can run a cluster
+- Miners validate cross-cluster transactions
+- Block rewards incentivize participation
+- Fully censorship-resistant
+```
+
+#### Proof of Stake (PoS)
+
+**What it is**: Validators stake tokens to participate in consensus; validators are selected based on stake.
+
+**When to use**:
+- Energy efficiency important
+- Fast finality needed (seconds, not minutes)
+- Economic incentives for good behavior
+- Semi-permissioned network
+
+**Trade-offs**:
+- ✅ Energy efficient (99.9% less than PoW)
+- ✅ Fast finality (2-6 seconds)
+- ✅ Economic security (staked capital)
+- ❌ "Nothing at stake" problem (solved by slashing)
+- ❌ Initial distribution challenge
+
+**Implementation**:
+```rust
+pub struct PoSNetwork {
+    /// Validators and their stakes
+    validators: HashMap<ValidatorId, Stake>,
+    /// Current epoch
+    epoch: u64,
+    /// Slashing conditions
+    slashing_rules: SlashingRules,
+}
+
+pub struct Stake {
+    /// Amount staked (in tokens)
+    amount: u128,
+    /// Validator public key
+    pub_key: PublicKey,
+    /// Whether currently active
+    active: bool,
+}
+
+impl PoSNetwork {
+    pub fn select_validator(&self, slot: u64) -> ValidatorId {
+        // Weighted random selection based on stake
+        let total_stake: u128 = self.validators.values()
+            .filter(|v| v.active)
+            .map(|v| v.amount)
+            .sum();
+        
+        let mut rng = self.deterministic_rng(self.epoch, slot);
+        let target = rng.gen_range(0..total_stake);
+        
+        let mut cumulative = 0u128;
+        for (id, stake) in &self.validators {
+            if !stake.active { continue; }
+            cumulative += stake.amount;
+            if cumulative >= target {
+                return *id;
+            }
+        }
+        
+        unreachable!()
+    }
+    
+    pub async fn propose_block(
+        &self, 
+        validator: ValidatorId, 
+        transactions: Vec<Transaction>
+    ) -> Result<Block, Error> {
+        // Validator must have stake
+        let stake = self.validators.get(&validator)
+            .ok_or(Error::NotValidator)?;
+        
+        if !stake.active {
+            return Err(Error::InactiveValidator);
+        }
+        
+        let block = Block {
+            proposer: validator,
+            transactions,
+            epoch: self.epoch,
+            timestamp: SystemTime::now(),
+        };
+        
+        Ok(block)
+    }
+    
+    pub async fn attest(&self, validator: ValidatorId, block_hash: Hash) -> Attestation {
+        // Validator signs block hash
+        let stake = &self.validators[&validator];
+        let signature = stake.pub_key.sign(&block_hash);
+        
+        Attestation {
+            validator,
+            block_hash,
+            signature,
+            stake_weight: stake.amount,
+        }
+    }
+    
+    pub async fn finalize_block(&mut self, block: Block, attestations: Vec<Attestation>) -> Result<(), Error> {
+        // Check if 2/3 of stake has attested
+        let total_attesting_stake: u128 = attestations.iter()
+            .map(|a| a.stake_weight)
+            .sum();
+        
+        let total_stake: u128 = self.validators.values()
+            .filter(|v| v.active)
+            .map(|v| v.amount)
+            .sum();
+        
+        if total_attesting_stake * 3 >= total_stake * 2 {
+            // Block finalized!
+            self.apply_block(block).await?;
+            Ok(())
+        } else {
+            Err(Error::InsufficientAttestations)
+        }
+    }
+    
+    pub async fn slash_validator(&mut self, validator: ValidatorId, reason: SlashingReason) {
+        if let Some(stake) = self.validators.get_mut(&validator) {
+            match reason {
+                SlashingReason::DoubleSign => {
+                    // Slash 100% of stake
+                    stake.amount = 0;
+                    stake.active = false;
+                }
+                SlashingReason::Downtime => {
+                    // Slash 1% of stake
+                    stake.amount = stake.amount * 99 / 100;
+                }
+            }
+        }
+    }
+}
+
+pub enum SlashingReason {
+    /// Validator signed two conflicting blocks
+    DoubleSign,
+    /// Validator offline for extended period
+    Downtime,
+}
+```
+
+**Example Use Case**:
+```
+Enterprise Pyralog Network:
+- Known organizations run clusters
+- Stake $1M+ in tokens to become validator
+- Fast finality (3-6 seconds)
+- Slashing for misbehavior
+- Energy efficient
+```
+
+#### Comparison: PoW vs PoS
+
+| Aspect | Proof of Work | Proof of Stake |
+|--------|---------------|----------------|
+| **Energy** | High (mining hardware) | Low (standard servers) |
+| **Finality** | Probabilistic (10+ min) | Fast (2-6 seconds) |
+| **Security** | Computational work | Economic stake |
+| **Entry Barrier** | Mining hardware | Token ownership |
+| **Attack Cost** | 51% hashrate | 51% of staked tokens |
+| **Permissionless** | ✅ Fully | ⚠️ Semi (need tokens) |
+| **Maturity** | Proven (Bitcoin, 15+ years) | Newer (Ethereum, 2+ years) |
+| **Best For** | Public, permissionless | Semi-permissioned, fast |
+
+#### Hybrid Approaches
+
+Some Pyralog Networks may combine multiple consensus mechanisms:
+
+```rust
+pub enum HybridConsensus {
+    /// PoW for block proposal, PoS for finalization
+    PoWPoS {
+        pow: PoWNetwork,
+        pos: PoSNetwork,
+    },
+    
+    /// PoS for normal operation, PoW as fallback
+    PoSWithPoWFallback {
+        pos: PoSNetwork,
+        pow_threshold: Duration, // Switch to PoW if PoS stalls
+    },
+    
+    /// Raft within trusted zones, PoS across zones
+    ZonedConsensus {
+        intra_zone: RaftNetwork,
+        inter_zone: PoSNetwork,
+    },
 }
 ```
 
