@@ -166,7 +166,7 @@ Scope: Bring all EBNF docs in this repo into strict ISO/IEC 14977 shape while ke
    - Describe NEWLINE/INDENT/DEDENT as lexer behavior using comments / `? ... ?` only.
 10. Update README/profiles.md with ISO conformance notes and caveats
     - Explanation: Document what the grammar guarantees and where scanner semantics apply.
-   - Document where lexer semantics apply and what’s enforced by grammar vs scanner.
+   - Document where lexer semantics apply and what's enforced by grammar vs scanner.
 
 ## Deliverables
 
@@ -207,11 +207,11 @@ Scope: Refine inconsistencies left after Phase 1; make wording and rule shapes u
      - `comment = "#" , { ? any char except newline ? } , ( "\n" | "\r\n" | ? EOF ? ) ;`
    - Keep offside/NEWLINE/INDENT/DEDENT behavior unchanged; only unify the `comment` production.
 
-3. Unify “any char except …” phrasing
+3. Unify "any char except …" phrasing
    - Explanation: Use consistent phrasing and escaping (notably backslash) in special sequences.
    - In `05-keywords-and-escaped-symbols-ebnf.md` and `profiles.md` Profile A:
      - `bar_char = sym_escape | ? any char except | and \\ ? ;` (backslash doubled)
-   - In all `block_char` specials: keep “the sequences "#|" and "|#"” phrasing, with quotes.
+   - In all `block_char` specials: keep "the sequences "#|" and "|#" phrasing, with quotes.
 
 4. Consistency pass
    - Explanation: Final uniformity sweep: endings, expansions, and example comment markers.
@@ -221,7 +221,7 @@ Scope: Refine inconsistencies left after Phase 1; make wording and rule shapes u
 
 5. Optional canonical snippet (if desired)
    - Explanation: Centralize common lexical definitions to reduce duplication.
-   - Add a short “Common Lexical Snippets” section at the top of `profiles.md` and reference it from profiles.
+   - Add a short "Common Lexical Snippets" section at the top of `profiles.md` and reference it from profiles.
 
 ## Deliverables
 
@@ -231,7 +231,7 @@ Scope: Refine inconsistencies left after Phase 1; make wording and rule shapes u
 
 ## Acceptance Criteria
 
-- No occurrences of the phrase “and control” in any `string_char` rule.
+- No occurrences of the phrase "and control" in any `string_char` rule.
 - All `string_char` rules read exactly: `string_char = escape | ? any char except " and \\ ? ;`.
 - All `comment` rules read exactly: `comment = "#" , { ? any char except newline ? } , ( "\n" | "\r\n" | ? EOF ? ) ;` (unless a file intentionally omits comment support).
 - All `bar_char` and `block_char` specials use escaped backslash and quoted delimiters.
@@ -254,7 +254,7 @@ Scope: Ensure all surface profiles (infix, precedence, pipeline, indentation) pr
 
 2. Add desugaring-to-S-expr sections per profile
    - Explanation: Make each surface mapping explicit to ensure preserved homoiconicity.
-   - 03 (infix base): `a op b` ⇒ `((op a) b)`; mixing with application; non-assoc default.
+   - 03 (infix base): `a op b` ⇒ `(op a b)`; mixing with application; non-assoc default.
    - 10/11/12/13 (expr variants): app fold-right; prefix/postfix nesting; two-tier precedence; pipeline threading as last argument.
    - 04 (indentation): map `if/elif/else`, `while`, `for`, `def`, and simple statements to canonical S-expr forms.
    - 14/15/16 (indent variants): confirm `:` optionality, one-line suites, and trailing-op join are sugar-only (no change to S-expr output).
@@ -927,7 +927,7 @@ Moved to `DIAGRAMS.md`.
 #### 43. Effects/handlers (algebraic effects)
     - Explanation: Structured effect system; `perform`/`handle` compile to explicit handler S-exprs, enabling testing and reasoning.
     - Surface: `perform op(args)`, `handle expr with { op(x) -> expr }`
-    - Desugar: `(handle expr ((op x) expr) ...)`
+    - Desugar: `(handle expr (op x expr) ...)`
     - Examples: `perform ReadLine()`; `handle e with { ReadLine() -> "ok" }`
 
 #### 44. Visibility/exports per declaration

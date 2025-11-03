@@ -52,10 +52,10 @@ digit      = "0" | "1" | "2" | "3" | "4" | "5" | "6" | "7" | "8" | "9" ;
 
 ## Desugaring (to the core with right-assoc application)
 
-- `a op b`  ⇒  `((op a) b)`  
-  (So `+ 1 2` and `1 + 2` both end up as the same AST: `App(App(+, 1), 2)`.)
+- `a op b`  ⇒  `(op a b)`  
+  (So `+ 1 2` and `1 + 2` both end up as the same AST: `(+ 1 2)`).
 - Mixing requires parentheses:
-  - `(f x) + y` is OK ⇒ `((+ (f x)) y)`
+  - `(f x) + y` is OK ⇒ `(+ (f x) y)`
   - `f x + y` is **not allowed** without parentheses under this no-precedence policy.
 
 ---
@@ -74,7 +74,7 @@ Desugar a chain by **fold-left**:
 
 ```
 a1 op1 a2 op2 a3 ...  ⇒  (((a1 op1 a2) op2 a3) ...)
-                     ⇒  App(App(op2, App(App(op1, a1), a2)), a3) ...
+                     ⇒  (op2 (op1 a1 a2) a3) ...
 ```
 This truly has **no precedence**: `a + b * c` desugars as `((a + b) * c)`.
 
@@ -91,8 +91,8 @@ This keeps “no precedence levels” while still letting you write `a - b - c` 
 
 ## Examples
 
-- `1 + 2` ⇒ `((+ 1) 2)`
-- `(f x) * (g y)` ⇒ `((* (f x)) (g y))`
+- `1 + 2` ⇒ `(+ 1 2)`
+- `(f x) * (g y)` ⇒ `(* (f x) (g y))`
 - `a + b + c`
   - **Non-assoc default:** error; write `(a + b) + c` or `a + (b + c)`.
   - **Left-assoc variant:** `((a + b) + c)`.

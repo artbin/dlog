@@ -101,7 +101,7 @@ Desugar:     (if (> x 0) (return x))
 - Terminals are double-quoted; prose-only hints live in `? ... ?`.
 - Emit `NEWLINE`/`INDENT`/`DEDENT` in the lexer for 04/14–16; the grammar treats them as tokens.
 - Line comments are `#` and consume to `"\n" | "\r\n" | ? EOF ?`. Enable `#| ... |#` only if 07 is included.
-- Desugar after parse: right-assoc application (`a b c` ⇒ `a (b c)`), infix `lhs op rhs` ⇒ `((op lhs) rhs)`, pipeline `x |> f` ⇒ `(f x)`.
+- Desugar after parse: right-assoc application (`a b c` ⇒ `a (b c)`), infix `lhs op rhs` ⇒ `(op lhs rhs)`, pipeline `x |> f` ⇒ `(f x)`.
 
 8) Validate ISO shape (docs and grammars)
 - No Unicode ellipses; use ASCII and expand ranges explicitly.
@@ -115,7 +115,7 @@ Desugar:     (if (> x 0) (return x))
 ## Composition guidance
 
 - Application fold-right: Wherever `app` is parsed as a list of operands, desugar post-parse into right-nested unary application: `a b c` ⇒ `a (b c)`.
-- Infix desugaring: `lhs op rhs` ⇒ `((op lhs) rhs)` unless a precedence/associativity variant says otherwise.
+- Infix desugaring: `lhs op rhs` ⇒ `(op lhs rhs)` unless a precedence/associativity variant says otherwise.
 - Mixing infix and application: If you want `f x + g y` without parentheses, use 10 (application tighter than infix). Otherwise keep 03’s no-precedence rule and require parentheses.
 - Indentation: 04 defines how a lexer should emit `NEWLINE`, `INDENT`, `DEDENT`. Variants 14–16 only adjust header sugar, single-line suites, or line-join behavior.
 - Validation: Some rules (e.g., numeric base digit sets, byte range 0..255, nested comments) are best enforced in the lexer/scanner rather than pure grammar.

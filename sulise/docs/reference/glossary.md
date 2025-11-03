@@ -18,7 +18,7 @@
 - **Characters and bytevectors**: `#\\` character literals and `#u8(...)` bytevectors (08).
 - **Maps and sets**: `{ k : v }` and `#{ ... }` literal forms (09).
 - **Application (right-associative)**: Juxtaposition `a b c` parsed then desugared to `a (b c)`.
-- **Infix operators**: `lhs op rhs` desugars to `((op lhs) rhs)` unless precedence rules say otherwise (03, 10–12).
+- **Infix operators**: `lhs op rhs` desugars to `(op lhs rhs)` unless precedence rules say otherwise (03, 10–12).
 - **Precedence & associativity**: Operator tiering and grouping rules; minimal tiers in 12; application-tighter-than-infix in 10.
 - **Prefix/Postfix**: Unary operators that bind per 11’s rules.
 - **Pipeline (`|>`)**: Threads left value as last argument: `x |> f` → `(f x)` (13).

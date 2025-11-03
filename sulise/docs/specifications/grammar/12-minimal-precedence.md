@@ -20,8 +20,7 @@ atom         = identifier | number | string | boolean | "(" , _ , expr , _ , ")"
 ```
 
 Desugaring:
-- `a * b + c` ⇒ `(+ (* a b) c)` ⇒ `App(App(+, App(App(*, a), b)), c)`
-- Application within `atom`/`appl` remains right-associative after folding.
+- `a * b + c` ⇒ `(+ (* a b) c)`
 
 ## Examples
 

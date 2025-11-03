@@ -159,7 +159,7 @@ digit        = "0" | "1" | "2" | "3" | "4" | "5" | "6" | "7" | "8" | "9" ;
 
 Desugaring:
 - Application: `a b c` ⇒ `a (b c)` (fold-right)
-- Infix: `a + b` ⇒ `((+ a) b)`; `a |> f` ⇒ `f a`; `a |> f x` ⇒ `f x a`
+- Infix: `a + b` ⇒ `(+ a b)`; `a |> f` ⇒ `f a`; `a |> f x` ⇒ `f x a`
 
 Options:
 - Add prefix/postfix (see 11) by inserting the `prefix`/`postfix` tier between `mul` and `app`.

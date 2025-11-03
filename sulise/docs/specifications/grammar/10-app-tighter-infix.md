@@ -29,7 +29,7 @@ opchar       = "!" | "$" | "%" | "&" | "*" | "+" | "-" | "/" | ":" | "<"
 
 Desugaring:
 - Application: `a b c` ⇒ `a (b c)` (fold-right)
-- Infix: `lhs op rhs` ⇒ `((op lhs) rhs)`
+- Infix: `lhs op rhs` ⇒ `(op lhs rhs)`
 
 ## Examples
 
