@@ -1,6 +1,8 @@
 # Pyralog Blog Series
 
-A 10-part technical blog series explaining Pyralog's architecture, innovations, and implementation—from core primitives to quantum-resistant networking.
+A comprehensive 30-part technical blog series explaining Pyralog's architecture, innovations, and implementation—from core primitives to decentralized autonomous databases.
+
+**Latest**: Expansion series complete! Posts 11-30 added November 2025.
 
 ## 📚 The Series
 
@@ -228,6 +230,228 @@ A 10-part technical blog series explaining Pyralog's architecture, innovations, 
 
 ---
 
+## 🚀 Expansion Series (Posts 11-30)
+
+### [11. Zero-Copy Data Flow: 10-100× Performance Gains](11-zero-copy-data-flow.md)
+*How memory-mapped files and Arrow IPC eliminate expensive copies*
+
+**Key Topics**: Arrow IPC, memory-mapped files, file references vs blobs, DMA transfers
+
+**Target Audience**: Performance engineers, systems programmers
+
+**Length**: ~30 minute read
+
+---
+
+### [12. The Shen Ring: Five Distributed Patterns](12-shen-ring.md)
+*Egyptian-inspired architecture for distributed coordination*
+
+**Key Topics**: Ankh Ring (consistent hashing), Sundial Circle (gossip), Cartouche Ring (tokens), Ouroboros Circle (chain replication), Shen Ring (unified log)
+
+**Target Audience**: Distributed systems architects
+
+**Length**: ~25 minute read
+
+---
+
+### [13. Perfect Hash Maps at Scale: PPHM Algorithm](13-perfect-hash-maps.md)
+*O(1) lookups with zero collisions through streaming merging*
+
+**Key Topics**: PPHM algorithm, streaming construction, 6 deduplication strategies, O(1) guarantees
+
+**Target Audience**: Database engineers, algorithm designers
+
+**Length**: ~30 minute read
+
+---
+
+### [14. Multi-Layer Deduplication Strategies](14-deduplication.md)
+*Five layers of deduplication from storage to application*
+
+**Key Topics**: LSM compaction, PPHM merging, exactly-once semantics, content-addressable storage
+
+**Target Audience**: Storage engineers, data architects
+
+**Length**: ~25 minute read
+
+---
+
+### [15. Memory-Only Mode: Ultra-Fast Ephemeral Storage](15-memory-only.md)
+*10-100× faster with sub-microsecond latency*
+
+**Key Topics**: In-memory architecture, hybrid modes, testing, caching, real-time workloads
+
+**Target Audience**: Performance engineers, SRE teams
+
+**Length**: ~20 minute read
+
+---
+
+### [16. Five Ways to Query Pyralog: Choose Your Interface](16-five-interfaces.md)
+*SQL, JSON-RPC/WS, GraphQL, PRQL, Batuta—and why no gRPC*
+
+**Key Topics**: Query interface comparison, performance benchmarks, use cases, API design
+
+**Target Audience**: API designers, application developers
+
+**Length**: ~25 minute read
+
+---
+
+### [17. Batuta Execution Modes: Client vs Server](17-batuta-modes.md)
+*Same code, different location—32× performance difference*
+
+**Key Topics**: Client-side compilation, server-side execution, DataFusion integration, WASM
+
+**Target Audience**: Language implementers, database developers
+
+**Length**: ~25 minute read
+
+---
+
+### [18. Category Theory for Practitioners: Real Benefits](18-category-theory.md)
+*Abstract math becomes concrete performance gains*
+
+**Key Topics**: Functors, monads, natural transformations, multi-model queries, practical examples
+
+**Target Audience**: Functional programmers, mathematicians, architects
+
+**Length**: ~20 minute read
+
+---
+
+### [19. The Tensor Database: ML Models as First-Class Citizens](19-tensor-database.md)
+*Safetensors + DLPack for 220× faster model loading*
+
+**Key Topics**: Tensor storage, ML model registry, vector embeddings, DLPack/Safetensors integration
+
+**Target Audience**: ML engineers, AI researchers
+
+**Length**: ~25 minute read
+
+---
+
+### [20. LSM Trees Meet Arrow: Hybrid Storage Architecture](20-lsm-arrow.md)
+*Native LSM for hot data, external files for cold—68% cost savings*
+
+**Key Topics**: Hybrid storage decision matrix, Parquet/Zarr integration, cost optimization
+
+**Target Audience**: Database architects, DevOps engineers
+
+**Length**: ~25 minute read
+
+---
+
+### [21. From Cluster to Network: Decentralized Autonomous Databases](21-decentralized.md)
+*Scale from one datacenter to a global decentralized network*
+
+**Key Topics**: Cluster vs network architecture, PoW/PoS consensus, Byzantine fault tolerance
+
+**Target Audience**: Blockchain engineers, distributed systems architects
+
+**Length**: ~30 minute read
+
+---
+
+### [22. Zero-Knowledge Proofs: SNARKs vs STARKs](22-zk-proofs.md)
+*Prove you know something without revealing it*
+
+**Key Topics**: zk-SNARKs (200-byte proofs), zk-STARKs (post-quantum), private transactions
+
+**Target Audience**: Cryptographers, privacy engineers
+
+**Length**: ~35 minute read
+
+---
+
+### [23. PoW Without Miners: Useful Proof of Work](23-pow-useful.md)
+*CPU puzzles for anti-spam, not cryptocurrency*
+
+**Key Topics**: Rate limiting, Sybil resistance, time-lock puzzles, useful computation
+
+**Target Audience**: Security engineers, API designers
+
+**Length**: ~25 minute read
+
+---
+
+### [24. Operating Pyralog in Production: A Practical Guide](24-operations.md)
+*Deployment, monitoring, and keeping the lights on*
+
+**Key Topics**: Bare metal/K8s/cloud deployment, capacity planning, monitoring, failure modes
+
+**Target Audience**: SRE teams, operations engineers
+
+**Length**: ~30 minute read
+
+---
+
+### [25. Migrating from Kafka to Pyralog: 6-Week Journey](25-kafka-migration.md)
+*Zero downtime, 56× faster writes, 70% cost savings*
+
+**Key Topics**: Dual-write strategy, data backfill, gradual cutover, real metrics
+
+**Target Audience**: Platform engineers, migration teams
+
+**Length**: ~30 minute read
+
+---
+
+### [26. Event-Driven Architecture: CQRS, CDC, Event Sourcing](26-event-driven.md)
+*Event sourcing, CQRS, and exactly-once semantics in practice*
+
+**Key Topics**: Event store, command-query separation, change data capture, schema evolution
+
+**Target Audience**: Software architects, backend developers
+
+**Length**: ~25 minute read
+
+---
+
+### [27. Real-Time Analytics: Pyralog vs ClickHouse](27-analytics.md)
+*Columnar storage + SIMD = 20-30% faster than ClickHouse*
+
+**Key Topics**: Arrow columnar format, DataFusion optimizer, Polars DataFrames, SIMD vectorization
+
+**Target Audience**: Data engineers, analytics developers
+
+**Length**: ~30 minute read
+
+---
+
+### [28. Building in Public with GraphMD: 6-Phase Workflow](28-graphmd.md)
+*How 77K lines of documentation were created in 6 weeks*
+
+**Key Topics**: Documentation-first development, LLM-assisted workflow, 5× productivity gain
+
+**Target Audience**: Engineering managers, technical writers
+
+**Length**: ~25 minute read
+
+---
+
+### [29. Shared-Nothing Architecture: Lock-Free Actor Model](29-shared-nothing.md)
+*~80ns message passing with millions of actors*
+
+**Key Topics**: Actor model, work-stealing pools, lock-free channels, zero contention
+
+**Target Audience**: Concurrency experts, systems programmers
+
+**Length**: ~25 minute read
+
+---
+
+### [30. Sulise Language Toolkit: The Foundation of Batuta](30-sulise.md)
+*Grammar design, type systems, category theory, homoiconicity*
+
+**Key Topics**: Language development toolkit, Hindley-Milner types, homoiconicity, macros
+
+**Target Audience**: Programming language designers, compiler engineers
+
+**Length**: ~30 minute read
+
+---
+
 ## 🎯 Reading Paths
 
 ### For Decision Makers (CTOs, VPs)
@@ -304,13 +528,26 @@ Read all 10 posts in order for the complete Pyralog story—from primitives to q
 
 ## 📊 Statistics
 
-- **Total posts**: 10
-- **Total words**: ~75,000
-- **Total reading time**: ~5 hours
-- **Code examples**: 150+
-- **Diagrams**: 50+
-- **Performance benchmarks**: 40+
-- **Topics covered**: Coordination primitives, consensus, performance, Rust, cryptography, multi-model, language design, actors, quantum resistance
+### Original Series (Posts 1-10)
+- **Posts**: 10
+- **Words**: ~47,000
+- **Reading time**: ~2.8 hours
+- **Published**: October 2024
+
+### Expansion Series (Posts 11-30)
+- **Posts**: 20
+- **Words**: ~103,000
+- **Reading time**: ~7.5 hours
+- **Published**: November 2025
+
+### Combined Totals
+- **Total posts**: 30
+- **Total words**: ~150,000
+- **Total reading time**: ~10.3 hours
+- **Code examples**: 300+
+- **Diagrams**: 80+
+- **Performance benchmarks**: 80+
+- **Topics covered**: Coordination primitives, consensus, performance, Rust, cryptography, multi-model, language design, actors, quantum resistance, zero-copy, PPHM, deduplication, tensor databases, zk-proofs, PoW, operations, migration, event-driven, analytics, GraphMD, shared-nothing, language toolkits
 
 ---
 
@@ -374,5 +611,13 @@ You're free to:
 
 ---
 
-*Last updated: November 2, 2025*
+*Last updated: November 3, 2025*
+
+---
+
+## 🎉 Series Complete!
+
+All 30 posts (150K words, 10+ hours reading) are now available. This comprehensive series covers everything from low-level primitives to high-level architecture, from performance optimization to production operations, and from theoretical foundations to practical migration guides.
+
+**Start reading**: [Post #1: Introducing Pyralog](1-introducing-pyralog.md) or jump to any topic that interests you!
 
