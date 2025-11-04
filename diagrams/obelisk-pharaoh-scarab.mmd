@@ -115,7 +115,7 @@ graph TB
             BENEFIT_LINEAR[Linear Scaling<br/>2,048 nodes = 2× throughput]
             BENEFIT_STATELESS[Stateless<br/>Just Obelisk counters]
             BENEFIT_FAILOVER[Fast Failover<br/>Client retries different node]
-            BENEFIT_OPS[Total: 28+ billion ops/sec<br/>Across all types]
+            BENEFIT_OPS[Total: 4B+ ops/sec per type<br/>Linear scaling]
             
             N_TSO -.->|Add nodes| BENEFIT_LINEAR
             ROUTE_TSO -.->|Hash routing| BENEFIT_STATELESS

@@ -452,7 +452,7 @@ By leveraging sparse files—a feature present in every modern filesystem—we b
 - 📦 **Minimal storage** (~4KB for billions of IDs)
 - 🎯 **Simple** (~50 lines of code)
 
-This primitive enables Pyralog's Pharaoh Network to achieve **28 billion operations per second** without central bottlenecks.
+This primitive enables Pyralog's Pharaoh Network to achieve **linear scalability** without central bottlenecks.
 
 In the next post, we'll show how combining Obelisk Sequencers with Scarab IDs eliminates ALL coordinators in distributed systems.
 

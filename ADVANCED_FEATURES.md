@@ -32,7 +32,7 @@ Sparse File Counter:
 - **CDC Event IDs**: Durable event sequencing
 - **Timestamp Oracles**: Distributed TSO (1000× faster than TiKV)
 
-**Performance**: 28+ billion operations/sec across 1024 coordinators.
+**Performance**: 4+ billion operations/sec per coordinator type, linear scaling.
 
 ### 🪲 Scarab IDs (Globally Unique Identifiers)
 
@@ -2696,7 +2696,7 @@ Pyralog's advanced features are built on a foundation of novel architectural pri
 These innovations enable Pyralog to achieve:
 - **4+ billion transactions/sec** (vs Kafka's 10K/sec)
 - **4+ billion timestamps/sec** (vs TiKV's 500K/sec)
-- **28+ billion total operations/sec** across the platform
+- **4+ billion ops/sec per coordinator type** with linear scaling
 - **10-50× faster multi-model queries** (vs ETL)
 - **100× faster ML model operations** (vs pickle)
 - **500/node partitions** (vs Kafka's 20/node)

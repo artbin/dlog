@@ -282,7 +282,7 @@ impl ObeliskSequencer {
 |----------|---------|
 | **Crash-safe** | File system guarantees atomic size updates |
 | **Coordination-free** | No Raft consensus needed between nodes |
-| **High throughput** | 28 billion ops/sec theoretical |
+| **High throughput** | 4+ billion ops/sec per coordinator type |
 | **Simple** | Just truncate() system call |
 | **No mmap** | Avoids SIGBUS on disk full |
 | **Persistent** | Counter survives crashes |
@@ -292,7 +292,7 @@ impl ObeliskSequencer {
 ```
 Sequential counter increment:
   • Sparse file truncate(): 36 ns/op
-  • 28 billion ops/sec per core (theoretical)
+  • 4+ billion ops/sec per coordinator type
   • Actual: ~1-2 million ops/sec (with fsync)
   • Batch mode: ~10 million ops/sec (async flush)
 ```
@@ -316,7 +316,7 @@ Sequential counter increment:
 
 **Original innovation**: Not found in Kafka, LogDevice, TiKV, or other distributed logs.
 
-**See also**: [CLIENT_PARTITIONING_PATTERNS.md](CLIENT_PARTITIONING_PATTERNS.md) for Obelisk Sequencer details, blog posts [02](blog/02-obelisk-sequencer.md), [04](blog/04-28-billion-ops.md).
+**See also**: [CLIENT_PARTITIONING_PATTERNS.md](CLIENT_PARTITIONING_PATTERNS.md) for Obelisk Sequencer details, blog posts [02](blog/02-obelisk-sequencer.md), [04](blog/04-28-billion-ops.md) (performance deep-dive).
 
 ### ☀️ Pharaoh Network
 
@@ -475,7 +475,7 @@ Scarab ID generation:
 
 **Original innovation**: Snowflake algorithm + Obelisk Sequencer = crash-safe distributed IDs.
 
-**See also**: [CLIENT_PARTITIONING_PATTERNS.md](CLIENT_PARTITIONING_PATTERNS.md) for Scarab ID use cases, blog post [04](blog/04-28-billion-ops.md).
+**See also**: [CLIENT_PARTITIONING_PATTERNS.md](CLIENT_PARTITIONING_PATTERNS.md) for Scarab ID use cases, blog post [04](blog/04-28-billion-ops.md) (performance deep-dive).
 
 ---
 

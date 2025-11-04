@@ -309,7 +309,7 @@ Cryptographic verification isn't free. Here's the overhead:
 
 **In practice**: Write latency increases from 0.5 μs to 1.7 μs.
 
-Still achieving **28+ billion ops/sec** with full verification enabled.
+Still achieving **4+ billion ops/sec per coordinator type** with full verification enabled.
 
 ### Read Path
 
@@ -517,7 +517,7 @@ In the next post, we'll explore **Pyralog's multi-model database capabilities**,
 1. [Introducing Pyralog: Rethinking Distributed Logs](1-introducing-pyralog.md)
 2. [The Obelisk Sequencer: A Novel Persistent Atomic Primitive](2-obelisk-sequencer.md)
 3. [Pharaoh Network: Coordination Without Consensus](3-pharaoh-network.md)
-4. [28 Billion Operations Per Second: Architectural Deep-Dive](4-28-billion-ops.md)
+4. [Performance Deep-Dive: Architectural Foundations](04-28-billion-ops.md)
 5. [Building Modern Data Infrastructure in Rust](5-rust-infrastructure.md)
 6. Cryptographic Verification with BLAKE3 (this post)
 

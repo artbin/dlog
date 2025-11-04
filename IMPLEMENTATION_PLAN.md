@@ -110,7 +110,7 @@ Pyralog's architecture is **fundamentally different** from traditional systems:
 │  • Persistent atomic counter using file size               │
 │  • <1μs increment (no consensus!)                           │
 │  • Crash-safe (sparse file technique)                      │
-│  • Enables 28+ billion ops/sec (1024 nodes)                │
+│  • Linear scaling: 4B+ ops/sec per coordinator type        │
 │  📝 Foundation for everything                               │
 │                                                              │
 └──────────────────────────────────────────────────────────────┘

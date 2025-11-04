@@ -429,7 +429,7 @@ Theory ─────┘
 │  Foundation  →  Identity  → Coordination      │
 └───────────────────────────────────────────────┘
                      ↓ achieves
-           28 Billion Operations/Second
+           High-Throughput Linear Scaling
 ```
 
 **Dependency Flow**:
@@ -522,7 +522,7 @@ Hieroglyph Black:     #000000  ■  Strong emphasis
 
 **Confident · Precise · Monumental**
 
-- **Do**: "Pyralog achieves 28 billion operations per second"
+- **Do**: "Pyralog achieves 4+ billion operations per second per coordinator type"
 - **Don't**: "Pyralog might be able to handle billions of operations"
 
 **Technical but Accessible**
@@ -538,7 +538,7 @@ Hieroglyph Black:     #000000  ■  Strong emphasis
 ### Voice
 
 **Pyralog is**:
-- ✅ Ambitious (28 billion ops/sec)
+- ✅ Ambitious (billions of ops/sec per coordinator type)
 - ✅ Precise (exact numbers, benchmarks)
 - ✅ Confident (definitive statements)
 - ✅ Educational (explains complex concepts)
@@ -791,7 +791,7 @@ pub struct ObeliskSequencer { /* ... */ }
 - "🔺 Pyralog: Monumental Performance, Eternal Data"
 - "🔺 Pyralog: The Distributed Log for the Ages"
 - "🔺 Pyralog: Solid Foundation, Infinite Scale"
-- "🔺 Pyralog: 28 Billion Operations Per Second. Zero Compromises."
+- "🔺 Pyralog: Linear Scalability. Zero Compromises."
 
 ### Elevator Pitch
 
@@ -801,14 +801,14 @@ pub struct ObeliskSequencer { /* ... */ }
 Egyptian engineering. Like the pyramids, it's built to last—with 
 crash-safe primitives (🗿 Obelisk Sequencer), distributed 
 coordination (☀️ Pharaoh Network), unique identifiers (🪲 Scarab IDs),
-and an expressive language (🎼 Batuta). It achieves 28 billion 
-operations per second without centralized bottlenecks.
+and an expressive language (🎼 Batuta). It achieves 4+ billion 
+operations per second per coordinator type with linear scaling.
 ```
 
 **5 seconds**:
 ```
 🔺 Pyralog: Distributed data infrastructure with zero bottlenecks.
-28 billion ops/sec. Built to last millennia.
+Linear scaling. Built to last millennia.
 ```
 
 ---

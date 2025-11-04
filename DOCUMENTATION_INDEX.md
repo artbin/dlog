@@ -126,7 +126,7 @@ Pyralog unifies cryptographic verification, actor-based concurrency, functional 
 | [01](blog/01-introducing-pyralog.md) | Introducing Pyralog | Platform overview |
 | [02](blog/02-obelisk-sequencer.md) | Obelisk Sequencer | Novel persistent atomic primitive |
 | [03](blog/03-pharaoh-network.md) | Pharaoh Network | Eliminating bottlenecks |
-| [04](blog/04-28-billion-ops.md) | 28 Billion Ops/Sec | Architectural deep-dive |
+| [04](blog/04-28-billion-ops.md) | Performance Deep-Dive | Architecture & throughput |
 | [05](blog/05-rust-infrastructure.md) | Building in Rust | Lessons learned |
 | [06](blog/06-cryptographic-verification.md) | Cryptographic Verification | Merkle trees, BLAKE3 |
 | [07](blog/07-multi-model-database.md) | Multi-Model Database | Five data models |

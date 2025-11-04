@@ -73,7 +73,7 @@ WireGuard is a modern VPN protocol that outperforms TLS in every metric:
 ### Why This Matters for Pyralog
 
 Pyralog requires:
-1. **High throughput**: 28+ billion ops/sec
+1. **High throughput**: 4+ billion ops/sec per coordinator type
 2. **Low latency**: Sub-millisecond queries
 3. **Strong security**: Zero-trust architecture
 4. **Firewall traversal**: Works in restricted networks
@@ -589,7 +589,7 @@ This concludes our 10-part blog series on Pyralog. We've covered:
 
 1. **Novel coordination primitives** (Obelisk Sequencer)
 2. **Pharaoh Network** (eliminating bottlenecks)
-3. **28+ billion operations per second** (architectural deep-dive)
+3. **Performance Deep-Dive** (architectural foundations)
 4. **Building in Rust** (lessons learned)
 5. **Cryptographic verification** (BLAKE3, Merkle trees, zero-trust)
 6. **Multi-model database** (category theory foundation)
@@ -637,7 +637,7 @@ cargo run --example quick-start
 1. [Introducing Pyralog: Rethinking Distributed Logs](1-introducing-pyralog.md)
 2. [The Obelisk Sequencer: A Novel Persistent Atomic Primitive](2-obelisk-sequencer.md)
 3. [Pharaoh Network: Coordination Without Consensus](3-pharaoh-network.md)
-4. [28 Billion Operations Per Second: Architectural Deep-Dive](4-28-billion-ops.md)
+4. [Performance Deep-Dive: Architectural Foundations](04-28-billion-ops.md)
 5. [Building Modern Data Infrastructure in Rust](5-rust-infrastructure.md)
 6. [Cryptographic Verification with BLAKE3](6-cryptographic-verification.md)
 7. [Multi-Model Database with Category Theory](7-multi-model-database.md)

@@ -432,7 +432,7 @@ impl ObeliskSequencer {
 2. **Minimal Disk Usage**: Sparse files only consume metadata (~4KB for billion-value counter)
 3. **Fast Recovery**: Instant (single stat() syscall)
 4. **Simple Implementation**: No log replay, no checkpointing
-5. **High Throughput**: ~36 ns/op (28 billion ops/sec theoretical)
+5. **High Throughput**: ~36 ns/op (4+ billion ops/sec per coordinator type)
 
 **Actual Performance:**
 - With fsync: 1-2 million ops/sec

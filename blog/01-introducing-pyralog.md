@@ -131,8 +131,9 @@ Distributed Coordinators:
   1,024 TSO nodes → 4+ billion timestamps/sec ✅
   1,024 Tx Coordinators → 4+ billion tx/sec ✅
   1,024 Session Managers → 4+ billion sessions/sec ✅
+  1,024 Consumer Coords → 4+ billion ops/sec ✅
   
-  Total: 28+ billion operations/sec
+  Linear scaling: 2× nodes = 2× throughput
   No centralized bottlenecks!
 ```
 
@@ -195,7 +196,7 @@ Query: SUM(value)
 │    • 1,024 Session Managers → 4B sessions/sec             │
 │    • 1,024 Consumer Coords  → 4B ops/sec                  │
 │    ─────────────────────────────────────────              │
-│    Total: 28+ billion ops/sec                             │
+│    Linear scaling with node count                         │
 │    (Lightweight, stateless, coordination-free)            │
 │                                                            │
 ├────────────────────────────────────────────────────────────┤
@@ -511,7 +512,7 @@ This is the first in a **30-post series** diving deep into Pyralog's architectur
 |------|-------|-------|
 | **02** | [🗿 Obelisk Sequencer](02-obelisk-sequencer.md) | Persistent atomic counters |
 | **03** | [☀️ Pharaoh Network](03-pharaoh-network.md) | Coordination without bottlenecks |
-| **04** | [28 Billion Ops/Sec](04-28-billion-ops.md) | Performance deep-dive |
+| **04** | [Performance Deep-Dive](04-28-billion-ops.md) | Architecture & throughput |
 | **05** | [Rust Infrastructure](05-rust-infrastructure.md) | Building with Rust |
 | **06** | [Cryptographic Verification](06-cryptographic-verification.md) | BLAKE3 Merkle trees |
 | **07** | [Multi-Model Database](07-multi-model-database.md) | Six data models in Arrow |

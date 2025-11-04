@@ -340,7 +340,7 @@ impl ObeliskSequencer {
 1. **Atomic**: Filesystem guarantees atomic size updates
 2. **Crash-safe**: Size persists across crashes
 3. **Simple**: Just one system call (truncate)
-4. **Fast**: 36 ns/op (28 billion ops/sec theoretical)
+4. **Fast**: 36 ns/op (4+ billion ops/sec per coordinator type)
 5. **No mmap**: Avoids SIGBUS on disk full
 
 **Why not file content?**
@@ -358,7 +358,7 @@ impl ObeliskSequencer {
 ```
 Sequential counter increment:
   truncate() syscall: 36 ns/op
-  Theoretical: 28 billion ops/sec per core
+  Theoretical: 4+ billion ops/sec per coordinator type
   
 Actual (with fsync):
   fsync() per increment: ~1 μs

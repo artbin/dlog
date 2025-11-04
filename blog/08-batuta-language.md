@@ -656,7 +656,7 @@ In the next post, we'll explore **Actor-Based Concurrency** in Pyralog, showing 
 1. [Introducing Pyralog: Rethinking Distributed Logs](1-introducing-pyralog.md)
 2. [The Obelisk Sequencer: A Novel Persistent Atomic Primitive](2-obelisk-sequencer.md)
 3. [Pharaoh Network: Coordination Without Consensus](3-pharaoh-network.md)
-4. [28 Billion Operations Per Second: Architectural Deep-Dive](4-28-billion-ops.md)
+4. [Performance Deep-Dive: Architectural Foundations](04-28-billion-ops.md)
 5. [Building Modern Data Infrastructure in Rust](5-rust-infrastructure.md)
 6. [Cryptographic Verification with BLAKE3](6-cryptographic-verification.md)
 7. [Multi-Model Database with Category Theory](7-multi-model-database.md)

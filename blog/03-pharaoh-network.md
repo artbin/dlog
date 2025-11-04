@@ -1,6 +1,6 @@
 # Pharaoh Network Without Consensus
 
-**How we eliminated every centralized coordinator and achieved 28 billion operations per second**
+**How we eliminated every centralized coordinator and achieved linear scalability**
 
 *Published: November 1, 2025*
 
@@ -620,7 +620,7 @@ We've eliminated **every centralized coordinator** in Pyralog.
 
 This is a **fundamental rethinking** of how distributed systems handle coordination.
 
-In the next post, we'll show how all these innovations come together to achieve **28 billion operations per second** across the entire Pyralog platform.
+In the next post, we'll show how all these innovations come together to achieve unprecedented scalability across the entire Pyralog platform.
 
 ---
 

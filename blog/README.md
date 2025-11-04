@@ -12,7 +12,7 @@ A comprehensive 30-part technical blog series explaining Pyralog's architecture,
 **Key Topics**:
 - Why we need unified data infrastructure
 - The 5+ systems you're probably running today
-- How Pyralog achieves 28 billion ops/sec
+- How Pyralog achieves high-throughput coordination
 - Three core innovations
 - Real-world use cases and comparisons
 
@@ -66,7 +66,7 @@ A comprehensive 30-part technical blog series explaining Pyralog's architecture,
 
 ---
 
-### [4. 28 Billion Operations Per Second: Architectural Deep-Dive](04-28-billion-ops.md)
+### [4. Performance Deep-Dive: Architectural Foundations](04-28-billion-ops.md)
 *How Pyralog's architecture achieves unprecedented scale*
 
 **Key Topics**:
@@ -184,7 +184,7 @@ A comprehensive 30-part technical blog series explaining Pyralog's architecture,
 ---
 
 ### [9. Actor-Based Concurrency: Distributed Query Execution at Scale](09-actor-concurrency.md)
-*How the actor model enables 28 billion operations per second*
+*How the actor model enables high-throughput distributed coordination*
 
 **Key Topics**:
 - Actor model: isolated, asynchronous, lightweight
@@ -456,7 +456,7 @@ A comprehensive 30-part technical blog series explaining Pyralog's architecture,
 
 ### For Decision Makers (CTOs, VPs)
 1. [Introducing Pyralog](01-introducing-pyralog.md) - Understand the value proposition
-2. [28 Billion Ops/Sec](04-28-billion-ops.md) - See the performance benefits
+2. [Performance Deep-Dive](04-28-billion-ops.md) - See the architecture benefits
 3. [Quantum-Resistant Networking](10-wireguard-networking.md) - Security features
 4. [Building in Rust](05-rust-infrastructure.md) - Understand technology choices
 
@@ -467,7 +467,7 @@ A comprehensive 30-part technical blog series explaining Pyralog's architecture,
 ### For Architects
 1. [Introducing Pyralog](01-introducing-pyralog.md) - System overview
 2. [Pharaoh Network](03-pharaoh-network.md) - Scaling pattern
-3. [28 Billion Ops/Sec](04-28-billion-ops.md) - Complete architecture
+3. [Performance Deep-Dive](04-28-billion-ops.md) - Complete architecture
 4. [Multi-Model Database](07-multi-model-database.md) - Category theory foundation
 5. [Actor-Based Concurrency](09-actor-concurrency.md) - Execution model
 6. [Research Paper](../PAPER.md) - Academic analysis
@@ -489,7 +489,7 @@ A comprehensive 30-part technical blog series explaining Pyralog's architecture,
 ### For Distributed Systems Engineers
 1. [Obelisk Sequencer](02-obelisk-sequencer.md) - Novel primitive
 2. [Pharaoh Network](03-pharaoh-network.md) - Coordination pattern
-3. [28 Billion Ops/Sec](04-28-billion-ops.md) - Implementation details
+3. [Performance Deep-Dive](04-28-billion-ops.md) - Implementation details
 4. [Actor-Based Concurrency](09-actor-concurrency.md) - Supervision trees & topology reactivity
 5. [Research Paper](../PAPER.md) - Formal analysis
 
